@@ -317,7 +317,7 @@ pns2013[V0001==53 & V0031<3, metro := "Federal District"]
 pns2013[P040==1 | P040==2, v1410 := "Yes"]
 pns2013[P040==3, v1410 := "No"]
 table(pns2013$v1410)
-break()
+
 
 ### create indicator variable of ind. above 18yearsold that practice active travel for > 30minutes
 ## this is the definition used in table 3.4.1.1 of IBGE report
@@ -362,7 +362,7 @@ summary(pns2013$F00702)
 summary(pns2013$F00802)
 summary(pns2013$VDF00102)
 
-
+break()
 #  Household Income per Capita, compatible with PNAD 2008 data
 pns2013[ C004 <17 , v4721 := sum( E01602, E01604, E01802, E01804, F00102, F00702, F00802, VDF00102, na.rm = T) / VDC001,
          by= .(V0001, V0024, UPA_PNS, V0006_PNS)] # sum all income sources
