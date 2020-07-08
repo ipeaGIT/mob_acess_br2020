@@ -107,15 +107,17 @@ lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
 #
-# plot - active commute acive 15 / region / educational level-------------
+# plot - active commute active 1 / region / quintil-------------
 #
 
 pns2013df <- pns2013[urban %in% "Urbano",]
-pns2013df <- pns2013df[,sum(actv_commutetime15)/.N,by = .(C009,region)]
+pns2013df[,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
+pns2013df <- pns2013df[,sum(actv_commutetime1)/.N,by = .(C009,region)]
 pns2013df <- pns2013df[,.(C009,V1,region)]
 # br 
 pns2013br <- pns2013[urban %in% "Urbano",]
-pns2013br <- pns2013br[,sum(actv_commutetime15)/.N,by = .(C009)]
+pns2013br[,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
+pns2013br <- pns2013br[,sum(actv_commutetime1)/.N,by = .(C009)]
 pns2013br <- pns2013br[,region := "Brasil"]
 pns2013df <- list(pns2013df,pns2013br) %>% data.table::rbindlist()
 pns2013df <- pns2013df[!is.na(C009) & !is.na(region),]
@@ -148,10 +150,10 @@ for(i in 1:2){ # i = 1
     geom_text(data = aux_avg,
               aes(x = 100 * V1, y = 1.25, 
                   label= (paste0("Média =\n"," ",round(100 * V1,1),"%"))),
-              vjust = 0, hjust = -0.1, colour = "black",size = 3.5) + 
+              vjust = 0, hjust = -0.1, colour = "black",size = 3.0) + 
     ylab(NULL) +
     xlab(NULL) + 
-    xlim(100 * c(0,max(pns2013df$V1))) + 
+    xlim(100 * c(0,1.05*max(pns2013df$V1))) + 
     guides(fill=guide_legend(ncol=2)) + 
     theme( legend.position = "none",
            axis.text.x = element_text(size = rel(1.25)),
@@ -166,12 +168,12 @@ for(i in 1:2){ # i = 1
   if(i == 2){
     pp[[i]] <- pp[[i]] + 
       xlab("Frequência(%) de pessoas residentes na zona urbana que se deslocam
-      a pé ou de bicicleta para o trabalho por no mínimo 15 minutos, por região")
+      a pé ou de bicicleta para o trabalho, por região")
   }
 }
 pf <- pp[[1]] / pp[[2]]
-pf
-ggsave(pf,filename = "figures/PNS/FIG_income_region_race15.png",width = 27,
+
+ggsave(pf,filename = "figures/PNS/FIG_income_region_race01.png",width = 22,
        height = 15,scale = 0.8,units = "cm")
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
@@ -195,7 +197,8 @@ order_region <- unique(pns2013df$region)
 pns2013df$region <- factor(pns2013df$region,order_region)
 
 avg <- pns2013df[,lapply(.SD,mean),by = region,.SDcols = "V1"]
-lista <- list(c("Sul","Sudeste","Centro-Oeste"),c("Norte","Nordeste","Brasil"))
+lista <- list(c("Sul","Sudeste","Centro-Oeste"),
+              c("Norte","Nordeste","Brasil"))
 pp <- list()
 for(i in 1:2){ # i = 1 
   aux_pns <- pns2013df[region %in% lista[[i]],]
@@ -289,7 +292,7 @@ ggplot(data = pns2013df,
          legend.key = element_rect(fill = "white", colour = NA))
 
 ggsave(filename = "figures/PNS/FIG_metro_quartil_actv_commutetime30.png",
-       width = 20, height = 15,scale = 0.9, units = 'cm')
+       width = 20,height = 20,scale = 0.8,units = "cm")
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
@@ -346,6 +349,57 @@ ggplot(data = pns2013df,
 
 ggsave(filename = "figures/PNS/FIG_urban_timetravel_edugroup_region_points.png",
        width = 20,height = 20,scale = 0.8,units = "cm")
+# keep only initial files
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+
+#
+# plot - travel tim / metropolitan region /quintil----------
+#
+
+pns2013df <- pns2013[urban %in% "Urbano",][actv_commutetime > 0,]
+pns2013df <- pns2013df[,.(quintileMetro,actv_commutetime,metro)]
+pns2013df <- pns2013df[!is.na(quintileMetro) & !is.na(actv_commutetime) 
+                       & !is.na(metro),]
+pns2013df <- pns2013df[,lapply(.SD,mean),
+                       .SDcols = 'actv_commutetime', by = .(metro,quintileMetro)]
+
+orderuf <- pns2013df[,lapply(.SD,mean),.SDcols = 'actv_commutetime', by = metro]
+orderuf <- orderuf[order(actv_commutetime, na.last=FALSE),metro]
+
+pns2013df$metro <- factor(pns2013df$metro,orderuf)
+# to_string <- as_labeller(c(`Sem instrução + Fundamental incompleto` = "Sem instrução + \n Fundamental \n incompleto",
+#                            `Fundamental completo` = "Fundamental \n completo",
+#                            `Médio completo` = "Médio \n completo",
+#                            `Superior completo` = "Superior \n completo"))
+
+ggplot(data = pns2013df,
+       aes(y = factor(metro), 
+           x = actv_commutetime)) + 
+  geom_point(aes(fill = factor(quintileMetro)),
+             shape=21,  size = 4.5, alpha = 1) + 
+  scale_fill_brewer(palette = "PuOr",
+                    direction = +1)  +
+  labs(fill = "Quintil de renda") + 
+  scale_x_continuous(breaks = seq(0,60,by = 5),
+                     limits = c(15,55)) + 
+  xlab("Tempo de viagem (em minutos) a pé ou de bicicleta da 
+  população de zonas urbanas") + 
+  ylab(NULL) +
+  guides(fill=guide_legend(nrow=1)) + 
+  theme( legend.position = "bottom",
+         axis.text.y = element_text(size = rel(1.25)),
+         axis.text.x = element_text(size = rel(1.25)),
+         panel.background = element_rect(fill = "white",colour = NA),
+         panel.border = element_rect(fill = NA, colour = "grey20"),
+         panel.grid = element_line(colour = "grey82",size = rel(0.35)), 
+         panel.grid.minor = element_line(size = rel(0.35)), 
+         strip.background = element_rect(fill = "grey82",colour = "grey20"),
+         legend.key = element_rect(fill = "white", colour = NA),
+         legend.text = element_text(size = rel(1.05))) 
+
+ggsave(filename = "figures/PNS/FIG_urban_timetravel_quintil_region_points.png",
+       width = 20,height = 17,scale = 0.8,units = "cm")
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
