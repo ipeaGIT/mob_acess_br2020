@@ -1,7 +1,3 @@
-################# # Leitura, limpeza e organização dos microdados POF 2002, 2008 e 2017
-##### Lucas ##### # A rotina do código é a mesma para todos os anos, apenas 2017 está comentado
-################# # Lê, padroniza e calcula variáveis, salva .csv para cada ano e um .csv de todos os anos
-
 ### Setup
 
 source("setup.R")
@@ -9,21 +5,23 @@ source("setup.R")
 
 ######## 1. Dowload and Clean data ----------------------------------------------------------
 
-#####################
-### POF 2017-2018 ###
-#####################
+######################################################################
+### POF 2017-2018 ####################################################
+######################################################################
 
 setwd("~/POF/2017_2018")
 
 # Despesa Individual ----------------
 
-despesa_individual <- # Recuperando microdados de despesa
+despesa_individual <- 
+  # Recuperando microdados de despesa
   readRDS("DESPESA_INDIVIDUAL.rds")
 
-despesa_individual <- # Seleciona variáveis
-  despesa_individual %>% # Calcula ID para família e indivíduo
-  dplyr::select(           # Calcula consumo e renda anuais
-    UF,
+total_despesas_transporte <-        
+  despesa_individual %>%    
+  # Seleciona as variáveis
+  dplyr::select(             
+    UF, 
     ESTRATO_POF,
     COD_UPA,
     NUM_DOM,
@@ -37,54 +35,42 @@ despesa_individual <- # Seleciona variáveis
     PESO_FINAL,
     RENDA_TOTAL
   ) %>%
+  # Cria ID para Família e Indivíduo
+  # Calcula Renda e Consumo por produto Anual
   dplyr::mutate(
     ID_FAMILIA = paste(COD_UPA, NUM_DOM, NUM_UC, sep = ""),
     ID_MORADOR = paste(COD_UPA, NUM_DOM, NUM_UC, COD_INFORMANTE, sep = ""),
     CONSUMO_ANUAL = ifelse(is.na(N_MESES),
       VALOR_DEFLA * FATOR_ANUALIZACAO,
-      VALOR_DEFLA * N_MESES * FATOR_ANUALIZACAO
-    ),
+      VALOR_DEFLA * N_MESES * FATOR_ANUALIZACAO),
     RENDA_ANUAL = RENDA_TOTAL * 12
-  ) 
-
-total_despesas <-
-  despesa_individual %>% # Calcula valor total gasto por ano por produto
+  )  %>%
+  # Filtra despesas com transporte
+  dplyr::filter(
+    QUADRO == "23" | QUADRO == '33' | QUADRO == '50'
+  ) %>% 
+  # Calcula despesa anual por produto por indivíduo
   dplyr::group_by(
     UF,
     ESTRATO_POF,
     RENDA_ANUAL,
-    QUADRO,
     COD_ITEM,
     PESO_FINAL,
     ID_FAMILIA,
     ID_MORADOR
   ) %>%
-  dplyr::summarise(valor = sum(CONSUMO_ANUAL, na.rm = T))
-
-total_despesas_transporte <- # Filtra despesas de transporte
-  total_despesas %>%
-  dplyr::filter(QUADRO == "23" | QUADRO == '33' | QUADRO == '50' | QUADRO == '51' |
-                QUADRO == '41' & COD_ITEM >= '4100201' & COD_ITEM <= '4101601')
-
-total_despesas_transporte <-
-  total_despesas_transporte %>% # Calcula valor total gasto por ano com transporte
-  dplyr::group_by(
-    UF,
-    ESTRATO_POF,
-    RENDA_ANUAL,
-    PESO_FINAL,
-    ID_FAMILIA,
-    ID_MORADOR
-  ) %>%
-  dplyr::summarise(valor_total = sum(valor, na.rm = T))
+  dplyr::summarise(valor_total = sum(CONSUMO_ANUAL, na.rm = T)
+  )
 
 # Moradores ------------------------------
 
-moradores <- # Recupera microdados de características dos indivíduos
+moradores <- 
+  # Recupera microdados de características dos indivíduos
   readRDS("MORADOR.rds")
 
-moradores <- # Seleciona variáveis
-  moradores %>% # Calcula ID para o indivíduo
+moradores <- 
+  moradores %>% 
+  # Seleciona variáveis
   dplyr::select(
     COD_UPA,
     NUM_DOM,
@@ -92,34 +78,42 @@ moradores <- # Seleciona variáveis
     COD_INFORMANTE,
     IDADE = V0403,
     SEXO = V0404,
-    COR = V0405
+    COR = V0405,
+    ANOS_ESTUDO
   ) %>%
+  # Cria ID para o indivíduo
   dplyr::mutate(
     ID_MORADOR = paste(COD_UPA, NUM_DOM, NUM_UC, COD_INFORMANTE, sep = "")
   )
 
 total_despesas_transporte <- # Seleciona variáveis
-  moradores %>% # Join com df de despesas com transporte
+  moradores %>%
+  # Seleciona variáveis
   dplyr::select(
     IDADE,
     SEXO,
     COR,
+    ANOS_ESTUDO,
     ID_MORADOR
   ) %>%
+  # Join com df de despesas com transporte
   dplyr::right_join(total_despesas_transporte, by = "ID_MORADOR")
 
 ######## 2. Recode data -------------------------------------------------------------------
 
-total_despesas_transporte <- # Calcula renda per capita familiar, gasto total por família e gasto per capita por família
+total_despesas_transporte <-  
   total_despesas_transporte %>% 
+  # Calcula renda per capita familiar,
   dplyr::group_by(ID_FAMILIA) %>% 
-  dplyr::mutate(renda_pc = RENDA_ANUAL / n(),
-                gasto_total = sum(valor_total),
-                gasto_pc = gasto_total / n()) %>% 
+  dplyr::mutate(
+    n = n_distinct(ID_MORADOR),
+    renda_pc = RENDA_ANUAL / n
+  ) %>% 
   dplyr::rename(renda_total = RENDA_ANUAL) %>% 
   dplyr::ungroup()
 
-quintiles <- # Calcula quintis de renda ponderados 
+quintiles <- 
+  # Calcula quintis de renda ponderados 
   Hmisc::wtd.quantile(
     total_despesas_transporte$renda_pc,
     weights = total_despesas_transporte$PESO_FINAL,
@@ -128,7 +122,8 @@ quintiles <- # Calcula quintis de renda ponderados
     normwt = FALSE, na.rm = T
   )
 
-deciles <- # Calcula decis de renda ponderados 
+deciles <- 
+  # Calcula decis de renda ponderados 
   Hmisc::wtd.quantile(
     total_despesas_transporte$renda_pc,
     weights = total_despesas_transporte$PESO_FINAL,
@@ -146,9 +141,9 @@ total_despesas_transporte[, quintil_renda := findInterval(
 )]
 
 total_despesas_transporte[, quintil_renda := fifelse(
-  quintil_renda == 1, "Q1 poorest",
+  quintil_renda == 1, "Q1 mais pobre",
   fifelse(
-    quintil_renda == 5, "Q5 richest",
+    quintil_renda == 5, "Q5 mais rico",
     paste0("Q", quintil_renda)
   )
 )]
@@ -158,58 +153,58 @@ total_despesas_transporte[, decil_renda := findInterval(
 )]
 
 total_despesas_transporte[, decil_renda := fifelse(
-  decil_renda == 1, "Q1 poorest",
+  decil_renda == 1, "Q1 mais pobre",
   fifelse(
-    decil_renda == 10, "Q10 richest",
+    decil_renda == 10, "Q10 mais rico",
     paste0("Q", decil_renda)
   )
 )]
 
-total_despesas_transporte <-
-  total_despesas_transporte %>% # Calcula parcela da renda familiar gasta com transporte
-  dplyr::group_by(ID_FAMILIA) %>% 
-  dplyr::mutate(prop_transporte_familia = gasto_total / renda_total) %>% 
-  dplyr::ungroup() %>% # Calcula gasto individual com transporte e parcela da renda individual gasta com transporte
-  dplyr::group_by(ID_MORADOR) %>% 
-  dplyr::mutate(gasto_ind = sum(valor_total),
-         prop_transporte_ind = gasto_ind / renda_pc) %>% 
-  dplyr::ungroup()
-
-total_despesas_transporte <- # Recodifica variáveis com informações dos indivíduos
+total_despesas_transporte <- 
+  # Recodifica variáveis com informações dos indivíduos
   total_despesas_transporte %>%
   dplyr::mutate(
-    faixa_etaria = ifelse(IDADE <= 10, "até 10 anos",
+    faixa_etaria = 
+      ifelse(IDADE <= 10, "até 10 anos",
       ifelse(IDADE <= 19, "10 a 19 anos",
-        ifelse(IDADE <= 29, "20 a 29 anos",
-          ifelse(IDADE <= 39, "30 a 39 anos",
-            ifelse(IDADE <= 49, "40 a 49 anos",
-              ifelse(IDADE <= 59, "50 a 59 anos",
-                ifelse(IDADE <= 69, "60 a 69 anos",
-                  ifelse(IDADE <= 79, "70 a 79 anos",
-                    "80 anos ou mais"
-                     )))))))),
-    genero = ifelse(SEXO == 1, "Homem", "Mulher"),
-    etnia = ifelse(COR == 1, "Branca",
+      ifelse(IDADE <= 29, "20 a 29 anos",
+      ifelse(IDADE <= 39, "30 a 39 anos",
+      ifelse(IDADE <= 49, "40 a 49 anos",
+      ifelse(IDADE <= 59, "50 a 59 anos",
+      ifelse(IDADE <= 69, "60 a 69 anos",
+      ifelse(IDADE <= 79, "70 a 79 anos",
+      "80 anos ou mais")))))))),
+    genero = 
+      ifelse(SEXO == 1, "Homem", "Mulher"),
+    etnia = 
+      ifelse(COR == 1, "Branca",
       ifelse(COR == 2, "Preta",
-        ifelse(COR == 3, "Amarela",
-          ifelse(COR == 4, "Parda",
-            ifelse(COR == 5, "Indígena",
-              "Sem declaração"
-            ))))),
-    regiao = ifelse(UF < 20, "Norte",
+      ifelse(COR == 3, "Amarela",
+      ifelse(COR == 4, "Parda",
+      ifelse(COR == 5, "Indígena",
+      "Sem declaração"))))),
+    regiao = 
+      ifelse(UF < 20, "Norte",
       ifelse(UF < 30, "Nordeste",
-        ifelse(UF < 40, "Sudeste",
-          ifelse(UF < 50, "Sul",
-            "Centro-Oeste"
-          )))),
+      ifelse(UF < 40, "Sudeste",
+      ifelse(UF < 50, "Sul",
+      "Centro-Oeste")))),
+    Modo = 
+      ifelse(
+        COD_ITEM <= 2300404 |
+        COD_ITEM >= 2300701 & COD_ITEM <= 2301301 |
+        COD_ITEM >= 2302301 & COD_ITEM <= 2303001 , "Transporte Coletivo",
+        "Transporte Individual"),
     Ano = "2017"
   )
 
 total_despesas_transporte <-
-  total_despesas_transporte %>% # Cria classes para os Estratos Urbano, Rural, RM e interior
+  total_despesas_transporte %>% 
+  # Cria classes para os Estratos Urbano, Rural, RM e interior
   dplyr::mutate(
     ESTRATO_POF = as.numeric(ESTRATO_POF),
-    Estrato = ifelse(
+    Estrato = 
+      ifelse(
       ESTRATO_POF == 1101 | ESTRATO_POF == 1102 |
       ESTRATO_POF == 1201 |
       ESTRATO_POF >= 1301 & ESTRATO_POF <= 1306 |
@@ -291,33 +286,31 @@ total_despesas_transporte <-
           "Interior Rural")))
     )
 
-pof_2017 <- # filtra e seleciona variáveis
+pof_2017 <- 
+  # Cria df selecionando variáveis
   total_despesas_transporte %>%
-  dplyr::filter(prop_transporte_familia <= 1 &
-                  prop_transporte_ind <= 1  ) %>%
   dplyr::select(
     PESO_FINAL,
     ID_MORADOR,
     ID_FAMILIA,
     renda_total,
-    gasto_total,
+    valor_total,
     renda_pc,
-    gasto_pc,
-    gasto_ind,
-    prop_transporte_familia,
-    prop_transporte_ind,
     quintil_renda,
     decil_renda,
     faixa_etaria,
     genero,
     etnia,
     regiao,
+    ANOS_ESTUDO,
     Ano,
     UF,
-    Estrato
+    Estrato,
+    Modo
   )
 
-pof_2017$UF <- # Recodifica nome dos estados
+pof_2017$UF <- 
+  # Recodifica nome dos estados
   dplyr::recode(pof_2017$UF,
     "11" =  "RO",
     "12" =  "AC",
@@ -348,21 +341,23 @@ pof_2017$UF <- # Recodifica nome dos estados
     "53" =  "DF"
   )
 
-write.csv(pof_2017, "pof_2017.csv")
+# Salva df e limpa memória
+write.csv(pof_2017, "pof_2017b.csv")
 rm(list = ls())
 
-#####################
-### POF 2008-2009 ###
-#####################
+###############################################################
+### POF 2008-2009 #############################################
+###############################################################
 
 setwd("C:/Users/lucas/Documents/POF/2008_2009")
 
 # Despesa Individual ----------------------
 
 despesa_individual <-
+  # Recuperando microdados de despesa
   readRDS("DESPESA_INDIVIDUAL.rds")
 
-despesa_individual <-
+total_despesas_transporte <-
   despesa_individual %>%
   dplyr::select(
     UF,
@@ -382,40 +377,26 @@ despesa_individual <-
   dplyr::mutate(
     ID_FAMILIA = paste(UF, NUM_SEQ, DV_SEQ, NUM_DOM, NUM_UC, sep = ""),
     ID_MORADOR = paste(UF, NUM_SEQ, DV_SEQ, NUM_DOM, NUM_UC, COD_INFORMANTE, sep = ""),
+    COD_ITEM = ifelse(
+      COD_ITEM <= 999, paste(QUADRO, COD_ITEM, sep = "00"),
+      paste(QUADRO, COD_ITEM, sep = "0")),
     CONSUMO_ANUAL = VALOR_DEFLA * FATOR_ANUALIZACAO,
     RENDA_ANUAL = RENDA_TOTAL * 12
-  )
-
-total_despesas <-
-  despesa_individual %>%
+  ) %>%
+  dplyr::filter(
+    QUADRO == "23" | QUADRO == '43' | QUADRO == '50'
+  ) %>%
   dplyr::group_by(
     UF,
     ESTRATO_POF,
     RENDA_ANUAL,
-    QUADRO,
     COD_ITEM,
     PESO_FINAL,
     ID_FAMILIA,
     ID_MORADOR
   ) %>%
-  dplyr::summarise(valor = sum(CONSUMO_ANUAL, na.rm = T))
-
-total_despesas_transporte <-
-  total_despesas %>%
-  dplyr::filter(QUADRO == "23" | QUADRO == '33' | QUADRO == '50' | QUADRO == '51' |
-                QUADRO == '41' & COD_ITEM >= '41001' & COD_ITEM <= '41022')
-
-total_despesas_transporte <-
-  total_despesas_transporte %>%
-  dplyr::group_by(
-    UF,
-    ESTRATO_POF,
-    RENDA_ANUAL,
-    PESO_FINAL,
-    ID_FAMILIA,
-    ID_MORADOR
-  ) %>%
-  dplyr::summarise(valor_total = sum(valor, na.rm = T))
+  dplyr::summarise(valor_total = sum(CONSUMO_ANUAL, na.rm = T)
+  )
 
 # Moradores ------------------------------
 
@@ -424,7 +405,8 @@ moradores <-
 
 moradores <-
   moradores %>%
-  dplyr::select(UF,
+  dplyr::select(
+    UF,
     NUM_SEQ = num_seq,
     DV_SEQ = dv_seq,
     NUM_DOM = num_dom,
@@ -432,7 +414,8 @@ moradores <-
     COD_INFORMANTE,
     IDADE,
     SEXO,
-    COR
+    COR,
+    ANOS_ESTUDO
   ) %>%
   dplyr::mutate(
     ID_MORADOR = paste(UF, NUM_SEQ, DV_SEQ, NUM_DOM, NUM_UC, COD_INFORMANTE, sep = "")
@@ -444,6 +427,7 @@ total_despesas_transporte <-
     IDADE,
     SEXO,
     COR,
+    ANOS_ESTUDO,
     ID_MORADOR
   ) %>%
   dplyr::right_join(total_despesas_transporte, by = "ID_MORADOR")
@@ -453,9 +437,10 @@ total_despesas_transporte <-
 total_despesas_transporte <-
   total_despesas_transporte %>% 
   dplyr::group_by(ID_FAMILIA) %>% 
-  dplyr::mutate(renda_pc = RENDA_ANUAL / n(),
-                gasto_total = sum(valor_total),
-                gasto_pc = gasto_total / n()) %>% 
+  dplyr::mutate(
+    n = n_distinct(ID_MORADOR),
+    renda_pc = RENDA_ANUAL / n
+  ) %>% 
   dplyr::rename(renda_total = RENDA_ANUAL) %>% 
   dplyr::ungroup()
 
@@ -486,9 +471,9 @@ total_despesas_transporte[, quintil_renda := findInterval(
 )]
 
 total_despesas_transporte[, quintil_renda := fifelse(
-  quintil_renda == 1, "Q1 poorest",
+  quintil_renda == 1, "Q1 mais pobre",
   fifelse(
-    quintil_renda == 5, "Q5 richest",
+    quintil_renda == 5, "Q5 mais rico",
     paste0("Q", quintil_renda)
   )
 )]
@@ -498,50 +483,49 @@ total_despesas_transporte[, decil_renda := findInterval(
 )]
 
 total_despesas_transporte[, decil_renda := fifelse(
-  decil_renda == 1, "Q1 poorest",
+  decil_renda == 1, "Q1 mais pobre",
   fifelse(
-    decil_renda == 10, "Q10 richest",
+    decil_renda == 10, "Q10 mais rico",
     paste0("Q", decil_renda)
   )
 )]
 
 total_despesas_transporte <-
-  total_despesas_transporte %>% 
-  dplyr::group_by(ID_FAMILIA) %>% 
-  dplyr::mutate(prop_transporte_familia = gasto_total / renda_total) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::group_by(ID_MORADOR) %>% 
-  dplyr::mutate(gasto_ind = sum(valor_total),
-                prop_transporte_ind = gasto_ind / renda_pc) %>% 
-  dplyr::ungroup()
-
-total_despesas_transporte <-
   total_despesas_transporte %>%
   dplyr::mutate(
-    faixa_etaria = ifelse(IDADE <= 10, "até 10 anos",
+    faixa_etaria = 
+      ifelse(IDADE <= 10, "até 10 anos",
       ifelse(IDADE <= 19, "10 a 19 anos",
-        ifelse(IDADE <= 29, "20 a 29 anos",
-          ifelse(IDADE <= 39, "30 a 39 anos",
-            ifelse(IDADE <= 49, "40 a 49 anos",
-              ifelse(IDADE <= 59, "50 a 59 anos",
-                ifelse(IDADE <= 69, "60 a 69 anos",
-                  ifelse(IDADE <= 79, "70 a 79 anos",
-                    "80 anos ou mais"
-                  )))))))),
-    genero = ifelse(SEXO == 1, "Homem", "Mulher"),
-    etnia = ifelse(COR == 1, "Branca",
+      ifelse(IDADE <= 29, "20 a 29 anos",
+      ifelse(IDADE <= 39, "30 a 39 anos",
+      ifelse(IDADE <= 49, "40 a 49 anos",
+      ifelse(IDADE <= 59, "50 a 59 anos",
+      ifelse(IDADE <= 69, "60 a 69 anos",
+      ifelse(IDADE <= 79, "70 a 79 anos",
+      "80 anos ou mais")))))))),
+    genero = 
+      ifelse(SEXO == 1, "Homem", "Mulher"),
+    etnia = 
+      ifelse(COR == 1, "Branca",
       ifelse(COR == 2, "Preta",
-        ifelse(COR == 3, "Amarela",
-          ifelse(COR == 4, "Parda",
-            ifelse(COR == 5, "Indígena",
-              "Sem declaração"
-            ))))),
-    regiao = ifelse(UF < 20, "Norte",
+      ifelse(COR == 3, "Amarela",
+      ifelse(COR == 4, "Parda",
+      ifelse(COR == 5, "Indígena",
+      "Sem declaração"))))),
+    regiao = 
+      ifelse(UF < 20, "Norte",
       ifelse(UF < 30, "Nordeste",
-        ifelse(UF < 40, "Sudeste",
-          ifelse(UF < 50, "Sul",
-            "Centro-Oeste"
-          )))),
+      ifelse(UF < 40, "Sudeste",
+      ifelse(UF < 50, "Sul",
+      "Centro-Oeste")))),
+    Modo = 
+      ifelse(
+      COD_ITEM <= 2300201 |
+      COD_ITEM >= 2300401 & COD_ITEM <= 2300510 |
+      COD_ITEM >= 2301001 & COD_ITEM <= 2301101 |
+      COD_ITEM >= 2301401 & COD_ITEM <= 2301601 |
+      COD_ITEM >= 2302001 & COD_ITEM <= 2302304 , "Transporte Coletivo",
+      "Transporte Individual"),
     Ano = "2008"
   )
 
@@ -550,8 +534,8 @@ total_despesas_transporte <-
   dplyr::mutate(
     ESTRATO_POF = as.numeric(
       ifelse(ESTRATO_POF < 10,
-             paste(UF, ESTRATO_POF, sep = "0"),
-             paste0(UF, ESTRATO_POF))),
+       paste(UF, ESTRATO_POF, sep = "0"),
+       paste0(UF, ESTRATO_POF))),
     Estrato = ifelse(
       ESTRATO_POF == 1101 | ESTRATO_POF == 1102 |
       ESTRATO_POF == 1201 |
@@ -625,28 +609,24 @@ total_despesas_transporte <-
 
 pof_2008 <-
   total_despesas_transporte %>%
-  dplyr::filter(prop_transporte_familia <= 1 &
-                prop_transporte_ind <= 1) %>%
   dplyr::select(
     PESO_FINAL,
     ID_MORADOR,
     ID_FAMILIA,
-    prop_transporte_familia,
-    prop_transporte_ind,
-    renda_pc,
-    gasto_pc,
     renda_total,
-    gasto_total, 
-    gasto_ind,
+    valor_total,
+    renda_pc,
     quintil_renda,
     decil_renda,
     faixa_etaria,
     genero,
     etnia,
     regiao,
+    ANOS_ESTUDO,
     Ano,
     UF,
-    Estrato
+    Estrato,
+    Modo
   )
 
 pof_2008$UF <-
@@ -680,12 +660,12 @@ pof_2008$UF <-
     "53" =  "DF"
   )
 
-write.csv(pof_2008, "pof_2008.csv")
+write.csv(pof_2008, "pof_2008b.csv")
 rm(list = ls())
 
-#####################
-### POF 2002-2003 ###
-#####################
+###############################################################
+### POF 2002-2003 #############################################
+###############################################################
 
 setwd("C:/Users/lucas/Documents/POF/2002_2003")
 
@@ -694,7 +674,7 @@ setwd("C:/Users/lucas/Documents/POF/2002_2003")
 despesa_individual <-
   readRDS("DESPESA_INDIVIDUAL.rds")
 
-despesa_individual <-
+total_despesas_transporte <-
   despesa_individual %>%
   dplyr::select(UF,
     ESTRATO_POF,
@@ -713,40 +693,25 @@ despesa_individual <-
   dplyr::mutate(
     ID_FAMILIA = paste(UF, NUM_SEQ, DV_SEQ, NUM_DOM, NUM_UC, sep = ""),
     ID_MORADOR = paste(UF, NUM_SEQ, DV_SEQ, NUM_DOM, NUM_UC, COD_INFORMANTE, sep = ""),
+    COD_ITEM = ifelse(
+      COD_ITEM <= 999, paste(QUADRO, COD_ITEM, sep = "00"),
+      paste(QUADRO, COD_ITEM, sep = "0")),
     CONSUMO_ANUAL = VALOR_DEFLA,
     RENDA_ANUAL = RENDA_TOTAL * 12
-  )
-
-total_despesas <-
-  despesa_individual %>%
+  ) %>%
+  dplyr::filter(
+    QUADRO == "23" | QUADRO == '50' | QUADRO == '43'
+  ) %>%
   dplyr::group_by(
     UF,
     ESTRATO_POF,
     RENDA_ANUAL,
-    QUADRO,
     COD_ITEM,
     PESO_FINAL,
     ID_FAMILIA,
     ID_MORADOR
   ) %>%
-  dplyr::summarise(valor = sum(CONSUMO_ANUAL, na.rm = T))
-
-total_despesas_transporte <-
-  total_despesas %>%
-  dplyr::filter(QUADRO == "23" | QUADRO == '50' | QUADRO == '51' | QUADRO == '43' |
-                  QUADRO == '41' & COD_ITEM >= '4100902' & COD_ITEM <= '4102301')
-
-total_despesas_transporte <-
-  total_despesas_transporte %>%
-  dplyr::group_by(
-    UF,
-    ESTRATO_POF,
-    RENDA_ANUAL,
-    PESO_FINAL,
-    ID_FAMILIA,
-    ID_MORADOR
-  ) %>%
-  dplyr::summarise(valor_total = sum(valor, na.rm = T))
+  dplyr::summarise(valor_total = sum(CONSUMO_ANUAL, na.rm = T))
 
 # Moradores ------------------------------
 
@@ -764,7 +729,8 @@ moradores <-
     COD_INFORMANTE,
     IDADE,
     SEXO,
-    COR
+    COR,
+    ANOS_ESTUDO
   ) %>%
   dplyr::mutate(
     ID_MORADOR = paste(UF, NUM_SEQ, DV_SEQ, NUM_DOM, NUM_UC, COD_INFORMANTE, sep = "")
@@ -776,6 +742,7 @@ total_despesas_transporte <-
     IDADE,
     SEXO,
     COR,
+    ANOS_ESTUDO,
     ID_MORADOR
   ) %>%
   dplyr::right_join(total_despesas_transporte, by = "ID_MORADOR")
@@ -785,9 +752,10 @@ total_despesas_transporte <-
 total_despesas_transporte <-
   total_despesas_transporte %>% 
   dplyr::group_by(ID_FAMILIA) %>% 
-  dplyr::mutate(renda_pc = RENDA_ANUAL / n(),
-                gasto_total = sum(valor_total),
-                gasto_pc = gasto_total / n()) %>% 
+  dplyr::mutate(
+    n = n_distinct(ID_MORADOR),
+    renda_pc = RENDA_ANUAL / n
+  ) %>% 
   dplyr::rename(renda_total = RENDA_ANUAL) %>% 
   dplyr::ungroup()
 
@@ -818,9 +786,9 @@ total_despesas_transporte[, quintil_renda := findInterval(
 )]
 
 total_despesas_transporte[, quintil_renda := fifelse(
-  quintil_renda == 1, "Q1 poorest",
+  quintil_renda == 1, "Q1 mais pobre",
   fifelse(
-    quintil_renda == 5, "Q5 richest",
+    quintil_renda == 5, "Q5 mais rico",
     paste0("Q", quintil_renda)
   )
 )]
@@ -830,64 +798,51 @@ total_despesas_transporte[, decil_renda := findInterval(
 )]
 
 total_despesas_transporte[, decil_renda := fifelse(
-  decil_renda == 1, "Q1 poorest",
+  decil_renda == 1, "Q1 mais pobre",
   fifelse(
-    decil_renda == 10, "Q10 richest",
+    decil_renda == 10, "Q10 mais rico",
     paste0("Q", decil_renda)
   )
 )]
 
 total_despesas_transporte <-
-  total_despesas_transporte %>% 
-  dplyr::group_by(ID_FAMILIA) %>% 
-  dplyr::mutate(prop_transporte_familia = gasto_total / renda_total) %>% 
-  dplyr::ungroup() %>% 
-  dplyr::group_by(ID_MORADOR) %>% 
-  dplyr::mutate(gasto_ind = sum(valor_total),
-                prop_transporte_ind = gasto_ind / renda_pc) %>% 
-  dplyr::ungroup()
-
-total_despesas_transporte <-
   total_despesas_transporte %>%
   dplyr::mutate(
-    faixa_etaria = ifelse(IDADE <= 10, "até 10 anos",
+    faixa_etaria = 
+      ifelse(IDADE <= 10, "até 10 anos",
       ifelse(IDADE <= 19, "10 a 19 anos",
-        ifelse(IDADE <= 29, "20 a 29 anos",
-          ifelse(IDADE <= 39, "30 a 39 anos",
-            ifelse(IDADE <= 49, "40 a 49 anos",
-              ifelse(IDADE <= 59, "50 a 59 anos",
-                ifelse(IDADE <= 69, "60 a 69 anos",
-                  ifelse(IDADE <= 79, "70 a 79 anos",
-                    "80 anos ou mais"
-                  )
-                )
-              )
-            )
-          )
-        )
-      )
-    ),
-    genero = ifelse(SEXO == 1, "Homem", "Mulher"),
-    etnia = ifelse(COR == 1, "Branca",
+      ifelse(IDADE <= 29, "20 a 29 anos",
+      ifelse(IDADE <= 39, "30 a 39 anos",
+      ifelse(IDADE <= 49, "40 a 49 anos",
+      ifelse(IDADE <= 59, "50 a 59 anos",
+      ifelse(IDADE <= 69, "60 a 69 anos",
+      ifelse(IDADE <= 79, "70 a 79 anos",
+      "80 anos ou mais")))))))),
+    genero = 
+      ifelse(SEXO == 1, "Homem", "Mulher"),
+    etnia = 
+      ifelse(COR == 1, "Branca",
       ifelse(COR == 2, "Preta",
-        ifelse(COR == 3, "Amarela",
-          ifelse(COR == 4, "Parda",
-            ifelse(COR == 5, "Indígena",
-              "Sem declaração"
-            )
-          )
-        )
-      )
-    ),
-    regiao = ifelse(UF < 20, "Norte",
+      ifelse(COR == 3, "Amarela",
+      ifelse(COR == 4, "Parda",
+      ifelse(COR == 5, "Indígena",
+      "Sem declaração"))))),
+    regiao = 
+      ifelse(UF < 20, "Norte",
       ifelse(UF < 30, "Nordeste",
-        ifelse(UF < 40, "Sudeste",
-          ifelse(UF < 50, "Sul",
-            "Centro-Oeste"
-          )
-        )
-      )
-    ),
+      ifelse(UF < 40, "Sudeste",
+      ifelse(UF < 50, "Sul",
+      "Centro-Oeste")))),
+    Modo = 
+      ifelse(
+      COD_ITEM <= 2300201 |
+      COD_ITEM >= 2300401 & COD_ITEM <= 2300507 |
+      COD_ITEM >= 2301001 & COD_ITEM <= 2301101 |
+      COD_ITEM >= 2301401 & COD_ITEM <= 2301502 |
+      COD_ITEM >= 2302001 & COD_ITEM <= 2302304 |
+      COD_ITEM == 2302701 | 
+      COD_ITEM == 2302901 ,"Transporte Coletivo",
+      "Transporte Individual"),
     Ano = "2002"
   )
 
@@ -896,8 +851,8 @@ total_despesas_transporte <-
   dplyr::mutate(
       ESTRATO_POF = as.numeric(
         ifelse(ESTRATO_POF < 10,
-               paste(UF, ESTRATO_POF, sep = "0"),
-               paste0(UF, ESTRATO_POF))),
+         paste(UF, ESTRATO_POF, sep = "0"),
+         paste0(UF, ESTRATO_POF))),
     Estrato = ifelse(
       ESTRATO_POF >= 1101 & ESTRATO_POF <= 1105 |
       ESTRATO_POF >= 1201 & ESTRATO_POF <= 1204 |
@@ -972,28 +927,24 @@ total_despesas_transporte <-
 
 pof_2002 <-
   total_despesas_transporte %>%
-  dplyr::filter(prop_transporte_familia <= 1 &
-                prop_transporte_ind <= 1) %>%
   dplyr::select(
     PESO_FINAL,
     ID_MORADOR,
     ID_FAMILIA,
-    prop_transporte_familia,
-    prop_transporte_ind,
-    renda_pc,
-    gasto_pc,
-    gasto_total,
     renda_total,
-    gasto_ind,
+    valor_total,
+    renda_pc,
     quintil_renda,
     decil_renda,
     faixa_etaria,
     genero,
     etnia,
     regiao,
+    ANOS_ESTUDO,
     Ano,
     UF,
-    Estrato
+    Estrato,
+    Modo
   )
 
 pof_2002$UF <-
@@ -1027,19 +978,25 @@ pof_2002$UF <-
     "53" =  "DF"
   )
 
-write.csv(pof_2002, "pof_2002.csv")
+write.csv(pof_2002, "pof_2002b.csv")
 rm(list = ls())
 
 ######## 3. Merge and Group data -------------------------------------------
 
 setwd('~/POF/')
 
-pof_2002 <- read_csv("~/POF/2002_2003/pof_2002.csv")
-pof_2008 <- read_csv("~/POF/2008_2009/pof_2008.csv")
-pof_2017 <- read_csv("~/POF/2017_2018/pof_2017.csv")
+pof_2002b <- read_csv("~/POF/2002_2003/pof_2002b.csv")
+pof_2008b <- read_csv("~/POF/2008_2009/pof_2008b.csv")
+pof_2017b <- read_csv("~/POF/2017_2018/pof_2017b.csv")
 
-pof <- dplyr::bind_rows(pof_2002, pof_2008, pof_2017)
-pof <- pof %>%
+pofb <- 
+  dplyr::bind_rows(
+    pof_2002b, 
+    pof_2008b, 
+    pof_2017b 
+  )
+
+pofb <- pofb %>%
   dplyr::select(-X1)
 
-write.csv(pof, "pof_total.csv")
+write.csv(pofb, "pof_totalb.csv")
