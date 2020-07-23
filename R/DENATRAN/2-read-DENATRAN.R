@@ -136,7 +136,7 @@ obs[,TOTAL_MOTOS := MOTOCICLETA + MOTONETA]
 # add metropolitan region info------
 #
 break()
-metro <- geobr::read_metro_area() %>% data.table::setDT()
+metro <- geobr::read_metro_area(simplified = FALSE) %>% data.table::setDT()
 metro[,name_muni := toupper_noaccent(name_muni)]
 metro[,name_metro := toupper_noaccent(name_metro)]
 metro[,muni_uf := paste0(name_muni,"-",abbrev_state)]
@@ -232,3 +232,4 @@ obs2[, MOTO_RATE := (TOTAL_AUTOS + TOTAL_MOTOS) / POP]
 
 dir.create("data/DENATRAN")
 readr::write_rds(obs2,"data/DENATRAN/DENATRAN_jan.rds")
+
