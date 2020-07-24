@@ -5,15 +5,19 @@ source("setup.R")
 
 ######## 2. Recode and Subset data ----------------------------------------------------------
 
-pof <-
+pof_transporte <-
   # Recupera df consolidado
-  fread('pof_totalb.csv') 
+  fread('pof_transporte.csv')
 
-## POF Total ------------
+pof_total <-
+  # Recupera df consolidado
+  fread('pof_total.csv')
 
-pof <-
+## POF Transporte ------------
+
+pof_transporte <-
   # Calcula variáveis
-  pof %>%
+  pof_transporte %>%
   # Calcula gasto e comprometimento por família
   group_by(ID_FAMILIA, Ano) %>% 
   mutate(
@@ -49,13 +53,13 @@ pof <-
     prop_modo_ind < 1
   )
 
-write.csv(pof, 'pof_final.csv')
+write.csv(pof_transporte, 'pof_transporte_final.csv')
 
 # POF Urbano --------------------
 
-pof_urbano <-
+pof_transporte_urbano <-
   # Cria df Brasil Urbano
-  pof %>%
+  pof_transporte %>%
   #  filtra Brasil Urbano
   dplyr::filter(
     Estrato != "Interior Rural" 
@@ -76,118 +80,104 @@ pof_urbano <-
       "Brasil Urbano"))))))))))
   )
 
-write.csv(pof_urbano, 'pof_urbano.csv')
+pof_transporte_urbano <-
+  pof_transporte_urbano %>% 
+  as.data.table()
 
-# POF Status Vulnerabilidade --------------------
+pof_transporte_urbano[, decil_renda := cut(
+  x = renda_pc,
+  breaks = Hmisc::wtd.quantile(
+    x = renda_pc, weights = PESO_FINAL, probs = 0:10/10,
+    type = c('quantile','(i-1)/(n-1)', 'i/(n+1)','i/n'),
+    normwt = F, na.rm = T),
+  labels = F, include.lowest = T),
+  by = .(Ano, RM)]
 
-pof_status_total <-
-  # Cria df status para transporte total
-  pof_urbano %>% 
-  filter(RM != 'Brasil Urbano') %>% 
-  group_by(ID_MORADOR, PESO_FINAL, RM, Estrato, genero, etnia, Ano) %>% 
-  # Resume dados do indivíduo
-  summarise(
-    renda = mean(renda_pc),
-    gasto = mean(gasto_transp_ind),
-    prop = mean(prop_transp_ind)
-  ) %>% 
-  group_by(RM, Ano) %>%
-  # Calcula medias por RM e Ano
+
+pof_transporte_urbano[, quintil_renda := cut(
+  x = renda_pc,
+  breaks = Hmisc::wtd.quantile(
+    x = renda_pc, weights = PESO_FINAL, probs = 0:5/5,
+    type = c('quantile','(i-1)/(n-1)', 'i/(n+1)','i/n'),
+    normwt = F, na.rm = T),
+  labels = F, include.lowest = T),
+  by = .(Ano, RM)]
+
+write.csv(pof_transporte_urbano, 'pof_transporte_urbano.csv')
+
+## POF Total ------------
+
+pof_total <-
+  # Calcula variáveis
+  pof_total %>%
+  select(-V1) %>% 
+  # Calcula gasto e comprometimento por família
+  group_by(ID_FAMILIA, Ano, QUADRO) %>% 
   mutate(
-    prop_avg = weighted.mean(prop, PESO_FINAL),
-    renda_avg = log(weighted.mean(renda, PESO_FINAL)),
-    gasto_avg = log(weighted.mean(gasto, PESO_FINAL))
+    gasto_QUADRO_fam = sum(valor_total),
+    prop_QUADRO_fam = gasto_QUADRO_fam / renda_total
   ) %>% 
   ungroup() %>% 
-  # Cria status de vulnerabilidade
+  # Calcula gasto e comprometimento por morador
+  group_by(ID_MORADOR, Ano, QUADRO) %>% 
   mutate(
-    status = 
-     ifelse(log(renda) <= renda_avg & prop >= prop_avg, "Renda Baixa/Gasto Alto",
-     ifelse(log(renda) <= renda_avg & prop < prop_avg, "Renda Baixa/Gasto Baixo",
-     ifelse(log(renda) > renda_avg & prop >= prop_avg, "Renda Alta/Gasto Alto",
-     'Renda Alta/Gasto Baixo')))
+    gasto_QUADRO_ind = sum(valor_total),
+    prop_QUADRO_ind = gasto_QUADRO_ind / renda_pc
   ) %>% 
-  group_by(RM, status, Ano) %>% 
-  # Calcula parcela da população em cada status
-  mutate(pop_status = n()) %>% 
   ungroup() %>% 
-  group_by(RM, Ano) %>% 
-  mutate(pop_rm = n()) %>% 
-  ungroup() %>% 
-  mutate(share = pop_status/pop_rm
+  filter(
+      prop_QUADRO_ind < 1 &
+      prop_QUADRO_fam < 1
   )
 
-write.csv(pof_status_total, 'pof_status_total.csv')
+write.csv(pof_total, 'pof_total_final.csv')
 
-pof_status_individual <-
-  # Status de vulnerabilidade para transporte individual
-  pof_urbano %>% 
-  filter(RM != 'Brasil Urbano' & Modo == 'Transporte Individual') %>% 
-  group_by(ID_MORADOR, PESO_FINAL, RM, Estrato, genero, etnia, Ano) %>% 
-  summarise(
-    renda = mean(renda_pc),
-    gasto = mean(gasto_modo_ind),
-    prop = mean(prop_modo_ind)
-  ) %>% 
-  group_by(RM, Ano) %>%
-  mutate(
-    prop_avg = weighted.mean(prop, PESO_FINAL),
-    renda_avg = log(weighted.mean(renda, PESO_FINAL)),
-    gasto_avg = log(weighted.mean(gasto, PESO_FINAL))
-  ) %>% 
-  ungroup() %>% 
-  mutate(
-    status = 
-    ifelse(log(renda) <= renda_avg & prop >= prop_avg, "Renda Baixa/Gasto Alto",
-    ifelse(log(renda) <= renda_avg & prop < prop_avg, "Renda Baixa/Gasto Baixo",
-    ifelse(log(renda) > renda_avg & prop >= prop_avg, "Renda Alta/Gasto Alto",
-    'Renda Alta/Gasto Baixo')))
-  ) %>% 
-  group_by(RM, status, Ano) %>% 
-  mutate(pop_status = n()) %>% 
-  ungroup() %>% 
-  group_by(RM, Ano) %>% 
-  mutate(pop_rm = n()) %>% 
-  ungroup() %>% 
-  mutate(share = pop_status/pop_rm)
+# POF Urbano --------------------
 
-write.csv(pof_status_individual, 'pof_status_individual.csv')
+pof_total_urbano <-
+  # Cria df Brasil Urbano
+  pof_total %>%
+  #  filtra Brasil Urbano
+  dplyr::filter(
+    Estrato != "Interior Rural" 
+  ) %>%
+  # Nomeia Regiões Metropolitanas
+  dplyr::mutate( 
+    RM = 
+      ifelse(Estrato != "Interior Urbano" & UF == "SP", "São Paulo",
+      ifelse(Estrato != "Interior Urbano" & UF == "RJ", "Rio de Janeiro",
+      ifelse(Estrato != "Interior Urbano" & UF == "PR", "Curitiba",
+      ifelse(Estrato != "Interior Urbano" & UF == "RS", "Porto Alegre",
+      ifelse(Estrato != "Interior Urbano" & UF == "BA", "Salvador",
+      ifelse(Estrato != "Interior Urbano" & UF == "PE", "Recife",
+      ifelse(Estrato != "Interior Urbano" & UF == "CE", "Fortaleza",
+      ifelse(Estrato != "Interior Urbano" & UF == "PA", "Belém",
+      ifelse(Estrato != "Interior Urbano" & UF == "MG", "Belo Horizonte",
+      ifelse(Estrato != "Interior Urbano" & UF == "DF", "Brasília",
+      "Brasil Urbano"))))))))))
+  )
 
-# POF Medias por tipo de transporte --------------
+pof_total_urbano <-
+  pof_total_urbano %>% 
+  as.data.table()
 
-pof_medias <-
-pof_urbano %>% filter(RM != 'Brasil Urbano') %>% 
-  group_by(RM, Ano, decil_renda, Modo) %>% 
-  summarise(
-    prop = weighted.mean(prop_modo_ind, PESO_FINAL),
-    sd = sd(prop_modo_ind),
-    upper = prop + 1.96*sd/sqrt(n()),
-    lower = prop - 1.96*sd/sqrt(n())
-  ) %>% group_by(Ano, Modo) %>% 
-  mutate(media = mean(prop)) %>% 
-  ungroup()
-
-write.csv(pof_medias, 'pof_medias.csv')
-
-# POF desigualdade --------------
-
-desigualdade <-
-  pof_status_total %>% 
-  # Composição racial da RM
-  group_by(RM, Ano, etnia) %>% 
-  mutate(pop_etnia = n()) %>% 
-  ungroup() %>% 
-  mutate(share_etnia = pop_etnia/pop_rm) %>% 
-  # Composição racial do status dentro da RM
-  group_by(RM, Ano, etnia, status) %>% 
-  mutate(pop_etnia_status = n()) %>% 
-  ungroup() %>% 
-  mutate(share_etnia_status = pop_etnia_status/pop_status) %>% 
-  group_by(RM, Ano, status, etnia) %>% 
-  summarise(
-    share_etnia = mean(share_etnia),
-    share_etnia_status = mean(share_etnia_status)) %>% 
-  mutate(diff = share_etnia_status - share_etnia)
+pof_total_urbano[, decil_renda := cut(
+  x = renda_pc,
+  breaks = Hmisc::wtd.quantile(
+    x = renda_pc, weights = PESO_FINAL, probs = 0:10/10,
+    type = c('quantile','(i-1)/(n-1)', 'i/(n+1)','i/n'),
+    normwt = F, na.rm = T),
+  labels = F, include.lowest = T),
+  by = .(Ano, RM)]
 
 
+pof_total_urbano[, quintil_renda := cut(
+  x = renda_pc,
+  breaks = Hmisc::wtd.quantile(
+    x = renda_pc, weights = PESO_FINAL, probs = 0:5/5,
+    type = c('quantile','(i-1)/(n-1)', 'i/(n+1)','i/n'),
+    normwt = F, na.rm = T),
+  labels = F, include.lowest = T),
+  by = .(Ano, RM)]
 
+write.csv(pof_total_urbano, 'pof_total_urbano.csv')
