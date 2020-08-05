@@ -40,18 +40,14 @@ ggplot(data = pns2013df,
        aes(x = (AGE), 
            y = actv,
            group = v0302, color = v0302)) + 
-  geom_line() + 
-  geom_point()
-geom_line(aes(color = factor(v0302))) #+ 
-scale_fill_brewer(palette = "Set2",
-                  direction = +1)  +
+  geom_line(aes(color = factor(v0302))) + 
+  geom_point() + 
   scale_y_continuous(breaks = seq(0,30,by=5)) + 
-  labs(fill = "Gênero") + 
-  ylab("Proporção de pessoas no ambiente urbano 
-  que se deslocam a pé ou de bicicleta por no mínimo 
-       15 minutos, conforme idade") + 
-  xlab("Faixa de idade") + 
-  theme( legend.position = c(.9, .9),
+  labs(color = "Sexo",x = "Faixa etária", y = "Proporção (%)",
+       title = "Deslocamento por modos ativos",
+       subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo e faixa etária"
+  ) +
+  theme( legend.position = c(.9, .875),
          axis.text.y = element_text(size = rel(1.25)),
          axis.text.x = element_text(size = rel(1.25)),
          panel.background = element_rect(fill = "white",colour = NA),
@@ -61,8 +57,8 @@ scale_fill_brewer(palette = "Set2",
          strip.background = element_rect(fill = "grey82",colour = "grey20"),
          legend.key = element_rect(fill = "white", colour = NA))
 
-ggsave(filename = "figures/PNS/FIG_agegroup_gender_active15.png",
-       width = 25, height = 14,scale = 0.9, units = 'cm')
+ggsave(filename = "figures/PNS/FIG_agegroup_gender_active1.png",
+       width = 21, height = 15,scale = 0.9, units = 'cm')
 
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
@@ -72,8 +68,9 @@ gc(reset = T)
 #
 # plot - gender / decil /  rate of active commute 30-------------
 #
-
-pns2013df <- pns2013[,sum(actv_commutetime30)/.N,by = .(decileBR,v0302,uf,v0302)]
+pns2013df <- pns2013[urban %in% "Urbano",][AGE %nin% '0-17',]
+pns2013df[,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
+pns2013df <- pns2013[,sum(actv_commutetime30)/.N,by = .(v0302,metro)]
 pns2013df <- pns2013df[,list(as.numeric(sd(V1)),as.numeric(median(V1))), by = .(decileBR)]
 data.table::setnames(pns2013df,c('V1','V2'),c("stdv","avg"))
 pns2013df
@@ -81,17 +78,8 @@ pns2013df <- pns2013df[!is.na(decileBR),]
 pns2013df$decileBR <- factor(pns2013df$decileBR,1:10)
 
 ggplot(data = pns2013df,aes(y = avg,x = factor(decileBR), group = 1)) + 
-  geom_ribbon(aes(ymin = avg - stdv, ymax = avg + stdv), alpha=.3) + 
-  geom_line() +
-  theme_minimal()
-
-geom_line()
-geom_ribbon(aes(ymin = avg - stdv, ymax = avg + stdv), alpha=.3) +
-  geom_line(aes(color=factor(v0302))) +
-  theme_minimal()
-
-geom_point(aes(color = factor(v0302)),
-           position = position_dodge(0.0),size=2) +
+  geom_point(aes(color = factor(v0302)),
+             position = position_dodge(0.0),size=2) +
   geom_line(aes(group = factor(v0302),color = factor(v0302))) +
   scale_x_discrete(breaks = 1:10, labels = paste0(1:10,"º") ) + 
   scale_y_continuous(breaks = seq(0,15,by=3),limits = c(0,16))+
@@ -367,7 +355,7 @@ lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
 #
-# plot - quintil / travel tim / active prop / metropolitan region----------
+# plot - quintil /  active prop / time / metropolitan region----------
 #
 
 pns2013df <- pns2013[urban %in% "Urbano",]
@@ -381,9 +369,9 @@ pns2013df <- pns2013df[!is.na(quintileMetro) & !is.na(prop) & !is.na(time)
                        & !is.na(metro),]
 
 pns2013df <- data.table::melt(data = pns2013df,
-                               id.vars = c('quintileMetro','metro'),
-                               measure.vars =  c('time','prop'),
-                               variable.names = "type")
+                              id.vars = c('quintileMetro','metro'),
+                              measure.vars =  c('time','prop'),
+                              variable.names = "type")
 # order metro
 orderuf <- pns2013df[variable %in% 'time',lapply(.SD,min),.SDcols = 'value', by = metro]
 orderuf <- orderuf[order(value, na.last=FALSE),metro]
@@ -391,13 +379,13 @@ orderuf <- orderuf[order(value, na.last=FALSE),metro]
 
 pns2013df$metro <- factor(pns2013df$metro,orderuf)
 label_plot <- as_labeller(c(`time` = "Tempo (minutos)",
-                          `prop` = "Proporção de deslocamentos (%)"))
+                            `prop` = "Proporção de deslocamentos (%)"))
 ggplot(data = pns2013df,
-             aes(y = factor(metro), 
-                 x = value)) + 
+       aes(y = factor(metro), 
+           x = value)) + 
   geom_line(linetype = "dotted") + 
   geom_point(aes(fill = factor(quintileMetro)),
-             shape=21,  size = 4.0, alpha = 1) + 
+             shape=21,  size = 3.0, alpha = 1) + 
   scale_fill_brewer(palette = "RdBu",
                     direction = +1,
                     labels = c("1º","2º","3º","4º","5º"))  +
@@ -415,7 +403,7 @@ ggplot(data = pns2013df,
          legend.position = "bottom")
 
 ggsave(filename = "figures/PNS/FIG_urban_timetravel_quintil_region_points.png",
-       width = 20,height = 15,scale = 0.8,units = "cm")
+       width = 25,height = 15,scale = 0.8,units = "cm")
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
@@ -609,6 +597,79 @@ ggplot(data = pns2013df,
          complete = TRUE) 
 
 ggsave(filename = "figures/PNS/FIG_urban_pcernttravel_race_gender_region_points.png",
+       width = 30,height = 17,scale = 0.8,units = "cm")
+# keep only initial files
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+
+#
+# plot - etnia / genero / edugroup / actv1 / region ----------
+#
+
+pns2013df <- pns2013[urban %in% "Urbano",]
+pns2013df[,actv_commutetime1 := data.table::fifelse(actv_commutetime > 0,1,0)]
+pns2013df[C009 %in% c("Preta","Parda"),C009 := "Negra"]
+pns2013df <- pns2013df[C009 %in% c("Negra","Branca"),]
+
+pns2013df <- pns2013df[,list(actv = 100 * sum(actv_commutetime1)/.N),by = .(C009,region,v0302,edugroup)]
+
+pns2013df <- pns2013df[!is.na(C009) & !is.na(actv) 
+                       & !is.na(region) & !is.na(v0302) & !is.na(edugroup),]
+# brasil urbano
+#pns2013df <- pns2013df[metro %in% "Restante das UF",metro := "Brasil Não-Metropolitano"]
+pns2013df[v0302 %in% "Feminino",v0302 := "Mulher"]
+pns2013df[v0302 %in% "Masculino",v0302 := "Homem"]
+pns2013df[v0302 %in% 'Homem',C009 := fifelse(C009 %in% 'Branca',"Branco","Negro")]
+pns2013df[v0302 %in% 'Mulher',C009 := fifelse(C009 %in% 'Branca',"Branca","Negra")]
+pns2013df <- pns2013df[,genero_etnia := paste(v0302,C009)]
+# order edugroup
+pns2013df[edugroup %in% "Sem instrução + Fundamental incompleto",
+          edugroup := "Sem instrução"]
+eduvector <- c("Sem instrução",
+               "Fundamental completo","Médio completo","Superior completo")
+pns2013df$edugroup <- factor(pns2013df$edugroup,eduvector)
+# order metro
+orderuf <-  pns2013df[edugroup %in% "Sem instrução",lapply(.SD,min),.SDcols = 'actv', by = region][,region]
+pns2013df[,region := factor(region,orderuf)]
+# create group
+pns2013df[,grp_metro := .GRP, by = region][,grp_metro := as.numeric(grp_metro)*3]
+pns2013df[v0302 %in% "Homem",grp_metro := grp_metro + 0.2]
+pns2013df[v0302 %in% "Mulher",grp_metro := grp_metro - 0.2]
+
+vec <- (1:length(unique(pns2013df$region)))*3
+
+ggplot(data = pns2013df,
+       aes(x = actv, 
+           y = grp_metro,
+           group = grp_metro)) + 
+  geom_path(color = "black", size = 0.5,linetype = "dotted") +
+  geom_point(aes(fill = genero_etnia), size = 3.0,shape = 21) +
+  scale_y_continuous(breaks = vec,
+                     labels = orderuf) +
+  scale_fill_manual(values=c("#a8dadc","#457b9d","#FF7070","#DE030F")) +
+  facet_grid(cols = vars(edugroup), scales = "free") + 
+  guides(fill=guide_legend(ncol=2)) + 
+  labs(fill = NULL,x = "Proporção (%)", y = NULL,
+       title = "Deslocamento por modos ativos",
+       subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo, etnia e escolaridade"
+  ) + 
+  theme_minimal()  +  
+  theme( plot.title = element_text(size = rel(0.95), hjust = 0),
+         plot.subtitle = element_text(size = rel(0.75), hjust = 0),
+         legend.position = "bottom",
+         panel.background = element_rect(fill = "white", 
+                                         colour = NA),
+         panel.border = element_rect(fill = NA,
+                                     colour = "grey20"),
+         panel.grid = element_line(colour = "grey92"),
+         panel.grid.minor = element_line(size = rel(0.5)),
+         strip.background = element_rect(fill = "grey85",
+                                         colour = "grey20"),
+         legend.key = element_rect(fill = "white",
+                                   colour = NA), 
+         complete = TRUE) 
+
+ggsave(filename = "figures/PNS/FIG_urban_prop_race_edu_gender_region_points.jpg",
        width = 30,height = 17,scale = 0.8,units = "cm")
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]

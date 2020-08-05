@@ -17,6 +17,7 @@ denatran <- readr::read_rds("data/DENATRAN/DENATRAN_jan.rds")
 denatran[name_metro_pns %in% "RIDE - REGIAO INTEGRADA DE DESENVOLVIMENTO DO DISTRITO FEDERAL E ENTORNO",
          name_metro_pns := "RM BRASILIA"]
 ls_initial_list <- "denatran"
+
 #
 # check names-------------
 #
@@ -28,7 +29,7 @@ unique(denatran$name_metro_pns)
 unique(denatran$name_region)
 
 #
-# metro / region/ time - metro PNS ------
+# taxa / rms / 2001-2020 ------
 #
 
 temp_pns <- denatran[!is.na(name_metro_pns),]
@@ -84,15 +85,17 @@ ggsave("figures/DENATRAN/rm_taxa-motorizacao.png",scale=0.8,
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
-#
+
 #
 # map motorization rate Brasil-------------
 #
-#
+
 map_br <- data.table::melt(data = denatran[ANO %in% c(2001,2010,2020),],
                               id.vars = c('ANO','MUNICIPIO','UF','geometry'),
                               measure.vars =  c('AUTOS_PER_POP','MOTOS_PER_POP'))
-head(map_br)
+#map_br <- map_br[UF %in% "SP",]
+#state_map <- geobr::read_state("all",simplified = FALSE)
+
 max(denatran$AUTOS_PER_POP,na.rm = TRUE)
 max(denatran$MOTOS_PER_POP,na.rm = TRUE)
 #map_br <- sf::st_as_sf(map_br[UF %in% 'AC',])
@@ -106,7 +109,6 @@ ggplot() +
                                       '2001' = '2001',
                                       '2010' = '2010',
                                       '2020' = '2020'))) + 
-  
   geom_sf(data = map_br[map_br$variable %in% 'MOTOS_PER_POP',],
           aes(fill = value),size=0) +
   viridis::scale_fill_viridis("Motocicletas \n(veículos/hab.)",limits = c(0,0.6),
@@ -118,9 +120,8 @@ ggplot() +
           aes(fill = value),size=0) +
   viridis::scale_fill_viridis("Automóveis \n(veículos/hab.)",limits = c(0,1.1),
                               breaks = seq(0,1.1,by = 0.15),option = "D") + 
-  # scale_fill_continuous("Motocicletas",limits = c(0,0.6),
-  #                       breaks = seq(0,0.6,by = 0.1),
-  #                       type = "gradient")+
+  
+  #geom_sf(data = state_map,fill = NA, color = 'white') + 
   theme_bw() + 
   labs(title = 'Taxa de motorização em 2019',
        subtitle = 'Número de veículos por habitante') + 
@@ -134,10 +135,9 @@ ggsave("figures/DENATRAN/map_years_BR2.png",
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
-#
+
 #
 # map motorization rate RM-------------
-#
 #
 
 head(denatran,2)
@@ -205,7 +205,7 @@ urban[,area := units::set_units(area,"km^2") %>% as.numeric()]
 urban[,code_muni := as.character(code_muni)]
 
 
-temp_denatran <- denatran[ANO %in% 2019 & CODE %in% 
+temp_denatran <- denatran[ANO %in% 2015 & CODE %in% 
                             unique(urban$code_muni),]
 temp_denatran[urban,on = c('CODE' = 'code_muni'), urban_area := i.area]
 
@@ -231,56 +231,109 @@ lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
 #
-# aumento relativo (2001-2020)--------------
+# tx moto/ aggregated population / 2001-2020--------------
 #
 
 names(denatran)
-temp1 <- denatran[!is.na(MOTO_RATE) & ANO %in% 2010,][,MOTO_RATE_old := MOTO_RATE]
-temp2 <- denatran[!is.na(MOTO_RATE) & ANO %in% 2020,][,MOTO_RATE_new := MOTO_RATE]
-temp2[temp1,on = 'CODE',MOTO_RATE_old := i.MOTO_RATE_old]
+temp <- data.table::copy(denatran)
+temp[POP < 5e3, class_pop := "< 5 mil"]
+temp[POP >= 5e3 & POP < 10e3, class_pop := "5 mil  - 10 mil"]
+temp[POP >= 10e3 & POP < 20e3, class_pop := "10 mil - 20 mil"]
+temp[POP >= 20e3 & POP < 50e3, class_pop := "20 mil - 50 mil"]
+temp[POP >= 50e3 & POP < 100e3, class_pop := "50 mil - 100 mil"]
+temp[POP >= 100e3 & POP < 500e3, class_pop := "100 mil - 500 mil"]
+temp[POP >= 500e3, class_pop := "> 500 mil"]
 
-temp2[,RATIO_20y := (MOTO_RATE_new / MOTO_RATE_old)]
-temp2 <- temp2[RATIO_20y != Inf & !is.na(RATIO_20y) & RATIO_20y < 15,]
-temp2[POP < 2e3, class_pop := "< 2 mil"]
-temp2[POP >= 2e3 & POP < 5e3, class_pop := "2 mil  - 5 mil"]
-temp2[POP >= 5e3 & POP < 10e3, class_pop := "5 mil - 10 mil"]
-temp2[POP >= 10e3 & POP < 50e3, class_pop := "10 mil - 50 mil"]
-temp2[POP >= 50e3 & POP < 100e3, class_pop := "50 mil - 100 mil"]
-temp2[POP >= 100e3 & POP < 250e3, class_pop := "100 mil - 250 mil"]
-temp2[POP >= 250e3 & POP < 1e6, class_pop := "250 mil - 1 milhão"]
-temp2[POP >= 1e6,class_pop := "> 1 milhão"]
+temp <- temp[,lapply(.SD,mean), by = .(ANO,class_pop), 
+             .SDcols = c('AUTOS_PER_POP','MOTOS_PER_POP')]
 
-order_classpop <- c("< 2 mil","2 mil  - 5 mil","5 mil - 10 mil","10 mil - 50 mil",
-                    "50 mil - 100 mil","100 mil - 250 mil","250 mil - 1 milhão","> 1 milhão")
-temp2$class_pop <- factor(temp2$class_pop,order_classpop)
-table(temp2$class_pop)
-ggplot(data = temp2, aes(x = factor(class_pop), y = RATIO_20y)) + 
-  geom_boxplot(outlier.shape = NA) +
-  scale_y_continuous(breaks = seq(0,4.5,by=0.5)) +
-  coord_cartesian(ylim = c(0,4.5))
-  labs(x = NULL, y = "Razão entre taxa de motorização 2020 / 2001")
+temp_br <- data.table::melt(data = temp,
+                           id.vars = c('ANO','class_pop'),
+                           measure.vars =  c('AUTOS_PER_POP','MOTOS_PER_POP'))
 
+order_classpop <- c("< 5 mil","5 mil  - 10 mil","10 mil - 20 mil","20 mil - 50 mil",
+                    "50 mil - 100 mil","100 mil - 500 mil","> 500 mil")
+temp_br$class_pop <- factor(temp_br$class_pop,order_classpop)
+
+temp_br[,TOTAL_city := sum(value), by = .(ANO,class_pop)]
+temp_br[variable %in% "MOTOS_PER_POP",TOTAL_city := value]
+temp_br <- temp_br[!is.na(class_pop),]
+ggplot(temp_br,aes(x = ANO,y = value,fill = variable)) +
+  geom_area(colour="black", size=.3, alpha=.8) +
+  scale_fill_brewer(palette="Blues",labels = c("Automóvel","Motocicleta"))+
+  
+  geom_point(data = temp_br[ANO %in% c("2001","2020"),],
+             aes(x = ANO,y = TOTAL_city), shape = 3,size = 0.75) + 
+  geom_text(data = temp_br[ANO %in% "2001",],
+            aes(y = TOTAL_city,label = round(value,2)),
+            vjust = -0.7, hjust = 0.15,size = 2.5) + 
+  geom_text(data = temp_br[ANO %in% "2020",],
+            aes(y = TOTAL_city,label = round(value,2)),
+            vjust = -0.7, hjust = 0.75,size = 2.5) + 
+  labs(x = NULL,y = "Taxa de motorização (veículos/hab.)",
+       title = "Taxa de motorização",
+       subtitle = "Relação veículo/habitante por tamanho de município",
+       fill="Tipo de veículo") + 
+  facet_wrap(~class_pop,ncol = 4)+
+  theme_bw()+
+  theme(legend.position = "bottom") + 
+  ylim(c(0,max(temp_br$TOTAL_city) * 1.05)) + 
+  guides(fill = guide_legend(override.aes = list(shape = NA)))
+
+ggsave("figures/DENATRAN/rm_taxa_city.png",scale=0.8,
+       width = 25,height = 15,units = "cm")
+
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
   #
   # aumento relativo (2001-2020)--------------
   #
+
+names(denatran)
+temp <- data.table::copy(denatran)
+temp[POP < 5e3, class_pop := "< 5 mil"]
+temp[POP >= 5e3 & POP < 10e3, class_pop := "5 mil  - 10 mil"]
+temp[POP >= 10e3 & POP < 20e3, class_pop := "10 mil - 20 mil"]
+temp[POP >= 20e3 & POP < 50e3, class_pop := "20 mil - 50 mil"]
+temp[POP >= 50e3 & POP < 100e3, class_pop := "50 mil - 100 mil"]
+temp[POP >= 100e3 & POP < 500e3, class_pop := "100 mil - 500 mil"]
+temp[POP >= 500e3, class_pop := "> 500 mil"]
+
+temp <- temp[,lapply(.SD,mean), by = .(ANO,class_pop), 
+             .SDcols = c('AUTOS_PER_POP','MOTOS_PER_POP')]
+temp[,AUTOS_PER_POP := AUTOS_PER_POP/min(AUTOS_PER_POP), by = class_pop]
+temp[,MOTOS_PER_POP := MOTOS_PER_POP/min(MOTOS_PER_POP), by = class_pop]
+
+temp_br <- data.table::melt(data = temp,
+                            id.vars = c('ANO','class_pop'),
+                            measure.vars =  c('AUTOS_PER_POP','MOTOS_PER_POP'))
+
+order_classpop <- c("< 5 mil","5 mil  - 10 mil","10 mil - 20 mil","20 mil - 50 mil",
+                    "50 mil - 100 mil","100 mil - 500 mil","> 500 mil")
+temp_br$class_pop <- factor(temp_br$class_pop,order_classpop)
+
+temp_br <- temp_br[!is.na(class_pop),]
+ggplot(temp_br,aes(x = ANO,y = value)) +
+  geom_line(aes(color = variable), size=.8, alpha=.8) +
+  scale_color_discrete(labels = c("Automóvel","Motocicleta"))+
   
-  names(denatran)
-  temp2 <- denatran
-  temp2[POP < 2e3, class_pop := "< 2 mil"]
-  temp2[POP >= 2e3 & POP < 5e3, class_pop := "2 mil  - 5 mil"]
-  temp2[POP >= 5e3 & POP < 10e3, class_pop := "5 mil - 10 mil"]
-  temp2[POP >= 10e3 & POP < 50e3, class_pop := "10 mil - 50 mil"]
-  temp2[POP >= 50e3 & POP < 100e3, class_pop := "50 mil - 100 mil"]
-  temp2[POP >= 100e3 & POP < 250e3, class_pop := "100 mil - 250 mil"]
-  temp2[POP >= 250e3 & POP < 1e6, class_pop := "250 mil - 1 milhão"]
-  temp2[POP >= 1e6,class_pop := "> 1 milhão"]
-  
-  order_classpop <- c("< 2 mil","2 mil  - 5 mil","5 mil - 10 mil","10 mil - 50 mil",
-                      "50 mil - 100 mil","100 mil - 250 mil","250 mil - 1 milhão","> 1 milhão")
-  temp2$class_pop <- factor(temp2$class_pop,order_classpop)
-  table(temp2$class_pop)
-  ggplot(data = temp2, aes(x = factor(class_pop), y = RATIO_20y)) + 
-    geom_boxplot(outlier.shape = NA) +
-    scale_y_continuous(breaks = seq(0,4.5,by=0.5)) +
-    coord_cartesian(ylim = c(0,4.5))
-  labs(x = NULL, y = "Razão entre taxa de motorização 2020 / 2001")
+  geom_point(data = temp_br[ANO %in% c("2001","2020"),],
+             aes(x = ANO,y = value), shape = 1,size = 0.75) + 
+  geom_text(data = temp_br[ANO %in% "2001",],
+            aes(y = value,label = round(value,2)),
+            vjust = -0.7, hjust = 0.15,size = 2.5) + 
+  geom_text(data = temp_br[ANO %in% "2020",],
+            aes(y = value,label = round(value,2)),
+            vjust = -0.7, hjust = 0.75,size = 2.5) + 
+  labs(x = NULL,y = "Aumento com relação a 2001",
+       title = "Aumento da taxa de motorização",
+       subtitle = "Crescimento da taxa de motorização com relação ao ano base 2001\nMédia de municipios conforme faixa populacional",
+       color="Tipo de veículo",fill = NULL) + 
+  facet_wrap(~class_pop,ncol = 4)+
+  theme_bw()+
+  theme(legend.position = "bottom") +
+  ylim(c(1,max(temp_br$value) * 1.05)) +  
+  guides(fill = guide_legend(override.aes = list(shape = NA)))
+
+ggsave("figures/DENATRAN/rm_taxa_city_adjust.png",scale=0.8,
+       width = 25,height = 15,units = "cm")
