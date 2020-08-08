@@ -25,7 +25,7 @@ toupper_noaccent <- function(i){
   stringi::stri_trans_general(i,id = "Latin-ASCII") %>% 
     toupper() %>% stringr::str_replace_all("-"," ")  %>% 
     stringr::str_replace_all("'","")
-  }
+}
 
 data_fix <- function(dt,uf,muni,year,state){
   
@@ -96,7 +96,7 @@ dtfiles <- data.table(path = c(
   sheet =    c(1  ,1   ,1   ,1   ,1    ,2   ,2   ,2   ,2   ,2   ,2   ,2   ,2   ,2   ,2   ,2   ,1   ,1   ,1   ,1   ),
   startrow = c(3  ,3   ,3   ,4   ,3    ,3   ,3   ,3   ,3   ,3   ,3   ,4   ,4   ,4   ,3   ,4   ,4   ,4   ,4   ,4   ),
   year =     c(2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020)
-  )
+)
 
 #
 # check if this reading properly--------
