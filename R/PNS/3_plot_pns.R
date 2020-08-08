@@ -1,5 +1,9 @@
+#
+# init ----
+#
 rm(list=ls())
 gc(reset = T)
+library(gghighlight)
 source("R/PNS/0_loadpackages.R",local = TRUE)
 `%nin%` = Negate(`%in%`)
 pns2013 <- readr::read_rds("data/PNS/pns2013.Rds")
@@ -23,31 +27,71 @@ unique(pns2013$decileBR)
 unique(pns2013$quartileMetro)
 unique(pns2013$uf)
 unique(pns2013$urban)
+unique(pns2013$AGE_group)
+unique(pns2013$AGE)
 unique(pns2013$agegroup)
 unique(pns2013$AGE)
 unique(pns2013$dummyVehicle)
+unique(pns2013$a)
 
 #
-# plot - age x gender x metropolitan region  ------------
+# plot - age / gender / decil / proportion ------------
 #
-pns2013df <- pns2013[urban %in% "Urbano",][AGE %nin% '0-17',]
+# 1st plot
+pns2013df <- pns2013[urban %in% "Urbano",][agegroup %nin% c('0-4','5-13','14-17'),]
 pns2013df[,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
 pns2013df <- pns2013df[,list(actv = 100 * sum(actv_commutetime1)/.N)
-                       ,by = .(AGE,v0302)]
-pns2013df <- pns2013df[!is.na(AGE) & !is.na(v0302),]
+                       ,by = .(agegroup,v0302)]
+pns2013df <- pns2013df[!is.na(agegroup) & !is.na(v0302),][,.(agegroup,v0302,actv)]
 
-ggplot(data = pns2013df,
-       aes(x = (AGE), 
+pns2013df$agegroup <- factor(pns2013df$agegroup,
+                             c("18-24","25-29","30-34","35-39",
+                               "40-44","45-49","50-54","55-59","60-64","65+"))
+# order metro
+p1 <- ggplot(data = pns2013df,
+       aes(x = (agegroup), 
            y = actv,
            group = v0302, color = v0302)) + 
   geom_line(aes(color = factor(v0302))) + 
   geom_point() + 
-  scale_y_continuous(breaks = seq(0,30,by=5)) + 
-  labs(color = "Sexo",x = "Faixa etária", y = "Proporção (%)",
-       title = "Deslocamento por modos ativos",
-       subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo e faixa etária"
+  scale_y_continuous(breaks = seq(0,30,by=5),limits = c(0,30),
+                     labels = seq(0,30,by=5)) + 
+  labs(color = "Sexo",x = "Faixa etária", y = "Proporção (%)"
+       #,title = "Deslocamento por modos ativos",
+       #subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo e faixa etária"
   ) +
-  theme( legend.position = c(.9, .875),
+  theme( legend.position = 'none',
+         axis.text.y = element_text(size = rel(1.25)),
+         axis.text.x = element_text(size = rel(1.00),angle = 0),
+         panel.background = element_rect(fill = "white",colour = NA),
+         panel.border = element_rect(fill = NA, colour = "grey20"),
+         panel.grid = element_line(colour = "grey82",size = rel(0.35)), 
+         panel.grid.minor = element_line(size = rel(0.35)), 
+         strip.background = element_rect(fill = "grey82",colour = "grey20"),
+         legend.key = element_rect(fill = "white", colour = NA))
+
+# 2nd plot
+pns2013df <- pns2013[urban %in% "Urbano",]
+pns2013df[,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
+pns2013df <- pns2013df[,list(actv = 100 * sum(actv_commutetime1)/.N)
+                       ,by = .(decileBR,v0302)]
+pns2013df <- pns2013df[!is.na(decileBR) & !is.na(v0302),][,.(decileBR,v0302,actv)]
+
+# order metro
+p2 <- ggplot(data = pns2013df,
+             aes(x = (decileBR), 
+                 y = actv,
+                 group = v0302, color = v0302)) + 
+  geom_line(aes(color = factor(v0302))) + 
+  geom_point() + 
+  scale_y_continuous(breaks = seq(0,30,by=5),limits = c(0,30),
+                     labels = seq(0,30,by=5)) + 
+  scale_x_continuous(breaks = 1:10) + 
+  labs(color = "Sexo",x = "Decil de renda", y = NULL
+       #,title = " ",
+       #subtitle = "\nClassificação por sexo e faixa etária"
+  ) +
+  theme( legend.position = c(.875, .82),
          axis.text.y = element_text(size = rel(1.25)),
          axis.text.x = element_text(size = rel(1.25)),
          panel.background = element_rect(fill = "white",colour = NA),
@@ -57,8 +101,211 @@ ggplot(data = pns2013df,
          strip.background = element_rect(fill = "grey82",colour = "grey20"),
          legend.key = element_rect(fill = "white", colour = NA))
 
+
+#
+pf <- p1 | p2
+pf + plot_annotation(title = "Deslocamento por modos ativos",
+  subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas")
+
 ggsave(filename = "figures/PNS/FIG_agegroup_gender_active1.png",
-       width = 21, height = 15,scale = 0.9, units = 'cm')
+       width = 30, height = 13,scale = 0.9, units = 'cm')
+
+# keep only initial files
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+gc(reset = T)
+
+#
+# plot - quintil / time  / metro ------------
+#
+pns2013df_temp <- pns2013[urban %in% "Urbano",]
+pns2013df_temp <- pns2013df_temp[metro %in% "Restante das UF",metro := "Brasil não-metropolitano"]
+pns2013df_temp <- pns2013df_temp[actv_commutetime > 0,][,.(actv_commutetime,quintileMetro,metro,quintileBR)]
+# all
+pns2013df <- data.table::copy(pns2013df_temp)[,list(time = mean(actv_commutetime)),
+                                              by = .(quintileMetro,metro)]
+# averaged
+pns2013df_avg <- data.table::copy(pns2013df_temp)[metro %nin% "Brasil não-metropolitano"
+                                                  ,list(time = mean(actv_commutetime))
+                                                  ,by = .(quintileBR)]
+pns2013df_avg[,metro := "Brasil metropolitano"]
+# br
+pns2013br <- data.table::copy(pns2013df)[pns2013df_avg,
+                                         on = c('quintileMetro' = 'quintileBR'),
+                                         time := i.time]
+# renames
+data.table::setcolorder(pns2013df_avg,c("quintileBR","metro","time"))
+data.table::setnames(pns2013df_avg,old = "quintileBR",new = "quintile")
+
+data.table::setcolorder(pns2013br,c("quintileMetro","metro","time"))
+data.table::setnames(pns2013br,old = "quintileMetro",new = "quintile")
+
+data.table::setcolorder(pns2013df,c("quintileMetro","metro","time"))
+data.table::setnames(pns2013df,old = "quintileMetro",new = "quintile")
+
+pns2013df <- list(pns2013df,pns2013df_avg) %>% data.table::rbindlist()
+
+# clean up
+pns2013df <- pns2013df[!is.na(metro) & !is.na(quintile) & !is.na(time),]
+pns2013br <- pns2013br[!is.na(metro) & !is.na(quintile) & !is.na(time),]
+# order name
+ordername <- c("Belém","Belo Horizonte","Curitiba",            
+               "Distrito Federal","Fortaleza","Porto Alegre","Recife",             
+               "Rio de Janeiro","Salvador","São Paulo",
+               "Brasil não-metropolitano","Brasil metropolitano")
+pns2013df$metro_name = factor(pns2013df$metro, levels= ordername)
+pns2013br$metro_name = factor(pns2013br$metro, levels= ordername)
+
+unique(pns2013df$metro_name)
+ggplot() + 
+  geom_line(data = pns2013df,
+            aes(x = quintile,y = time, group = metro),
+            size = 0.5, color = 'black') + 
+  geom_point(data = pns2013df,aes(x = quintile, 
+                                  y = time,
+                                  group = metro),color = 'black',size = 1.25) + 
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(size = 0.5, 
+                                          color = alpha("grey70", 0.4))) + 
+  geom_line(data = pns2013br,aes(x = quintile, y = time, colour = metro), linetype = "dotted",
+            color = 'black',size = 0.75) + 
+  facet_wrap(~metro_name,ncol = 3) + 
+  labs(group = "Sexo",x = "Quintil de renda", y = "Tempo (minutos)",
+       caption = "Brasil metropolitano: Média das regiões metropolitanas\nMédia das observações em pontilhado",
+       title = "Deslocamento por modos ativos",
+       subtitle = "Tempo de viagem (em minutos) a pé ou por bicicleta nas zonas urbanas \nClassificação por Região Metropolitana e quintil de renda"
+  ) +
+  theme( legend.position = 'bottom',
+         axis.text.y = element_text(size = rel(1.25)),
+         axis.text.x = element_text(size = rel(1.25),angle = 0),
+         panel.background = element_rect(fill = "white",colour = NA),
+         panel.border = element_rect(fill = NA, colour = "grey20"),
+         panel.grid = element_line(colour = "grey82",size = rel(0.35)), 
+         panel.grid.minor = element_line(size = rel(0.35)), 
+         strip.background = element_rect(fill = "grey82",colour = "grey20"),
+         legend.key = element_rect(fill = "white", colour = NA) )
+
+ggsave(filename = "figures/PNS/FIG_quinil_time_metro_facet.jpg",
+       width = 28, height = 27,scale = 0.8, units = 'cm')
+
+# keep only initial files
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+gc(reset = T)
+#
+# plot - quintil / prop  / metro ------------
+#
+# pns2013df <- pns2013df[,.(actv_commutetime1,quintileMetro,metro)]
+# pns2013br <- data.table::copy(pns2013df)[,list(time = 100 * sum(actv_commutetime1)/.N),by = .(quintileMetro)]
+# pns2013df <- pns2013df[,list(time = 100 * sum(actv_commutetime1)/.N),by = .(quintileMetro,metro)]
+pns2013df_temp <- pns2013[urban %in% "Urbano",][,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
+pns2013df_temp <- pns2013df_temp[metro %in% "Restante das UF",metro := "Brasil não-metropolitano"]
+pns2013df_temp <- pns2013df_temp[,.(actv_commutetime1,quintileMetro,metro,quintileBR)]
+# all
+pns2013df <- data.table::copy(pns2013df_temp)[,list(time = 100 * sum(actv_commutetime1)/.N),
+                                              by = .(quintileMetro,metro)]
+# averaged
+pns2013df_avg <- data.table::copy(pns2013df_temp)[metro %nin% "Brasil não-metropolitano"
+                                                  ,list(time = 100 * sum(actv_commutetime1)/.N)
+                                                  ,by = .(quintileBR)]
+pns2013df_avg[,metro := "Brasil metropolitano"]
+# br
+pns2013br <- data.table::copy(pns2013df)[pns2013df_avg,
+                                         on = c('quintileMetro' = 'quintileBR'),
+                                         time := i.time]
+# renames
+data.table::setcolorder(pns2013df_avg,c("quintileBR","metro","time"))
+data.table::setnames(pns2013df_avg,old = "quintileBR",new = "quintile")
+
+data.table::setcolorder(pns2013br,c("quintileMetro","metro","time"))
+data.table::setnames(pns2013br,old = "quintileMetro",new = "quintile")
+
+data.table::setcolorder(pns2013df,c("quintileMetro","metro","time"))
+data.table::setnames(pns2013df,old = "quintileMetro",new = "quintile")
+
+pns2013df <- list(pns2013df,pns2013df_avg) %>% data.table::rbindlist()
+
+# clean up
+pns2013df <- pns2013df[!is.na(metro) & !is.na(quintile) & !is.na(time),]
+pns2013br <- pns2013br[!is.na(metro) & !is.na(quintile) & !is.na(time),]
+# order name
+ordername <- c("Belém","Belo Horizonte","Curitiba",            
+               "Distrito Federal","Fortaleza","Porto Alegre","Recife",             
+               "Rio de Janeiro","Salvador","São Paulo",
+               "Brasil não-metropolitano","Brasil metropolitano")
+pns2013df$metro_name = factor(pns2013df$metro, levels= ordername)
+pns2013br$metro_name = factor(pns2013br$metro, levels= ordername)
+
+unique(pns2013df$metro_name)
+ggplot() + 
+  geom_line(data = pns2013df,
+            aes(x = quintile,y = time, group = metro),
+            size = 0.5, color = 'black') + 
+  geom_point(data = pns2013df,aes(x = quintile, 
+                                  y = time,
+                                  group = metro),color = 'black',size = 1.25) + 
+  gghighlight(use_direct_label = FALSE,
+              unhighlighted_params = list(size = 0.5, 
+                                          color = alpha("grey70", 0.4))) + 
+  geom_line(data = pns2013br,aes(x = quintile, y = time, colour = metro), linetype = "dotted",
+            color = 'black',size = 0.75) + 
+  facet_wrap(~metro_name,ncol = 3) + 
+  labs(group = "Sexo",x = "Quintil de renda", y = "Proporção (%)",
+       caption = "Brasil metropolitano: Média das regiões metropolitanas\nMédia das observações em pontilhado",
+       title = "Deslocamento por modos ativos",
+       subtitle = "Tempo de viagem (em minutos) a pé ou por bicicleta nas zonas urbanas \nClassificação por Região Metropolitana e quintil de renda"
+  ) +
+  theme( legend.position = 'bottom',
+         axis.text.y = element_text(size = rel(1.25)),
+         axis.text.x = element_text(size = rel(1.25),angle = 0),
+         panel.background = element_rect(fill = "white",colour = NA),
+         panel.border = element_rect(fill = NA, colour = "grey20"),
+         panel.grid = element_line(colour = "grey82",size = rel(0.35)), 
+         panel.grid.minor = element_line(size = rel(0.35)), 
+         strip.background = element_rect(fill = "grey82",colour = "grey20"),
+         legend.key = element_rect(fill = "white", colour = NA) )
+
+ggsave(filename = "figures/PNS/FIG_quinil_prop_metro_facet.jpg",
+       width = 28, height = 27,scale = 0.8, units = 'cm')
+
+# keep only initial files
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+gc(reset = T)
+
+#
+# plot - age / gender  / metro ------------
+#
+pns2013df <- pns2013[urban %in% "Urbano",][agegroup %nin% c('0-4','5-13','14-17'),]
+pns2013df[,actv_commutetime1 := ifelse(actv_commutetime > 0,1,0)]
+pns2013df <- pns2013df[,list(actv = 100 * sum(actv_commutetime1)/.N)
+                       ,by = .(agegroup,v0302,metro)]
+pns2013df <- pns2013df[!is.na(agegroup) & !is.na(v0302) & !is.na(metro),]
+
+ggplot(data = pns2013df,
+       aes(x = (agegroup), 
+           y = actv,
+           group = v0302, color = v0302)) + 
+  geom_line(aes(color = factor(v0302))) + 
+  geom_point() + 
+  facet_wrap(vars(metro)) + 
+  scale_y_continuous(breaks = seq(0,40,by=5)) + 
+  labs(color = "Sexo",x = "Faixa etária", y = "Proporção (%)",
+       title = "Deslocamento por modos ativos",
+       subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo e faixa etária"
+  ) +
+  theme( legend.position = c(.865, .1),
+         axis.text.y = element_text(size = rel(1.25)),
+         axis.text.x = element_text(size = rel(1.25),angle = 90),
+         panel.background = element_rect(fill = "white",colour = NA),
+         panel.border = element_rect(fill = NA, colour = "grey20"),
+         panel.grid = element_line(colour = "grey82",size = rel(0.35)), 
+         panel.grid.minor = element_line(size = rel(0.35)), 
+         strip.background = element_rect(fill = "grey82",colour = "grey20"),
+         legend.key = element_rect(fill = "white", colour = NA) )
+
+ggsave(filename = "figures/PNS/FIG_agegroup_gender_active_rm.png",
+       width = 28, height = 19.5,scale = 0.9, units = 'cm')
 
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
@@ -603,7 +850,7 @@ lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
 #
-# plot - etnia / genero / edugroup / actv1 / region ----------
+# plot - etnia / genero / prop  ----------
 #
 
 pns2013df <- pns2013[urban %in% "Urbano",]
@@ -611,12 +858,10 @@ pns2013df[,actv_commutetime1 := data.table::fifelse(actv_commutetime > 0,1,0)]
 pns2013df[C009 %in% c("Preta","Parda"),C009 := "Negra"]
 pns2013df <- pns2013df[C009 %in% c("Negra","Branca"),]
 
-pns2013df <- pns2013df[,list(actv = 100 * sum(actv_commutetime1)/.N),by = .(C009,region,v0302,edugroup)]
+pns2013df <- pns2013df[,list(actv = 100 * sum(actv_commutetime1)/.N),by = .(C009,v0302,edugroup)]
 
-pns2013df <- pns2013df[!is.na(C009) & !is.na(actv) 
-                       & !is.na(region) & !is.na(v0302) & !is.na(edugroup),]
+pns2013df <- pns2013df[!is.na(C009) & !is.na(actv) & !is.na(v0302) & !is.na(edugroup),]
 # brasil urbano
-#pns2013df <- pns2013df[metro %in% "Restante das UF",metro := "Brasil Não-Metropolitano"]
 pns2013df[v0302 %in% "Feminino",v0302 := "Mulher"]
 pns2013df[v0302 %in% "Masculino",v0302 := "Homem"]
 pns2013df[v0302 %in% 'Homem',C009 := fifelse(C009 %in% 'Branca',"Branco","Negro")]
@@ -628,15 +873,17 @@ pns2013df[edugroup %in% "Sem instrução + Fundamental incompleto",
 eduvector <- c("Sem instrução",
                "Fundamental completo","Médio completo","Superior completo")
 pns2013df$edugroup <- factor(pns2013df$edugroup,eduvector)
-# order metro
-orderuf <-  pns2013df[edugroup %in% "Sem instrução",lapply(.SD,min),.SDcols = 'actv', by = region][,region]
-pns2013df[,region := factor(region,orderuf)]
+edulabel <- c("Sem \ninstrução",
+              "Fundamental \ncompleto","Médio \ncompleto","Superior \ncompleto")
 # create group
-pns2013df[,grp_metro := .GRP, by = region][,grp_metro := as.numeric(grp_metro)*3]
-pns2013df[v0302 %in% "Homem",grp_metro := grp_metro + 0.2]
-pns2013df[v0302 %in% "Mulher",grp_metro := grp_metro - 0.2]
+fat <- 0.5
+delta <- 0.05
+pns2013df[,metro := "Brasil"]
+pns2013df[,grp_metro := .GRP, by = edugroup][,grp_metro := as.numeric(grp_metro)*fat]
+pns2013df[v0302 %in% "Homem",grp_metro := grp_metro + delta]
+pns2013df[v0302 %in% "Mulher",grp_metro := grp_metro - delta]
 
-vec <- (1:length(unique(pns2013df$region)))*3
+vec <- (1:length(unique(pns2013df$edugroup)))*fat
 
 ggplot(data = pns2013df,
        aes(x = actv, 
@@ -645,13 +892,92 @@ ggplot(data = pns2013df,
   geom_path(color = "black", size = 0.5,linetype = "dotted") +
   geom_point(aes(fill = genero_etnia), size = 3.0,shape = 21) +
   scale_y_continuous(breaks = vec,
-                     labels = orderuf) +
+                     labels = edulabel) +
   scale_fill_manual(values=c("#a8dadc","#457b9d","#FF7070","#DE030F")) +
-  facet_grid(cols = vars(edugroup), scales = "free") + 
-  guides(fill=guide_legend(ncol=2)) + 
+  xlim(c(10,25)) + 
+  #facet_grid(rows = vars(edugroup),scales = "free") + 
+  guides(fill=guide_legend(ncol=1)) + 
   labs(fill = NULL,x = "Proporção (%)", y = NULL,
        title = "Deslocamento por modos ativos",
-       subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo, etnia e escolaridade"
+       subtitle = "Percentual de pessoas que se deslocam a pé ou por bicicleta nas zonas urbanas \nClassificação por sexo, etnia e nível de escolaridade"
+  ) + 
+  theme_minimal()  +  
+  theme( plot.title = element_text(size = rel(0.95), hjust = 0),
+         plot.subtitle = element_text(size = rel(0.75), hjust = 0),
+         legend.position = "right",
+         panel.background = element_rect(fill = "white", 
+                                         colour = NA),
+         panel.border = element_rect(fill = NA,
+                                     colour = "grey20"),
+         panel.grid = element_line(colour = "grey92"),
+         panel.grid.minor = element_line(size = rel(0.5)),
+         strip.background = element_rect(fill = "grey85",
+                                         colour = "grey20"),
+         legend.key = element_rect(fill = "white",
+                                   colour = NA), 
+         complete = TRUE) 
+
+ggsave(filename = "figures/PNS/FIG_etnia_sexo_prop.jpg",
+       width = 17.5,height = 10,scale = 1,units = "cm")
+# keep only initial files
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+#
+# plot - etnia / genero / edugroup / tempo viagem / inverted ----------
+#
+
+pns2013df <- pns2013[urban %in% "Urbano",][actv_commutetime > 0,]
+#pns2013df[,metro := region]
+pns2013df[C009 %in% c("Preta","Parda"),C009 := "Negra"]
+pns2013df <- pns2013df[C009 %in% c("Negra","Branca"),]
+pns2013df <- pns2013df[,.(C009,actv_commutetime,metro,v0302,edugroup)]
+pns2013df <- pns2013df[!is.na(C009) & !is.na(actv_commutetime) 
+                       & !is.na(metro) & !is.na(v0302) & !is.na(edugroup),]
+pns2013df <- pns2013df[,lapply(.SD,mean),
+                       .SDcols = 'actv_commutetime', by = .(metro,C009,v0302,edugroup)]
+# brasil urbano
+pns2013df <- pns2013df[metro %in% "Restante das UF",metro := "Brasil Não-Metropolitano"]
+# xlabel
+myxlabel <- c("Brasil \nNão-Metropolitano","Belém","Fortaleza"  ,             
+              "Recife","Salvador","Belo \nHorizonte",    
+              "Rio de \nJaneiro","São \nPaulo","Curitiba",               
+              "Porto \nAlegre","Distrito \nFederal")
+# etnia
+pns2013df <- pns2013df[v0302 %in% "Feminino",v0302 := "Mulher"]
+pns2013df <- pns2013df[v0302 %in% "Masculino",v0302 := "Homem"]
+pns2013df[v0302 == "Homem",C009 := fifelse(C009 == "Branca","Branco","Negro")]
+pns2013df[v0302 == "Mulher",C009 := fifelse(C009 == "Branca","Branca","Negra")]
+pns2013df <- pns2013df[,genero_etnia := paste(v0302,C009)]
+# order edugroup
+pns2013df[edugroup %in% "Sem instrução + Fundamental incompleto",
+          edugroup := "Sem instrução"]
+eduvector <- c("Sem instrução",
+               "Fundamental completo","Médio completo","Superior completo")
+pns2013df$edugroup <- factor(pns2013df$edugroup,eduvector)
+# order metro
+orderuf <-  pns2013df[,lapply(.SD,min),.SDcols = 'actv_commutetime', by = metro][,metro]
+pns2013df[,metro := factor(metro,orderuf)]
+# create group
+pns2013df[,grp_metro := .GRP, by = metro][,grp_metro := as.numeric(grp_metro)*3]
+pns2013df[v0302 %in% "Homem",grp_metro := grp_metro + 0.2]
+pns2013df[v0302 %in% "Mulher",grp_metro := grp_metro - 0.2]
+
+vec <- (1:length(unique(pns2013df$metro)))*3
+
+ggplot(data = pns2013df,
+       aes(x = actv_commutetime, 
+           y = grp_metro,
+           group = grp_metro)) + 
+  geom_path(color = "black", size = 0.5,linetype = "dotted") +
+  geom_point(aes(fill = genero_etnia), size = 3.0,shape = 21) +
+  scale_y_continuous(breaks = vec,
+                     labels = myxlabel) +
+  scale_fill_manual(values=c("#a8dadc","#457b9d","#FF7070","#DE030F")) +
+  facet_grid(rows = vars(edugroup)) + 
+  guides(fill=guide_legend(ncol=2)) + 
+  labs(fill = NULL,x = "Minutos", y = NULL,
+       title = "Tempo de viagem por modos ativos de deslocamento",
+       subtitle = "Média do tempo de viagem (em minutos) a pé ou por bicicleta nas zonas urbanas\nClassificação por sexo, etnia e nível de escolaridade"
   ) + 
   theme_minimal()  +  
   theme( plot.title = element_text(size = rel(0.95), hjust = 0),
@@ -667,10 +993,10 @@ ggplot(data = pns2013df,
                                          colour = "grey20"),
          legend.key = element_rect(fill = "white",
                                    colour = NA), 
-         complete = TRUE) 
+         complete = TRUE) + coord_flip()
 
-ggsave(filename = "figures/PNS/FIG_urban_prop_race_edu_gender_region_points.jpg",
-       width = 30,height = 17,scale = 0.8,units = "cm")
+ggsave(filename = "figures/PNS/FIG_urban1_timetravel_race_edu_gender_region_points_h.png",
+       width = 25,height = 25,scale = 0.8,units = "cm")
 # keep only initial files
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
