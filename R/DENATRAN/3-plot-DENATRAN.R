@@ -6,8 +6,7 @@ rm(list=ls())
 gc(reset = T)
 library(XLConnect)
 library(gganimate)  # install.packages("gganimate")
-library(transformr) # install.packages("transformr")
-library(gifski)
+library(ggrepel)
 source("R/PNS/0_loadpackages.R",local = TRUE)
 `%nin%` = Negate(`%in%`)
 
@@ -16,12 +15,12 @@ dir.create("figures/DENATRAN")
 denatran <- readr::read_rds("data/DENATRAN/DENATRAN_jan.rds")
 denatran[name_metro_pns %in% "RIDE - REGIAO INTEGRADA DE DESENVOLVIMENTO DO DISTRITO FEDERAL E ENTORNO",
          name_metro_pns := "RM BRASILIA"]
-ls_initial_list <- "denatran"
+ls_initial_list <- c("denatran","%nin%")
 
 #
 # check names-------------
 #
-
+uniqueN(denatran$MUNI_UF)
 unique(denatran$UF)
 unique(denatran$ANO)
 unique(denatran$name_metro)
@@ -137,64 +136,7 @@ lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
 #
-# map motorization rate RM-------------
-#
-
-head(denatran,2)
-map_mot <- denatran[!is.na(name_metro_pns) & ANO %in% 2019,] %>% sf::st_as_sf()
-head(map_mot)
-
-lista_metro <- list()
-metro_name <- unique(map_mot$name_metro_pns)
-limits_plot <- c(min(map_mot$MOTO_RATE),max(map_mot$MOTO_RATE))
-
-for(i in seq_along(metro_name)){ # i = 1
-  lista_metro[[i]] <-  ggplot(data = 
-                                map_mot[map_mot$name_metro_pns  %in% metro_name[i],]
-  ) + 
-    geom_sf(aes(fill = MOTO_RATE),size=0.2,color = "black") +
-    viridis::scale_fill_viridis(limits = limits_plot) + 
-    facet_grid(~name_metro_pns) + 
-    theme_bw() + 
-    labs(fill= "Taxa\n(veículos/hab.)") + 
-    theme(axis.ticks = element_blank(),
-          axis.text = element_blank()) + 
-    theme(legend.position = 'none')
-  
-  #last obs
-  if(i == 9){
-    lista_metro[[i]] <- lista_metro[[i]] +
-      theme(legend.position = "right")
-  }
-}
-p1 <- (lista_metro[[1]] | lista_metro[[2]] | lista_metro[[3]] | lista_metro[[4]]) / 
-  (lista_metro[[10]] | lista_metro[[6]] |  lista_metro[[9]] ) /
-  (lista_metro[[5]] | lista_metro[[8]] | lista_metro[[7]] ) + plot_layout(nrow = 3, byrow = FALSE)
-
-p1 +  plot_annotation(title = 'Taxa de motorização em 2019',
-                      subtitle = 'Número de veículos por habitante',
-                      theme = theme_classic())
-
-ggsave("figures/DENATRAN/map_motorization_rate1.png",width = 20,height = 15,units = "cm")
-
-
-p1 <- ((lista_metro[[1]] + lista_metro[[2]] + lista_metro[[3]] + lista_metro[[4]])) + 
-  plot_layout(nrow = 1, byrow = FALSE)
-p2 <- (lista_metro[[5]] + lista_metro[[8]]) / ( lista_metro[[9]] + lista_metro[[10]] ) + 
-  plot_layout(nrow = 2, byrow = FALSE)
-p3 <- lista_metro[[6]] + lista_metro[[7]] + plot_layout(nrow = 1, byrow = FALSE)
-
-p1 / (p2 | p3) +  plot_annotation(title = 'Taxa de motorização em 2019',
-                                  subtitle = 'Número de veículos por habitante',
-                                  theme = theme_classic())
-
-ggsave("figures/DENATRAN/map_motorization_rate.png")
-
-lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
-rm(list = lista)
-
-#
-# density and urban motorization------
+# density / urban motorization------
 #
 
 urban <- geobr::read_urban_area(simplified = FALSE)
@@ -211,12 +153,15 @@ temp_denatran[urban,on = c('CODE' = 'code_muni'), urban_area := i.area]
 
 temp_denatran[,pop_dens := POP/urban_area]
 
+#
+city_annotation <- temp_denatran[order(TOTAL_AUTOS,decreasing = TRUE),]$CODE[1:4] 
+
 ggplot(data = temp_denatran)  + 
   geom_point(aes(x = pop_dens,y = MOTO_RATE, 
                  fill = name_region),shape = 21,size=2.5) +
   labs(x = "Densidade populacional urbana (hab./km²)",
        y = "Taxa de motorização (veículos/hab.)",
-       fill = "Região") + 
+       fill = "Região",caption = "Fonte: DENATRAN (2015) e IBGE (2015).") + 
   scale_x_continuous(breaks = seq(from = 0,to = 20000,by = 2500)) + 
   scale_y_continuous(breaks = seq(0,0.8,by= 0.1)) + 
   scale_fill_viridis_d(option = "A") + 
@@ -225,7 +170,6 @@ ggplot(data = temp_denatran)  +
 
 ggsave("figures/DENATRAN/motorizacao_x_densidade.png",scale = 0.9,
        width = 20,height = 12,units = "cm")
-plot(density$pop_dens,density$MOTO_RATE)
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
@@ -285,9 +229,11 @@ ggsave("figures/DENATRAN/rm_taxa_city.png",scale=0.8,
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
-  #
-  # aumento relativo (2001-2020)--------------
-  #
+
+
+#
+# aumento relativo (2001-2020) / facet_grid --------------
+#
 
 names(denatran)
 temp <- data.table::copy(denatran)
@@ -311,29 +257,34 @@ temp_br <- data.table::melt(data = temp,
 order_classpop <- c("< 5 mil","5 mil  - 10 mil","10 mil - 20 mil","20 mil - 50 mil",
                     "50 mil - 100 mil","100 mil - 500 mil","> 500 mil")
 temp_br$class_pop <- factor(temp_br$class_pop,order_classpop)
-
 temp_br <- temp_br[!is.na(class_pop),]
-ggplot(temp_br,aes(x = ANO,y = value)) +
-  geom_line(aes(color = variable), size=.8, alpha=.8) +
-  scale_color_discrete(labels = c("Automóvel","Motocicleta"))+
-  
+
+ggplot(temp_br,aes(x = ANO,y = value, group = class_pop)) +
+  geom_line(aes(color = class_pop), size=.8, alpha=.8) +
+  scale_color_brewer(palette = "Reds",direction = -1) + 
   geom_point(data = temp_br[ANO %in% c("2001","2020"),],
              aes(x = ANO,y = value), shape = 1,size = 0.75) + 
-  geom_text(data = temp_br[ANO %in% "2001",],
+  geom_text(data = temp_br[ANO %in% "2001",.SD[1],by = variable],
             aes(y = value,label = round(value,2)),
             vjust = -0.7, hjust = 0.15,size = 2.5) + 
-  geom_text(data = temp_br[ANO %in% "2020",],
+  geom_text(data = temp_br[ANO %in% "2020",.SD[3:7],by = variable],
             aes(y = value,label = round(value,2)),
-            vjust = -0.7, hjust = 0.75,size = 2.5) + 
+            vjust = +0.15, hjust = -0.5,size = 2.5) +
+  geom_text(data = temp_br[ANO %in% "2020" & variable %in% 'AUTOS_PER_POP',
+                           .SD[1:2],by = variable],
+            aes(y = value,label = round(value,2)),
+            vjust = +0.15, hjust = -0.5,size = 2.5) +
   labs(x = NULL,y = "Aumento com relação a 2001",
        title = "Aumento da taxa de motorização",
        subtitle = "Crescimento da taxa de motorização com relação ao ano base 2001\nMédia de municipios conforme faixa populacional",
-       color="Tipo de veículo",fill = NULL) + 
-  facet_wrap(~class_pop,ncol = 4)+
+       color="Tamanho do \nmunicípio",fill = NULL) + 
+  facet_grid(rows = vars(variable),scales = "free_y",
+             labeller = as_labeller(c('AUTOS_PER_POP' = "Automóveis",
+                                      'MOTOS_PER_POP' = "Motocicletas")))+
   theme_bw()+
-  theme(legend.position = "bottom") +
-  ylim(c(1,max(temp_br$value) * 1.05)) +  
+  theme(legend.position = "right") +
+  xlim(c(2001,2020.5)) +  
   guides(fill = guide_legend(override.aes = list(shape = NA)))
 
-ggsave("figures/DENATRAN/rm_taxa_city_adjust.png",scale=0.8,
-       width = 25,height = 15,units = "cm")
+ggsave("figures/DENATRAN/rm_taxa_city_adjust_facetveh.png",scale=0.9,
+       width = 20,height = 15,units = "cm")

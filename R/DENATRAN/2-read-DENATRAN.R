@@ -23,7 +23,9 @@ state <- state_geobr %>%
 # fix name columns
 toupper_noaccent <- function(i){
   stringi::stri_trans_general(i,id = "Latin-ASCII") %>% 
-    toupper()}
+    toupper() %>% stringr::str_replace_all("-"," ")  %>% 
+    stringr::str_replace_all("'","")
+  }
 
 data_fix <- function(dt,uf,muni,year,state){
   
@@ -73,7 +75,7 @@ data_fix <- function(dt,uf,muni,year,state){
 dtfiles <- data.table(path = c(
   "data-raw/DENATRAN/2001/Frota Tipo-Munic 2001.xls",
   "data-raw/DENATRAN/2002/Frota Tipo-Munic 2002.xls",
-  "data-raw/DENATRAN/2003/1Frota Tipo-UF Jan_03.xls",
+  "data-raw/DENATRAN/2003/Frota_Mun_Jan_03.xls",
   "data-raw/DENATRAN/2004/Frota Munic 012004 Internet.xls",
   "data-raw/DENATRAN/2005/Frota Munic 012005 Internet.xls",
   "data-raw/DENATRAN/2006/Frota Munic Jan2006 Internet.xls",
@@ -111,7 +113,7 @@ dtfiles <- data.table(path = c(
 #
 # read and fix data ----------------
 #
-obs <- lapply(1:nrow(dtfiles),function(i){ # i = 1
+obs <- lapply(1:nrow(dtfiles),function(i){ # i = 3
   
   message(dtfiles$year[i])
   
@@ -135,7 +137,6 @@ obs[,TOTAL_MOTOS := MOTOCICLETA + MOTONETA]
 #
 # add metropolitan region info------
 #
-break()
 metro <- geobr::read_metro_area(simplified = FALSE) %>% data.table::setDT()
 metro[,name_muni := toupper_noaccent(name_muni)]
 metro[,name_metro := toupper_noaccent(name_metro)]
@@ -169,6 +170,72 @@ muni_geom <- geobr::read_municipality(code_muni = "all") %>%
   data.table::setDT()
 muni_geom[,name_muni := toupper_noaccent(name_muni)]
 muni_geom[,muni_uf := paste0(name_muni,"-",abbrev_state)]
+# 
+# change it to dictionary----------
+#
+obs[MUNI_UF %in% "AMPARO DA SERRA-MG",MUNI_UF := "AMPARO DO SERRA-MG"]
+obs[MUNI_UF %in% "ARMACAO DE BUZIOS-RJ",MUNI_UF := "ARMACAO DOS BUZIOS-RJ"]
+obs[MUNI_UF %in% "ASSU-RN" ,MUNI_UF := "ACU-RN"]
+obs[MUNI_UF %in% "BALNEARIO DE PICARRAS-SC",MUNI_UF := "BALNEARIO PICARRAS-SC"]
+obs[MUNI_UF %in% "BELA VISTA DO CAROBA-PR",MUNI_UF := "BELA VISTA DA CAROBA-PR"]
+obs[MUNI_UF %in% "BELEM DE SAO FRANCISCO-PE",MUNI_UF := "BELEM DO SAO FRANCISCO-PE"]
+obs[MUNI_UF %in% "FLORINEA-SP",MUNI_UF := "FLORINIA-SP"]
+obs[MUNI_UF %in% "COUTO DE MAGALHAES-TO",MUNI_UF := "COUTO MAGALHAES-TO"]
+obs[MUNI_UF %in% "DONA EUZEBIA-MG",MUNI_UF := "DONA EUSEBIA-MG"]
+obs[MUNI_UF %in% "GOUVEA-MG",MUNI_UF := "GOUVEIA-MG"]
+obs[MUNI_UF %in% "GRACCHO CARDOSO-SE",MUNI_UF := "GRACHO CARDOSO-SE"]
+obs[MUNI_UF %in% "LAGEADO GRANDE-SC",MUNI_UF := "LAJEADO GRANDE-SC"]
+obs[MUNI_UF %in% "LAGEDO DO TABOCAL-BA",MUNI_UF := "LAJEDO DO TABOCAL-BA"]
+obs[MUNI_UF %in% "LAGOA DO ITAENGA-PE",MUNI_UF := "LAGOA DE ITAENGA-PE"]
+obs[MUNI_UF %in% "MOGI MIRIM-SP",MUNI_UF := "MOJI MIRIM-SP"]
+obs[MUNI_UF %in% "MUQUEM DO SAO FRANCISCO-BA",MUNI_UF := "MUQUEM DE SAO FRANCISCO-BA"]
+obs[MUNI_UF %in% "NOVA DO MAMORE-RO",MUNI_UF := "NOVA MAMORE-RO"]  
+obs[MUNI_UF %in% "VILA NOVA DO MAMORE-RO",MUNI_UF := "NOVA MAMORE-RO"]  
+obs[MUNI_UF %in% "PARATI-RJ",MUNI_UF := "PARATY-RJ"]
+obs[MUNI_UF %in% "PINHAL DO SAO BENTO-PR",MUNI_UF := "PINHAL DE SAO BENTO-PR"]
+obs[MUNI_UF %in% "PRESIDENTE CASTELO BRANCO-SC",MUNI_UF := "PRESIDENTE CASTELLO BRANCO-SC"]
+obs[MUNI_UF %in% "QUELUZITA-MG",MUNI_UF := "QUELUZITO-MG"]
+obs[MUNI_UF %in% "SANTA CRUZ DO MONTE CASTELO-PR",MUNI_UF := "SANTA CRUZ DE MONTE CASTELO-PR" ]
+obs[MUNI_UF %in% "SAO DOMINGOS DE POMBAL-PB",MUNI_UF := "SAO DOMINGOS-PB"]
+obs[MUNI_UF %in% "SAO FRANCISCO DE ASSIS DO PIAU-PI",MUNI_UF := "SAO FRANCISCO DE ASSIS DO PIAUI-PI"]
+obs[MUNI_UF %in% "SAO LOURENCO DOESTE-SC",MUNI_UF := "SAO LOURENCO DO OESTE-SC"]
+obs[MUNI_UF %in% "SAO MIGUEL DOESTE-SC",MUNI_UF := "SAO MIGUEL DO OESTE-SC"]
+obs[MUNI_UF %in% "SAO TOME DAS LETRAS-MG",MUNI_UF := "SAO THOME DAS LETRAS-MG"]
+obs[MUNI_UF %in% "SAO VALERIO DA NATIVIDADE-TO",MUNI_UF := "SAO VALERIO-TO"]
+obs[MUNI_UF %in% "TRAJANO DE MORAIS-RJ",MUNI_UF := "TRAJANO DE MORAES-RJ"]
+obs[MUNI_UF %in% "VILA BELA DA SANTISSIMA TRINDA-MT",MUNI_UF := "VILA BELA DA SANTISSIMA TRINDADE-MT"]       
+obs[MUNI_UF %in% "PRESIDENTE JUSCELINO-RN",MUNI_UF := "SERRA CAIADA-RN"] 
+obs[MUNI_UF %in% "GOIO ERE-PR" ,MUNI_UF := "GOIOERE-PR"]
+obs[MUNI_UF %in% "AMAPARI-AP", MUNI_UF := "PEDRA BRANCA DO AMAPARI-AP"]
+obs[MUNI_UF %in% "BARAO D0 MONTE ALTO-MG", MUNI_UF :="BARAO DO MONTE ALTO-MG"]
+obs[MUNI_UF %in% "BARRA DO SUL-SC", MUNI_UF := "BALNEARIO BARRA DO SUL-SC"]
+obs[MUNI_UF %in% "BARAO D0 MONTE ALTO-MG", MUNI_UF := "BARAO DO MONTE ALTO-MG"]
+obs[MUNI_UF %in% "JANUARIO CICCO-RN", MUNI_UF := "BOA SAUDE-RN"]
+obs[MUNI_UF %in% "BOM JESUS-GO", MUNI_UF := "BOM JESUS DE GOIAS-GO"]
+obs[MUNI_UF %in% "BRODOSQUI-SP", MUNI_UF := "BRODOWSKI-SP"]
+obs[MUNI_UF %in% "CAMPOS DOS GOITACAZES-RJ", MUNI_UF := "CAMPOS DOS GOYTACAZES-RJ"]
+obs[MUNI_UF %in% "IPAUCU-SP", MUNI_UF := "IPAUSSU-SP"]
+obs[MUNI_UF %in% "SALMORAO-SP", MUNI_UF := "SALMOURAO-SP"]
+obs[MUNI_UF %in% "SANTA ROSA-AC", MUNI_UF := "SANTA ROSA DO PURUS-AC"]
+obs[MUNI_UF %in% "SAO LUIS DO PARAITINGA-SP", MUNI_UF := "SAO LUIZ DO PARAITINGA-SP"]
+obs[MUNI_UF %in% "MUNHOZ DE MELO-PR", MUNI_UF := "MUNHOZ DE MELLO-PR"]
+obs[MUNI_UF %in% "ITAMARACA-PE", MUNI_UF := "ILHA DE ITAMARACA-PE"]
+obs[MUNI_UF %in% "SUD MENUCCI-SP", MUNI_UF := "SUD MENNUCCI-SP"]
+obs[MUNI_UF %in% "SUZANOPOLIS-SP", MUNI_UF := "SUZANAPOLIS-SP"]
+obs[MUNI_UF %in% "POTIRIGUA-BA", MUNI_UF := "POTIRAGUA-BA"]
+obs[MUNI_UF %in% "SANTA RITA DO IBITIPOCA-MG", MUNI_UF := "SANTA RITA DE IBITIPOCA-MG"]
+obs[MUNI_UF %in% "LUIZ EDUARDO MAGALHAES-BA", MUNI_UF := "LUIS EDUARDO MAGALHAES-BA"]
+obs[MUNI_UF %in% "BARAO DO MONTE ALTO-MG", MUNI_UF := "BARAO DE MONTE ALTO-MG"]
+obs[MUNI_UF %in% "MALHADA DAS PEDRAS-BA", MUNI_UF := "MALHADA DE PEDRAS-BA"]
+obs[MUNI_UF %in% "ITAPAGE-CE", MUNI_UF := "ITAPAJE-CE"]
+obs[MUNI_UF %in% "ITABIRINHA DE MANTENA-MG", MUNI_UF := "ITABIRINHA-MG"]
+obs[MUNI_UF %in% "VILA ALTA-PR", MUNI_UF := "ALTO PARAISO-PR"]
+obs[MUNI_UF %in% "SAO VICENTE DO SERIDO-PB", MUNI_UF := "SERIDO-PB"]
+obs[MUNI_UF %in% "SANTA CARMEN-MT", MUNI_UF := "SANTA CARMEM-MT"]
+obs[MUNI_UF %in% "PIUI-MG", MUNI_UF := "PIUMHI-MG"]
+obs[MUNI_UF %in% "PICARRAS-SC", MUNI_UF := "BALNEARIO PICARRAS-SC"]
+obs[MUNI_UF %in% "MARACANI-BA", MUNI_UF := "MACARANI-BA"]
+# = 
 
 obs[muni_geom,on = c('MUNI_UF' = 'muni_uf'),geometry := i.geom]
 obs[muni_geom,on = c('MUNI_UF' = 'muni_uf'),CODE := i.code_muni]
