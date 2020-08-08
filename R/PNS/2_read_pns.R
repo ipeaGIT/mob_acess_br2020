@@ -166,14 +166,29 @@ table(pns2013$region)
 
 
 
+# Create age groups with bigger age1 interval
+pns2013[C008>=0 & C008<15, AGE_group :="0-15"]
+pns2013[C008>=15 & C008<20, AGE_group :="15-20"]
+pns2013[C008>=20 & C008<25, AGE_group :="20-25"]
+pns2013[C008>=25 & C008<30, AGE_group :="25-30"]
+pns2013[C008>=30 & C008<35, AGE_group :="30-35"]
+pns2013[C008>=35 & C008<40, AGE_group :="35-40"]
+pns2013[C008>=40 & C008<45, AGE_group :="40-45"]
+pns2013[C008>=45 & C008<50, AGE_group :="45-50"]
+pns2013[C008>=50 & C008<55, AGE_group :="50-55"]
+pns2013[C008>=55 & C008<60, AGE_group :="55-60"]
+pns2013[C008>=60 & C008<65, AGE_group :="60-65"]
+pns2013[C008>=65, AGE_group :="65+"]
+
+
 # Create age groups with bigger age interval
 pns2013[C008>=0 & C008<18, AGE :="0-17"]
 pns2013[C008>17 & C008<25, AGE :="18-24"]
-pns2013[C008>24 & C008<35, AGE :="25-34"]
-pns2013[C008>34 & C008<45, AGE :="35-44"]
-pns2013[C008>44 & C008<55, AGE :="45-54"]
-pns2013[C008>54 & C008<65, AGE :="55-64"]
-pns2013[C008>64,  AGE :="65+"]
+pns2013[C008>=25 & C008<35, AGE :="25-34"]
+pns2013[C008>=35 & C008<45, AGE :="35-44"]
+pns2013[C008>=45 & C008<55, AGE :="45-54"]
+pns2013[C008>=55 & C008<65, AGE :="55-64"]
+pns2013[C008>=65,  AGE :="65+"]
 table(pns2013$AGE)
 
 # Create  age groups with 5y intervals
