@@ -13,7 +13,8 @@ source("R/PNS/0_loadpackages.R",local = TRUE)
 dir.create("figures/DENATRAN")
 
 denatran <- readr::read_rds("data/DENATRAN/DENATRAN_jan.rds")
-denatran[name_metro_pns %in% "RIDE - REGIAO INTEGRADA DE DESENVOLVIMENTO DO DISTRITO FEDERAL E ENTORNO",
+unique(denatran$name_metro_pns)
+denatran[name_metro_pns %in% "RIDE   REGIAO INTEGRADA DE DESENVOLVIMENTO DO DISTRITO FEDERAL E ENTORNO",
          name_metro_pns := "RM BRASILIA"]
 ls_initial_list <- c("denatran","%nin%")
 
@@ -130,7 +131,7 @@ ggplot() +
 
 
 ggsave("figures/DENATRAN/map_years_BR2.png",
-       scale = 0.9,width = 30,height = 15,units = "cm")
+       scale = 0.9,width = 23.5,height = 15,units = "cm")
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
