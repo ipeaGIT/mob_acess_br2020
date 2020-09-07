@@ -1,27 +1,8 @@
 # Libraries
-library(extrafont)
-loadfonts()
-library(sidrar)
-library(data.table)
-library(dplyr)
-library(ggtext)
-library(dplyr)
-library(ggplot2)
-library(janitor)
-library(lemon)
-library(rio)
-library(lubridate)
-library(readr)
-library(stringr)
-library(hrbrthemes)
-library(scales)
-library(purrr)
-library(cowplot)
-library(tidyr)
-library(forcats)
+source("R/inflacao/inflacao_0_libraries.R")
 
 # Read data ----
-tab_1419 <- fread(file = "output/dados/sidra_1419_original.csv")
+tab_1419 <- fread(file = "data/inflacao/sidra_1419_original.csv")
 
 # Clean data ----
 tab_1419 <- tab_1419 %>% 
@@ -72,6 +53,6 @@ tab_1419 <- data.table::setDT(tab_1419)[
   ]
 
 # Save cleaned data ----
-fwrite(tab_1419, file = "output/dados/sidra_1419_cleaned.csv")
-saveRDS(tab_1419, file = "output/dados/sidra_1419_cleaned.rds")
+fwrite(tab_1419, file = "data/inflacao/sidra_1419_cleaned.csv")
+saveRDS(tab_1419, file = "data/inflacao/sidra_1419_cleaned.rds")
 

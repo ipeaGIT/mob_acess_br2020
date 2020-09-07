@@ -1,5 +1,5 @@
 # Libraries ----
-source('libraries_inflacao.R')
+source('R/inflacao/inflacao_0_libraries.R')
 # funcoes -----
 
 fct_case_when <- function(...) {
@@ -20,7 +20,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
 
 # Read clean data ----
 #tab_1419 <- fread(file = "output/dados/sidra_1419_cleaned.csv")
-tab_1419 <- readRDS(file = "output/dados/sidra_1419_cleaned.rds")
+tab_1419 <- readRDS(file = "data/inflacao/sidra_1419_cleaned.rds")
 
 # Bases ----
 
@@ -210,7 +210,7 @@ tema <- theme(
 # Grafico: Acumulada Brasil - GRUPOS - ATUALIZAR DEPOIS -----
 # testar cowplot (transportes (com outros grupos), facet(itens de transporte))
 
-png("output/graficos/inflacao/acumulada_brasil_grupos_facets.png", 
+png("figures/inflacao/acumulada_brasil_grupos_facets.png", 
     width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
 
 ggplot(
@@ -303,7 +303,7 @@ linhas_vert_BR <- data.table(
 
 # Com facets (componente)
 
-png("output/graficos/inflacao/acumulada_brasil_facets.png", 
+png("figures/inflacao/acumulada_brasil_transportes_facets.png", 
     width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
 
 gg_BR <- ggplot(
@@ -629,7 +629,7 @@ dev.off()
 
 # Grafico: Infl. acumulada; facets = RMs ----
 
-png("output/graficos/inflacao/acumulada_rms_facets_legendas_coloridas.png", 
+png("figures/inflacao/acumulada_transportes_rms_facets.png", 
     width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
 
 gg_RMs <- ggplot(
@@ -780,5 +780,5 @@ dev.off()
 
 
 # Remover tudo ----
-rm(list = ls())
+#rm(list = ls())
   

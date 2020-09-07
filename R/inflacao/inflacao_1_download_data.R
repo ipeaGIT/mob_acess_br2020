@@ -1,25 +1,6 @@
 
-# Libraries
-library(extrafont)
-loadfonts()
-library(sidrar)
-library(data.table)
-library(dplyr)
-library(ggtext)
-library(dplyr)
-library(ggplot2)
-library(janitor)
-library(lemon)
-library(rio)
-library(lubridate)
-library(readr)
-library(stringr)
-library(hrbrthemes)
-library(scales)
-library(purrr)
-library(cowplot)
-library(tidyr)
-library(forcats)
+# Libraries ----
+source("R/inflacao/inflacao_0_libraries.R")
 
 
 # Download data: sidrar::get_sidra ----
@@ -57,5 +38,5 @@ tab_1419 <- bind_rows(
 )
 
 # Save as .csv data ----
-fwrite(tab_1419, file = "output/dados/sidra_1419_original.csv")
+fwrite(tab_1419, file = "data/inflacao/sidra_1419_original.csv")
 
