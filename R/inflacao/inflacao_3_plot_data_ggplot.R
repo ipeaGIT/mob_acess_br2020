@@ -311,12 +311,11 @@ gg_BR <- ggplot(
   ) + 
   scale_colour_aop(
     values = c(
-      # cores paleta 'ipea'
-      
+      ## cores paleta 'ipea'
       # Menor (automovel novo -> Maior (Oleo diesel)
-      'Automóvel novo' = '#063754', 'Motocicleta' = '#2f6280',
-      'Metrô' = '#7696ae','Ônibus urbano' = '#878a97', 
-      'Gasolina' = '#a17a75', 'Óleo diesel' = '#9e3a26'
+      'Automóvel novo' = '#326287', 'Motocicleta' = '#6a9bb3',
+      'Metrô' = '#6c6766','Ônibus urbano' = '#c29365', 
+      'Gasolina' = '#a85a3f', 'Óleo diesel' = '#872E2B'
     )
   ) +
   aop_style() +
@@ -338,17 +337,17 @@ gg_BR <- ggplot(
 lista_grob_BR <- list(
   oleo = textGrob(
     label = "Óleo diesel",
-    gp = grid::gpar(fontsize = 14, col = '#9e3a26', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#872E2B', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   gasolina = textGrob(
     label = "Gasolina",
-    gp = grid::gpar(fontsize = 14, col = '#a17a75', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#a85a3f', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   onibus = textGrob(
     label = "Ônibus\nurbano",
-    gp = grid::gpar(fontsize = 14, col = '#878a97', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#c29365', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   ipca_text_grob = textGrob(
@@ -363,17 +362,17 @@ lista_grob_BR <- list(
   ),
   metro = textGrob(
     label = "Metrô",
-    gp = grid::gpar(fontsize = 14, col = '#7696ae', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#6c6766', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   motocicleta = textGrob(
     label = "Motocicleta",
-    gp = grid::gpar(fontsize = 14, col = '#2f6280', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#6a9bb3', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   automovel = textGrob(
     label = "Automóvel\nnovo",
-    gp = grid::gpar(fontsize = 14, col = '#063754', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#326287', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   jun2016_data = textGrob(
@@ -578,12 +577,12 @@ gg_RMs <- ggplot(
     date_labels = "%Y"#,
     #breaks = function(x) seq.Date(from = min(x), to = max(x), by = "24 months")
   ) + 
-  scale_colour_manual(
+  scale_colour_aop(
     values = c(
       # Menor (automovel novo -> Maior (Oleo diesel)
-      'Automóvel novo' = '#063754', 'Motocicleta' = '#2f6280',
-      'Metrô' = '#7696ae','Ônibus urbano' = '#878a97', 
-      'Gasolina' = '#a17a75', 'Óleo diesel' = '#9e3a26',
+      'Automóvel novo' = '#326287', 'Motocicleta' = '#6a9bb3',
+      'Metrô' = '#6c6766','Ônibus urbano' = '#c29365', 
+      'Gasolina' = '#a85a3f', 'Óleo diesel' = '#872E2B',
       # IPCA CINZA ESCURO
       'IPCA' = '#323232'
     )
@@ -612,17 +611,17 @@ gg_RMs <- ggplot(
 lista_grob_RMs <- list(
   oleo = textGrob(
     label = "Óleo diesel",
-    gp = grid::gpar(fontsize = 14, col = '#9e3a26', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#872E2B', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   gasolina = textGrob(
     label = "Gasolina",
-    gp = grid::gpar(fontsize = 14, col = '#a17a75', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#a85a3f', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   onibus = textGrob(
     label = "Ônibus\nurbano",
-    gp = grid::gpar(fontsize = 14, col = '#878a97', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#c29365', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   ipca = textGrob(
@@ -632,17 +631,17 @@ lista_grob_RMs <- list(
   ),
   metro = textGrob(
     label = "Metrô",
-    gp = grid::gpar(fontsize = 14, col = '#7696ae', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#6c6766', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   motocicleta = textGrob(
     label = "Motocicleta",
-    gp = grid::gpar(fontsize = 14, col = '#2f6280', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#6a9bb3', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   automovel = textGrob(
     label = "Automóvel\nnovo",
-    gp = grid::gpar(fontsize = 14, col = '#063754', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 14, col = '#326287', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   )
 )

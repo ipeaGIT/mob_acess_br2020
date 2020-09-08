@@ -17,50 +17,6 @@ aop_colors <- c(
   `amarelo`         = '#ffa600',
   `beje`            = '#c88300',
   
-  `cor1`        = '#AE8880',
-  `cor2`            = '#917b66',
-  `cor3`           = '#6c6b50',
-  `cor4`            = '#475944',
-  `cor5`         = '#24473d',
-  `cor6`         = '#013337',
-
-  ## sequenciais
-  # petroleo
-  `petroleo1`       = '#c0e4ff',
-  `petroleo2`       = '#80a4c1',
-  `petroleo3`       = '#436883',
-  `petroleo4`       = '#00324a',
-  
-  # roxo
-  `roxo1`           = '#d6dcff',
-  `roxo2`           = '#9199e6',
-  `roxo3`           = '#5360a7',
-  `roxo4`           = '#0f2c6b',
-  
-  # lilas
-  `lilas1`          = '#ffcdff',
-  `lilas2`          = '#cf87cf',
-  `lilas3`          = '#924e93',
-  `lilas4`          = '#58165b',
-  
-  # rosa
-  `rosa1`           = '#ff92c0',
-  `rosa2`           = '#da4e80',
-  `rosa3`           = '#a00a50',
-  `rosa4`           = '#540018',
-  
-  # laranja
-  `laranja1`        = '#ffaf8f',
-  `laranja2`        = '#f06149',
-  `laranja3`        = '#b42b1d',
-  `laranja4`        = '#6f0000',
-  
-  # amarelo
-  `amarelo1`        = '#ffa600',
-  `amarelo2`        = '#ba6d00',
-  `amarelo3`        = '#7a3800',
-  `amarelo4`        = '#410000',
-  
   #`branco`         = '#f1f1f1',
   `branco`         = '#d9d9d9',
   
@@ -69,21 +25,12 @@ aop_colors <- c(
   `cinza_medio`    = '#808080',
   `cinza_claro`    = '#cccccc',
   
-  
-  # crimson king
-  `crimson1`       = '#BF6F67',
-  `crimson2`       = '#9E877E',
-  `crimson3`       = '#A19097',
+  # crimson
+  `crimson1`       = '#bf7972',
+  `crimson2`       = '#9b7a7a',
+  `crimson3`       = '#aba091',
   `crimson4`       = '#5F6987',
   `crimson5`       = '#252B4A',
-  
-  
-  # crimson variacao
-  `crimsonvar1`       = '#bf7972',
-  `crimsonvar2`       = '#9b7a7a',
-  `crimsonvar3`       = '#aba091',
-  `crimsonvar4`       = '#5F6987',
-  `crimsonvar5`       = '#252B4A',
   
   # orpheus
   `orpheu1`       = '#E69E7A',
@@ -127,46 +74,23 @@ aop_colors <- c(
   
   # ipea
   `ipea1`       = '#9E3A26',
-  `ipea2`       = '#A17A75',
-  `ipea3`       = '#878a97',
-  `ipea4`       = '#7696AE',
-  `ipea5`       = '#2F6280',
-  `ipea6`       = '#063754',
+  `ipea2`       = '#a15545',
+  `ipea3`       = '#9e6e68',
+  `ipea4`       = '#878a97',
+  `ipea5`       = '#7696AE',
+  `ipea6`       = '#2F6280',
+  `ipea7`       = '#063754',
 
   
       ### animals
   # qualitativo
-  `animals1`       = '#632E2D',
-  `animals2`       = '#9B3431',
-  `animals3`       = '#A85A3F',
-  `animals4`       = '#C29B65',
-  `animals5`       = '#6c6766',
-  `animals6`       = '#6A9BB3',
-  `animals7`       = '#326287',
-  `animals8`       = '#274370',
-  `animals9`       = '#272D4F',
-  
-  # divergente
-  `animals_div1`       = '#632E2D',
-  `animals_div2`       = '#8C3D34',
-  `animals_div3`       = '#A55940',
-  `animals_div4`       = '#B57A51',
-  `animals_div5`       = '#558BB5',
-  `animals_div6`       = '#4677A6',
-  `animals_div7`       = '#3A5F8C',
-  `animals_div8`       = '#314463',
-  
-  # sequencial azul
-  `animals_azul1`       = '#7799AF',
-  `animals_azul2`       = '#507186',
-  `animals_azul3`       = '#1c4358',
-  `animals_azul4`       = '#00293A',
-  
-  # sequencial vermelho
-  `animals4`       = '#C29B65',
-  `animals3`       = '#A85A3F',
-  `animals2`       = '#9B3431',
-  `animals1`       = '#632E2D'
+  `animals1`       = '#872E2B',
+  `animals2`       = '#A85A3F',
+  `animals3`       = '#C29365',
+  `animals4`       = '#6c6766',
+  `animals5`       = '#6A9BB3',
+  `animals6`       = '#326287',
+  `animals7`       = '#274370'
   
   
   )
@@ -183,25 +107,8 @@ aop_cols <- function(...) {
 aop_palettes <- list(
   
   `original`           = aop_cols('beje','laranja','rosa','lilas','roxo','petroleo'),
-  
-  `sequencial_petroleo`   = aop_cols(map('petroleo', ~paste0(., 1:4))[[1]]),
-  
-  `sequencial_rosa`       = aop_cols(map('rosa', ~paste0(., 1:4))[[1]]),
-  
-  `divergente`            = aop_cols('petroleo3', 'petroleo1', 'rosa1', 'rosa3'),
-  
-  `divergente_teste`      = aop_cols(
-    map('petroleo', ~paste0(., 3:1))[[1]], map('rosa', ~paste0(., 1:3))[[1]]
-  ),
-  
-  `cinzas`           = aop_cols('cinza_escuro','cinza_medio', 'cinza_claro'),
-  
-  `nova` = aop_cols(map('cor', ~paste0(., 1:6))[[1]]),
-  
-  
+
   `crimson`               = aop_cols(map('crimson', ~paste0(., 1:5))[[1]]),
-  
-  `crimsonvar`               = aop_cols(map('crimsonvar', ~paste0(., 1:5))[[1]]),
   
   `orpheu`               = aop_cols(map('orpheu', ~paste0(., 1:6))[[1]]),
   
@@ -213,11 +120,15 @@ aop_palettes <- list(
   
   `wrapper`               = aop_cols(map('wrapper', ~paste0(., 1:5))[[1]]),
   
-  `ipea`               = aop_cols(map('ipea', ~paste0(., 1:6))[[1]]),
+  `ipea`                  = aop_cols(map('ipea', ~paste0(., 1:7))[[1]]),
   
-  `animals`               = aop_cols(map('animals', ~paste0(., 1:9))[[1]]),
+  `ipea_vermelho`         = aop_cols(map('ipea', ~paste0(., 4:1))[[1]]),
   
-  `animals_azul`          = aop_cols(map('animals', ~paste0(., 6:9))[[1]]),
+  `ipea_azul`             = aop_cols(map('ipea', ~paste0(., 4:7))[[1]]),
+  
+  `animals`               = aop_cols(map('animals', ~paste0(., 1:7))[[1]]),
+  
+  `animals_azul`          = aop_cols(map('animals', ~paste0(., 4:7))[[1]]),
   
   `animals_vermelho`          = aop_cols(map('animals', ~paste0(., 4:1))[[1]]),
   
@@ -301,7 +212,7 @@ rm(aop_cols, aop_colors)
 #ggplot(mpg, aes(manufacturer, fill = manufacturer)) +
 #  geom_bar() +
 #  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-#  scale_fill_aop(palette = 'orpheu')
+#  scale_fill_aop(palette = 'animals')
 
 
 #ggplot(gapminder::gapminder %>% filter(continent%in%c("Asia",'Africa','Europe'))
