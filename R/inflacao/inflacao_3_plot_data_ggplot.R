@@ -1,5 +1,7 @@
 # Libraries ----
 source('R/inflacao/inflacao_0_libraries.R')
+source('R/style.R')
+source('R/colours.R')
 # funcoes -----
 
 fct_case_when <- function(...) {
@@ -154,55 +156,7 @@ ultimo_RMs <- data.table(
                  'Automóvel novo', "Metrô")
 )
 
-# Theme ----
-tema <- theme(
-  text = element_text(family = "Roboto"),
-  # Panel
-  #panel.grid.major.y = element_line(
-  #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
-  #),
-  panel.grid.major.y = element_blank(),
-  panel.grid.major.x = element_blank(),
-  panel.grid.minor.x = element_blank(),
-  panel.grid.minor.y = element_blank(),
-  panel.border = element_blank(),
-  panel.spacing.x = unit(1.5, "lines"),
-  # background
-  plot.background = element_rect(fill = NA, colour = NA),
-  panel.background = element_rect(fill = NA, colour = NA),
-  # Axis
-  axis.line.x = element_line(size = 0.5, color = "grey"),
-  axis.line.y = element_blank(),
-  axis.ticks.y.left = element_line(colour = "#808080"),
-  axis.ticks.x = element_blank(),
-  axis.title.y = element_blank(),
-  #axis.title.y = element_text(size = 14, angle = 0, vjust = 0),
-  axis.title.x = element_blank(),
-  axis.text = element_markdown(size = 14, colour = '#808080'),
-  # Titulo
-  plot.title = element_markdown(
-    lineheight = 1.5, family = "Roboto", size = 20),
-  plot.title.position = "plot",
-  plot.subtitle = element_markdown(
-    lineheight = 1.5, colour = "#808080", family = "Roboto", size = 16#,
-    #margin = margin(t = 0., r = 0, b = 00.075.5, l = 0, unit = 'cm')
-    ),
-  plot.caption = element_markdown(
-    margin = margin(t = 10), size = 12, hjust = 0, colour = "#808080"),
-  plot.caption.position = "plot",
-  # Legend
-  legend.position = "none",
-  legend.title = element_text(size = 16),
-  legend.key = element_blank(),
-  legend.text = element_text(size = 14),
-  # Strip
-  strip.placement = "outside",
-  strip.background = ggplot2::element_rect(fill = NA),
-  strip.text = element_text(size = 14, face = "plain", colour = "#808080"),
-  #strip.text.y.left = element_text(size = 12, face = "bold", colour = "black", angle = 0),
-  # Margin
-  plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")
-)
+
 
 
 # Graficos utilizados ----
@@ -227,15 +181,15 @@ ggplot(
   geom_line(
     data = transform(tab_1419_grupos %>% filter(componente=='IPCA'), componente = NULL),
     aes(mes, acumulada, group = componente2), 
-    colour = '#626262',
+    colour = '#323232',
     alpha = 0.9, size = 1,
     linetype = 'twodash',lineend = 'round', linejoin = 'round'
   ) +
   ggtext::geom_richtext(
     data = ultimo_facets_grupo,
     aes(mes_legenda, acumulada, label = legenda),
-    colour = '#626262',
-    family = "Roboto",
+    colour = '#323232',
+    family = "Helvetica",
     size = 5.5, 
     fontface = 'bold',
     fill = NA, label.color = NA, # remove background and outline
@@ -249,7 +203,7 @@ ggplot(
     data = ultimo_facets_transportes,
     aes(mes_legenda, acumulada, label = legenda),
     colour = '#444e86',
-    family = "Roboto",
+    family = "Helvetica",
     size = 5.5, 
     fontface = 'bold',
     fill = NA, label.color = NA, # remove background and outline
@@ -269,19 +223,18 @@ ggplot(
     values = c(
       # Menor (automovel novo -> Maior (Oleo diesel)
       "Educação" = 'black',"Despesas pessoais" = 'black',"Saúde e cuidados pessoais" = 'black',
-      "Alimentação e bebidas" = 'black','Habitação' = 'black','IPCA' = '#626262',
+      "Alimentação e bebidas" = 'black','Habitação' = 'black','IPCA' = '#323232',
       'Transportes' = '#444e86', 'Vestuário' = 'black','Artigos de residência' = 'black',
       'Comunicação' = 'black'
     )
   ) +
-  ggplot2::theme_light(base_size = 16) +
-  tema +
+  aop_style() +
   theme(
     plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")
   ) +
   labs(
     title = "Trajetória dos níveis de preços dos <b style='color:#444e86'>Transportes</b> e do restante dos componentes do IPCA na última década",
-    subtitle = "Inflação acumulada dos componentes (grupos) do <b style='color:#626262'>IPCA</b> para todo o Brasil (2012-2019)",
+    subtitle = "Inflação acumulada dos componentes (grupos) do <b style='color:#323232'>IPCA</b> para todo o Brasil (2012-2019)",
     caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA)."
   )
 
@@ -314,34 +267,6 @@ gg_BR <- ggplot(
     aes(xintercept = mes),
     linetype = 'dotted', colour = '#808080', size = 0.25
   ) +
-  #geom_vline(
-  #  data = data.table(
-  #    componente = c("Óleo diesel", 'Gasolina'), mes = rep(as.Date('2016-06-01'),2)
-  #  ),
-  #  aes(xintercept = mes),
-  #  linetype = 'dotted', colour = '#808080', size = 0.25
-  #) +
-  #geom_vline(
-  #  data = data.table(
-  #    componente = c("Óleo diesel", 'Gasolina'), mes = rep(as.Date('2017-06-01'),2)
-  #  ),
-  #  aes(xintercept = mes),
-  #  linetype = 'dotted', colour = '#808080', size = 0.25
-  #) +
-  #geom_vline(
-  #  data = data.table(
-  #    componente = c("Óleo diesel", 'Gasolina'), mes = rep(as.Date('2018-05-01'),2)
-  #  ),
-  #  aes(xintercept = mes),
-  #  linetype = 'dotted', colour = '#808080', size = 0.25
-  #) +
-  #geom_vline(
-  #  data = data.table(
-  #    componente = c("Ônibus urbano", 'Metrô'), mes = rep(as.Date('2013-06-06'),2)
-  #  ),
-  #  aes(xintercept = mes),
-  #  linetype = 'dotted', colour = '#808080', size = 0.25
-  #) + 
   geom_line(
     data = transform(tab_1419_subitens %>% filter(!componente=='IPCA'), componente = NULL),
     aes(mes, acumulada, group = componente2), 
@@ -353,14 +278,14 @@ gg_BR <- ggplot(
   geom_line(
     data = transform(tab_1419_subitens %>% filter(componente=='IPCA'), componente = NULL),
     aes(mes, acumulada, group = componente2), 
-    colour = '#626262',
+    colour = '#323232',
     alpha = 0.9, size = 1,
     linetype = 'twodash',lineend = 'round', linejoin = 'round'
   ) +
   ggtext::geom_richtext(
     data = ultimo_subitens,
     aes(mes_legenda, acumulada_novo, colour = componente, label = legenda),
-    family = "Roboto",
+    family = "Helvetica",
     size = 4.5, 
     fill = NA, label.color = NA, # remove background and outline
     label.padding = grid::unit(rep(0, 4), "pt") # remove padding
@@ -380,34 +305,32 @@ gg_BR <- ggplot(
   ggplot2::scale_x_date(
     #date_breaks = "24 months", 
     limits = as.Date(c('2012-01-01','2020-01-01')),
-    expand = expansion(mult = c(0,0.029)),
+    expand = expansion(mult = c(0,0.032)),
     date_labels = "%Y"#,
     #breaks = function(x) seq.Date(from = min(x), to = max(x), by = "24 months")
   ) + 
-  scale_colour_manual(
+  scale_colour_aop(
     values = c(
+      # cores paleta 'ipea'
+      
       # Menor (automovel novo -> Maior (Oleo diesel)
-      'Automóvel novo' = '#ffa600', 'Motocicleta' = '#ff6e54',
-      'Metrô' = '#dd5182','Ônibus urbano' = '#955196', 
-      'Gasolina' = '#5561a8', 'Óleo diesel' = '#00324a'
+      'Automóvel novo' = '#063754', 'Motocicleta' = '#2f6280',
+      'Metrô' = '#7696ae','Ônibus urbano' = '#878a97', 
+      'Gasolina' = '#a17a75', 'Óleo diesel' = '#9e3a26'
     )
   ) +
-  ggplot2::theme_light(base_size = 16) +
-  tema +
+  aop_style() +
   theme(
     plot.margin = margin(t = 0.5, r = 2.75, b = 0.5, l = 0.5, unit = 'cm'),
-    legend.position = 'none',
     strip.text = element_blank(),
     panel.spacing.x = unit(1, "cm"),
-    #panel.spacing.y = unit(1, "cm"),
-    axis.ticks.y.left = element_blank(),
     plot.subtitle = element_markdown(
       margin = margin(t = 0., r = 0, b = 2, l = 0, unit = 'cm')
     )
   ) +
   labs(
     title = 'Encarecimento relativo do transporte público e barateamento do transporte privado no Brasil',
-    subtitle = "Inflação acumulada dos subitens do <b style='color:#626262'>IPCA</b> associados ao Transporte (2012-2019)",
+    subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte (2012-2019)",
     caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA)."
   )
 
@@ -415,91 +338,91 @@ gg_BR <- ggplot(
 lista_grob_BR <- list(
   oleo = textGrob(
     label = "Óleo diesel",
-    gp = grid::gpar(fontsize = 14, col = '#00324a', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#9e3a26', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   gasolina = textGrob(
     label = "Gasolina",
-    gp = grid::gpar(fontsize = 14, col = '#5561a8', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#a17a75', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   onibus = textGrob(
     label = "Ônibus\nurbano",
-    gp = grid::gpar(fontsize = 14, col = '#955196', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#878a97', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   ipca_text_grob = textGrob(
     label = "IPCA",
-    gp = grid::gpar(fontsize = 14, col = '#626262', lineheight = 0.5, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#323232', lineheight = 0.5, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   ipca_number_grob = textGrob(
     label = "56%",
-    gp = grid::gpar(fontsize = 13, col = '#626262', lineheight = 0.5,
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 13, col = '#323232', lineheight = 0.5,
+                    fontfamily = "Helvetica")
   ),
   metro = textGrob(
     label = "Metrô",
-    gp = grid::gpar(fontsize = 14, col = '#dd5182', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#7696ae', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   motocicleta = textGrob(
     label = "Motocicleta",
-    gp = grid::gpar(fontsize = 14, col = '#ff6e54', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#2f6280', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   automovel = textGrob(
     label = "Automóvel\nnovo",
-    gp = grid::gpar(fontsize = 14, col = '#ffa600', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#063754', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   jun2016_data = textGrob(
     label = "Jun/2016", 
     just = 'right',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   jun2016_texto = textGrob(
     label = "Fim da política de\ncontrole de preços",
     just = 'right',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   jun2017_data = textGrob(
     label = "Jun/2017",
     just = 'left',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   jun2017_texto = textGrob(
     label = "Aumento na frequência\nde reajustes",
     just = 'left',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   maio2018_data = textGrob(
     label = "Maio/2018",
     just = 'left',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   maio2018_texto = textGrob(
     label = "Greve dos\ncaminhoneiros",
     just = 'left',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   jun_2013_data = textGrob(
     label = "Jun/2013",
     just = 'left',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   ),
   jun_2013_texto = textGrob(
     label = "Protestos contra aumentos\nno transporte público",
     just = 'left',
     gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+                    fontfamily = "Helvetica")
   )
 )
 
@@ -658,11 +581,11 @@ gg_RMs <- ggplot(
   scale_colour_manual(
     values = c(
       # Menor (automovel novo -> Maior (Oleo diesel)
-      'Automóvel novo' = '#ffa600', 'Motocicleta' = '#ff6e54',
-      'Metrô' = '#dd5182','Ônibus urbano' = '#955196', 
-      'Gasolina' = '#5561a8', 'Óleo diesel' = '#00324a',
-      # IPCA CINZA
-      'IPCA' = '#626262'
+      'Automóvel novo' = '#063754', 'Motocicleta' = '#2f6280',
+      'Metrô' = '#7696ae','Ônibus urbano' = '#878a97', 
+      'Gasolina' = '#a17a75', 'Óleo diesel' = '#9e3a26',
+      # IPCA CINZA ESCURO
+      'IPCA' = '#323232'
     )
   ) +
   scale_linetype_manual(
@@ -673,15 +596,13 @@ gg_RMs <- ggplot(
       'IPCA' = 'twodash'
     )
   ) +
-  ggplot2::theme_light(base_size = 16) +
-  tema +
+  aop_style() +
   theme(
     plot.margin = margin(t = 0.5, r = 3, b = 0.5, l = 0.5, unit = 'cm'),
-    legend.position = 'none'
   ) +
   labs(
     title = 'Encarecimento relativo do transporte público e barateamento do transporte privado nas cidades brasileiras',
-    subtitle = "Inflação acumulada dos subitens do <b style='color:#626262'>IPCA</b> associados ao Transporte (2012-2019)",
+    subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte (2012-2019)",
     caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).",
     colour = "Componente",
     linetype = "Componente"
@@ -691,38 +612,38 @@ gg_RMs <- ggplot(
 lista_grob_RMs <- list(
   oleo = textGrob(
     label = "Óleo diesel",
-    gp = grid::gpar(fontsize = 14, col = '#00324a', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#9e3a26', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   gasolina = textGrob(
     label = "Gasolina",
-    gp = grid::gpar(fontsize = 14, col = '#5561a8', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#a17a75', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   onibus = textGrob(
     label = "Ônibus\nurbano",
-    gp = grid::gpar(fontsize = 14, col = '#955196', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#878a97', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   ipca = textGrob(
     label = "IPCA",
-    gp = grid::gpar(fontsize = 14, col = '#626262', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#323232', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   metro = textGrob(
     label = "Metrô",
-    gp = grid::gpar(fontsize = 14, col = '#dd5182', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#7696ae', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   motocicleta = textGrob(
     label = "Motocicleta",
-    gp = grid::gpar(fontsize = 14, col = '#ff6e54', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#2f6280', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   ),
   automovel = textGrob(
     label = "Automóvel\nnovo",
-    gp = grid::gpar(fontsize = 14, col = '#ffa600', lineheight = 0.75, fontface = 'bold',
-                    fontfamily = "Roboto")
+    gp = grid::gpar(fontsize = 14, col = '#063754', lineheight = 0.75, fontface = 'bold',
+                    fontfamily = "Helvetica")
   )
 )
 
