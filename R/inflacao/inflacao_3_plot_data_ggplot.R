@@ -331,7 +331,7 @@ gg_BR <- ggplot(
   labs(
     title = 'Encarecimento relativo do transporte público e barateamento do transporte privado no Brasil',
     subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte (2012-2019)",
-    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA)."
+    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).<br>Nota: Unidade territorial de cálculo do índice: Brasil."
   )
 
 # Lista testGrobs
@@ -603,7 +603,7 @@ gg_RMs <- ggplot(
   labs(
     title = 'Encarecimento relativo do transporte público e barateamento do transporte privado nas cidades brasileiras',
     subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte (2012-2019)",
-    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).",
+    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).<br>Nota: Unidades territoriais de cálculo do índice: regiões metropolitanas de Belém (PA), Fortaleza (CE), Recife (PE), Salvador (BA), Belo Horizonte (MG), Grande Vitória (ES), Rio de Janeiro (RJ),<br>São Paulo (SP), Curitiba (PR) e Porto Alegre (RS) e municípios de Goiânia (GO) e Brasília (DF).",
     colour = "Componente",
     linetype = "Componente"
   )
