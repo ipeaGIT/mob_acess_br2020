@@ -1,3 +1,7 @@
+# Libraries ----
+source('R/colours.R')
+
+
 # Create tables ----
 
   source(file = "R/PNAD/commuting_pnad_4_read_final_data.R")
@@ -17,54 +21,6 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
                                           xmin = xmin, xmax = xmax, 
                                           ymin = ymin, ymax = ymax))
 }
-
-# Theme ----
-tema <- theme(
-  text = element_text(family = "Roboto"),
-  # Panel
-  panel.grid.major.y = element_line(
-    linetype = "dotted",colour = '#bfbfbf',size = 0.25
-  ),
-  panel.grid.major.x = element_blank(),
-  panel.grid.minor.x = element_blank(),
-  panel.grid.minor.y = element_blank(),
-  panel.border = element_blank(),
-  panel.spacing.x = unit(2, "lines"),
-  # background
-  plot.background = element_rect(fill = NA, colour = NA),
-  panel.background = element_rect(fill = NA, colour = NA),
-  # Axis
-  axis.line.x = element_line(size = 0.5, color = "grey"),
-  axis.line.y = element_blank(),
-  axis.ticks = element_blank(),
-  axis.title.y = element_blank(),
-  #axis.title.y = element_text(size = 14, angle = 0, vjust = 0),
-  axis.title.x = element_blank(),
-  axis.text = element_markdown(size = 14, colour = '#808080'),
-  # Titulo
-  plot.title = element_markdown(
-    lineheight = 1.5, family = "Roboto", size = 20),
-  plot.title.position = "plot",
-  plot.subtitle = element_markdown(
-    lineheight = 1.5, colour = "#808080", family = "Roboto", size = 16,
-    margin = margin(t = 0., r = 0, b = 0.5, l = 0, unit = 'cm')
-    ),
-  plot.caption = element_markdown(
-    margin = margin(t = 10), size = 12, hjust = 0, colour = "#808080"),
-  plot.caption.position = "plot",
-  # Legend
-  legend.position = "none",
-  legend.title = element_markdown(size = 16, colour = "#808080"),
-  legend.key = element_blank(),
-  legend.text = element_markdown(size = 14, colour = "#808080"),
-  # Strip
-  strip.placement = "outside",
-  strip.background = ggplot2::element_rect(fill = NA),
-  strip.text = element_text(size = 14, face = "plain", colour = "#808080"),
-  #strip.text.y.left = element_text(size = 12, face = "bold", colour = "black", angle = 0),
-  # Margin
-  plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")
-)
 
   # Graficos utilizados ----
   
@@ -94,8 +50,7 @@ tema <- theme(
       #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
     ) +
     lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
-    tema +
-    theme(panel.grid.major.y = element_blank()) +
+    aop_style() +
     scale_x_continuous(
       breaks = c(2001,2006,2011,2015)#,
       #limits = c(2000.5, 2015.5)
@@ -140,7 +95,7 @@ tema <- theme(
       #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
     ) +
     lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
-    tema +
+    aop_style() +
     theme(
       axis.title.x = element_markdown(
         size = 16, margin = margin(t = 8, b = 2, unit = 'pt'), colour = "#808080"),
@@ -153,10 +108,10 @@ tema <- theme(
       limits = c(20,53)
     ) +
     scale_colour_manual(
-      values = c('2001' = "#bc5090", '2015' = "#003f5c")
+      values = c('2001' = "#6A9BB3", '2015' = "#274370")
     ) +
     labs(
-      title = "Diferenças nas condições de mobilidade por renda nas cidades brasileiras entre <b style='color:#bc5090'>2001</b> e <b style='color:#003f5c'>2015</b>",
+      title = "Diferenças nas condições de mobilidade por renda nas cidades brasileiras entre <b style='color:#6A9BB3'>2001</b> e <b style='color:#274370'>2015</b>",
       subtitle = "Tempo médio (em minutos) no deslocamento casa-trabalho do 1º (mais pobre) ao 10º (mais rico) decil de Renda domiciliar *per capita*",
       caption = "Fonte: PNAD (IBGE, 2001 e 2015).",
       colour = "Renda domiciliar per capita",
@@ -191,10 +146,10 @@ tema <- theme(
     scale_y_continuous(
       breaks = seq(20,50, by = 10), limits = c(20,50), expand = expansion(mult = c(0,0.01))
     ) +
-    scale_colour_manual(
-      values = c("10% mais ricos" = "#00BFC4", "40% mais pobres" = "#F8766D")
+    scale_colour_aop(
+      palette = 'animals'
     ) +
-    tema +
+    aop_style() +
     #theme(panel.grid.minor.y = element_line(
     #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
     #)) +
@@ -205,7 +160,7 @@ tema <- theme(
       ) +
     labs(
       colour = "Renda domiciliar per capita",
-      title = "Diferença nas condições de mobilidade entre os <b style='color:#00BFC4'>10% mais ricos</b>, <b style='color:#9a9a9a'>a média</b> e os <b style='color:#F8766D'>40% mais pobres</b> das cidades brasileiras",
+      title = "Diferenças nas mobilidades entre os <b style='color:#274370'>10% mais ricos</b>, <b style='color:#9a9a9a'>a média</b> e os <b style='color:#872E2B'>40% mais pobres</b> das cidades brasileiras",
       subtitle = "Tempo médio (em minutos) no deslocamento casa-trabalho, de acordo com a Renda domiciliar *per capita* (2001 e 2015)",
       caption = "Fonte: PNAD (IBGE, 2001 e 2015)."
     )
@@ -226,8 +181,8 @@ tema <- theme(
     commute_time = c(32.5, 47, 45),
     legenda = c(
       "Elevação no tempo de<br>deslocamento de<br>todos os grupos em<br>2015...",
-      "...especialmente para <br> <b style='color:#2166ac'>Homens Negros</b><br>e <b style='color:#b2182b'>Mulheres Negras</b>...",
-      #"...Porém, alguns<br>grupos foram<br>afetados de maneira<br>desproporcional.<br>Particularmente,<br><b style='color:#b2182b'> Mulheres Negras</b> de<br>baixa escolaridade."
+      "...especialmente para <br> <b style='color:#274370'>Homens Negros</b><br>e <b style='color:#872E2B'>Mulheres Negras</b>...",
+      #"...Porém, alguns<br>grupos foram<br>afetados de maneira<br>desproporcional.<br>Particularmente,<br><b style='color:#872E2B'> Mulheres Negras</b> de<br>baixa escolaridade."
       "...aumentando a desigualdade<br>já existente em todos os<br>níveis de escolaridade em 2001."
     )
   )
@@ -262,13 +217,13 @@ tema <- theme(
     ) +
     scale_colour_manual(
       values = c(
-        "Mulher Negra" = '#b2182b',
-        "Homem Negro" = '#2166ac',
-        'Mulher Branca' = '#f4a582',
-        'Homem Branco' = '#92c5de'
+        "Mulher Negra" = '#872E2B',
+        "Homem Negro" = '#274370',
+        'Mulher Branca' = '#C29365',
+        'Homem Branco' = '#6A9BB3'
       )
     ) +
-    tema +
+    aop_style() +
     theme(
       axis.line.x = element_line(size = 0.5, color = "grey"),
       #axis.line.x = element_blank(),
@@ -277,8 +232,6 @@ tema <- theme(
       #panel.grid.major.x = element_line(
       #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
       #),
-      panel.grid.major.x = element_blank(),
-      panel.grid.major.y = element_blank(),
       legend.position = 'bottom',
       axis.text.y = element_markdown(vjust = 0.5),
       axis.title.y = element_markdown(
@@ -291,10 +244,10 @@ tema <- theme(
     ) +
     labs(
       colour = "Sexo e Etnia",
-      title = "Condições de mobilidade por características sociodemográficas nas<br>Regiões Metropolitanas brasileiras (2001 e 2015)",
+      title = "Condições de mobilidade e características sociodemográficas",
       subtitle = 
         #expression(paste('Tempo médio (em minutos) no deslocamento por grau de ', escolaridade^1,', de acordo com sexo e etnia')),
-        "Deslocamento médio (em minutos) por grau de escolaridade<sup>1</sup>, de acordo com sexo e etnia",
+        "Deslocamento médio (em minutos) por grau de escolaridade<sup>1</sup>, de acordo com sexo e etnia<br>nas Regiões Metropolitanas brasileiras (2001 e 2015)",
       caption = "Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Ensino Fundamental; Média: Ensino Médio; Alta: Ensino Superior.",
       #"Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Até 7 anos de estudo; Média: 8 à 14 anos de estudo; Alta: 15 ou mais anos de estudo."
       y = "Escolaridade"

@@ -1,4 +1,5 @@
 # Libraries ----
+# atualizar: utilizar somente uma library
 library(extrafont)
 loadfonts()
 library(sidrar)

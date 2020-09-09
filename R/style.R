@@ -1,5 +1,4 @@
-library(tidyverse)
-library(ggtext)
+source('R/PNAD/commuting_pnad_0_libraries.R')
 
 aop_style <- function() {
   font <- "Helvetica"
@@ -11,9 +10,10 @@ aop_style <- function() {
     # Titles
     # Font, size, type, colour, lineheight, margin, for the chart's title, subtitle, caption
     plot.title = ggtext::element_markdown(
-      lineheight = 1.5, family = font, size = 20),
+      lineheight = 1.5, family = font, size = 20, colour = "#323232"),
     plot.subtitle = ggtext::element_markdown(
-      lineheight = 1.5, colour = "#808080", family = font, size = 16
+      lineheight = 1.5, colour = "#808080", family = font, size = 16,
+      margin = margin(t = 0., r = 0, b = 0.5, l = 0, unit = 'cm')
     ),
     plot.title.position = "plot",
     plot.caption = ggtext::element_markdown(

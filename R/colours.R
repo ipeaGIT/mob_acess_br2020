@@ -1,5 +1,4 @@
 # Libraries ----
-source('R/inflacao/inflacao_0_libraries.R')
 source("R/style.R")
 
 
