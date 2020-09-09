@@ -247,8 +247,11 @@ linhas_vert_BR <- data.table(
   componente = c(
     rep(c("Óleo diesel", 'Gasolina'),3), c("Ônibus urbano", 'Metrô')
   ),
-  mes = c(rep(as.Date('2016-06-01'),2),rep(as.Date('2017-06-01'),2),
-          rep(as.Date('2018-05-01'),2),rep(as.Date('2013-06-06'),2)
+  mes = c(
+    rep(as.Date('2016-06-01'),2),
+    rep(as.Date('2017-06-01'),2),
+    rep(as.Date('2018-05-01'),2),
+    rep(as.Date('2013-06-06'),2)
           )
 )
 
@@ -478,22 +481,22 @@ gg_annotation_BR <- gg_BR +
   annotation_custom2(
     grob = lista_grob_BR$jun2017_data, 
     xmin = as.Date('2017-06-01'), xmax = as.Date("2017-06-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Óleo diesel")
+    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2017_texto, 
     xmin = as.Date('2017-06-01'), xmax = as.Date("2017-06-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Óleo diesel")
+    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$maio2018_data, 
     xmin = as.Date('2018-05-01'), xmax = as.Date("2018-05-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Gasolina")
+    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$maio2018_texto, 
     xmin = as.Date('2018-05-01'), xmax = as.Date("2018-05-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Gasolina")
+    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun_2013_data, 
@@ -518,14 +521,14 @@ gg_annotation_BR <- gg_BR +
                      gp = gpar(col = "#808080", lwd = 1, lty="solid")),
     ymin = 0.975, ymax = 0.975, 
     xmin = -Inf, xmax = Inf, 
-    data = data.frame(componente = "Óleo diesel")
+    data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.7675, 0.955),  
                      gp = gpar(col = "#808080", lwd = 1, lty="solid")),
     ymin = 0.975, ymax = 0.975, 
     xmin = -Inf, xmax = Inf, 
-    data = data.frame(componente = "Gasolina")
+    data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.1725, 0.34),  
