@@ -471,12 +471,12 @@ gg_annotation_BR <- gg_BR +
   annotation_custom2(
     grob = lista_grob_BR$jun2016_data, 
     xmin = as.Date('2016-06-01'), xmax = as.Date("2016-06-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Óleo diesel")
+    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2016_texto, 
     xmin = as.Date('2016-06-01'), xmax = as.Date("2016-06-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Óleo diesel")
+    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2017_data, 
@@ -508,14 +508,17 @@ gg_annotation_BR <- gg_BR +
     xmin = as.Date('2013-06-01'), xmax = as.Date("2013-06-01"),
     ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Ônibus urbano")
   ) +
-  # lines https://stackoverflow.com/a/40622343/12707859
+  # lines ; ref: https://stackoverflow.com/a/40622343/12707859
+  
+  # jun/2016
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.37, 0.535),  
                      gp = gpar(col = "#808080", lwd = 1, lty="solid")),
     ymin = 0.975, ymax = 0.975, 
     xmin = -Inf, xmax = Inf, 
-    data = data.frame(componente = "Óleo diesel")
+    data = data.frame(componente = "Gasolina")
   ) +
+  # jun/2017
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.6575, 0.82),  
                      gp = gpar(col = "#808080", lwd = 1, lty="solid")),
@@ -523,6 +526,7 @@ gg_annotation_BR <- gg_BR +
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Gasolina")
   ) +
+  # maio/2018
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.7675, 0.955),  
                      gp = gpar(col = "#808080", lwd = 1, lty="solid")),
@@ -530,6 +534,7 @@ gg_annotation_BR <- gg_BR +
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Óleo diesel")
   ) +
+  # jun/2013
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.1725, 0.34),  
                      gp = gpar(col = "#808080", lwd = 1, lty="solid")),
