@@ -147,7 +147,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
       breaks = seq(20,50, by = 10), limits = c(20,50), expand = expansion(mult = c(0,0.01))
     ) +
     scale_colour_aop(
-      palette = 'animals'
+      palette = 'animals', reverse = T
     ) +
     aop_style() +
     #theme(panel.grid.minor.y = element_line(
