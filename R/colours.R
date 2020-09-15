@@ -79,20 +79,21 @@ aop_colors <- c(
   `ipea5`       = '#7696AE',
   `ipea6`       = '#2F6280',
   `ipea7`       = '#063754',
-
   
-      ### animals
+  
+  ### animals
   # qualitativo
   `animals1`       = '#872E2B',
   `animals2`       = '#A85A3F',
   `animals3`       = '#C29365',
   `animals4`       = '#6c6766',
+  `animals4.1`     = '#c8c8c8',
   `animals5`       = '#6A9BB3',
   `animals6`       = '#326287',
   `animals7`       = '#274370'
   
   
-  )
+)
 
 aop_cols <- function(...) {
   cols <- c(...)
@@ -106,7 +107,7 @@ aop_cols <- function(...) {
 aop_palettes <- list(
   
   `original`           = aop_cols('beje','laranja','rosa','lilas','roxo','petroleo'),
-
+  
   `crimson`               = aop_cols(map('crimson', ~paste0(., 1:5))[[1]]),
   
   `orpheu`               = aop_cols(map('orpheu', ~paste0(., 1:6))[[1]]),
@@ -127,6 +128,10 @@ aop_palettes <- list(
   
   `animals`               = aop_cols(map('animals', ~paste0(., 1:7))[[1]]),
   
+  `animals_mod`               = aop_cols(
+    c(map('animals', ~paste0(., 1:3))[[1]], 'animals4.1', map('animals', ~paste0(., 5:7))[[1]])
+  ),
+  
   `animals_azul`          = aop_cols(map('animals', ~paste0(., 4:7))[[1]]),
   
   `animals_vermelho`          = aop_cols(map('animals', ~paste0(., 4:1))[[1]])#,
@@ -141,7 +146,7 @@ aop_palettes <- list(
 
 # Colour
 scale_colour_aop <- function(palette = "original", discrete = TRUE, reverse = FALSE, 
-                            values = NULL, ...) {
+                             values = NULL, ...) {
   
   if (is.null(values)) {
     aop_pal <- function(palette = "original", reverse = FALSE, ...) {
@@ -263,7 +268,7 @@ rm(aop_cols, aop_colors)
 #  scale_colour_aop('ipea', reverse = T) +
 #  aop_style() +
 #  labs(subtitle = "Linhas") #+
-  
+
 # point graph
 #pontos <- ggplot(
 #  df_pontos,
