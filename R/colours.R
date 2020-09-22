@@ -199,9 +199,9 @@ scale_fill_aop <- function(palette = "original", discrete = TRUE, reverse = FALS
 
 # Show pallete and its colours
 
-viz_palletes <- function(colours, ...){
-  viz_palletes <- scales::show_col(colours = colours, ...)
-}
+#viz_palletes <- function(colours, ...){
+#  viz_palletes <- scales::show_col(colours = colours, ...)
+#}
 
 # Example
 #viz_palletes(aop_palettes$cartola)

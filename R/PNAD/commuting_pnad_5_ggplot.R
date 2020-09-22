@@ -22,12 +22,12 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
                                           ymin = ymin, ymax = ymax))
 }
 
-  # Graficos utilizados ----
+# Graficos utilizados ----
   
-  # 3.1- serie temporal de tempo medio por RM + e urbano nao metropolitano + Media RMs ----
+  # * 3.1- serie temporal de tempo medio por RM + e urbano nao metropolitano + Media RMs ----
 
   png("figures/PNAD/ts_mean_rms.png", 
-      width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
+      width = 16, height = 8.8, units = 'cm', res = 600, type = 'cairo')
   
   ggplot() + 
     geom_line(
@@ -69,7 +69,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
   
   dev.off()
   
-  # 3.2 - tempo no deslocamento por decil - 2001 vs 2015 ----
+  # * 3.2 - tempo no deslocamento por decil - 2001 vs 2015 ----
   
   png("figures/PNAD/mean_decil_rms.png", 
       width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
@@ -107,7 +107,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
       expand = expansion(mult = c(0,0.05)),
       limits = c(20,53)
     ) +
-    scale_colour_manual(
+    scale_colour_aop(
       values = c('2001' = "#6A9BB3", '2015' = "#274370")
     ) +
     labs(
@@ -121,7 +121,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
   
   dev.off()
   
-  # 3.3 - cleveland plot para extremos de renda em cada RM 2001 vs 2015 ----
+  # * 3.3 - cleveland plot para extremos de renda em cada RM 2001 vs 2015 ----
   
     ## Legenda no titulo
   png("figures/PNAD/clev_1040_mean_sem_legenda_com_media.png", 
@@ -168,7 +168,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
   dev.off()
   
   
-  # 3.4 - cleveland plot de tempo por escolaridade & sexo em cada RM 2001 vs 2015 ----
+  # * 3.4 - cleveland plot de tempo por escolaridade & sexo em cada RM 2001 vs 2015 ----
   
     # Eixo y = factor(ano)
   png("figures/PNAD/clev_esc_raca_sexo_mean.png", 
