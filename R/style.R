@@ -27,7 +27,7 @@ aop_style <- function() {
     # Legend is set to be excluded. However, in case it is needed, the code below sets its configuration. May need aditional manual tweaking
     legend.position = "none",
     legend.background = ggplot2::element_blank(),
-    legend.title = ggtext::element_markdown(size = 8, colour = "#808080"),
+    legend.title = ggtext::element_markdown(size = 8, colour = "#575757"),
     #legend.text = ggtext::element_markdown(size = 10, colour = "#808080"),
     legend.key = element_blank(),
     
@@ -37,8 +37,20 @@ aop_style <- function() {
     axis.ticks = element_blank(),
     axis.line.x = element_line(size = 0.5, color = "grey"),
     axis.line.y = element_blank(),
-    axis.title.y = element_blank(),
-    axis.title.x = element_blank(),
+    axis.title.y = element_markdown(
+      size = 8, 
+      margin = margin(r = 0.25, unit = 'cm'), 
+      lineheight = 0.5,
+      colour = "#575757",
+      hjust = 1
+    ),
+    axis.title.x = element_markdown(
+      size = 8, 
+      margin = margin(t = 0.25, b = 0, unit = 'cm'), 
+      lineheight = 0.5,
+      colour = "#575757",
+      hjust = 1
+    ),
     
     # Panel
     # Format panel grid, border, spacing, background. Aditional manual tweking may be necessary
@@ -58,7 +70,7 @@ aop_style <- function() {
     
     # Margin
     # Format plot.margin. Adjust if necessary
-    plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm")
+    plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")
     
   )
 }

@@ -128,9 +128,9 @@ aop_palettes <- list(
     c(map('red', ~paste0(., 1:3))[[1]], 'cinza4.1', map('blue', ~paste0(., 1:3))[[1]])
   ),
   
-  `blue`          = aop_cols(map('animals', ~paste0(., 4:7))[[1]]),
+  `blue`          = aop_cols('cinza4.1', 'blue1', 'blue2', 'blue3'),
   
-  `red`          = aop_cols(map('animals', ~paste0(., 4:1))[[1]])#,
+  `red`          = aop_cols('cinza4.1', 'red3', 'red2', 'red1')#,
   
   #`animals_divergente`        = aop_cols(
   #  c(map('animals', ~paste0(., 1:4))[[1]], map('animals', ~paste0(., 6:9))[[1]])

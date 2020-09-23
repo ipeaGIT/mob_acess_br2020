@@ -26,8 +26,8 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
   
   # * 3.1- serie temporal de tempo medio por RM + e urbano nao metropolitano + Media RMs ----
 
-  png("figures/PNAD/ts_mean_rms.png", 
-      width = 16, height = 8.8, units = 'cm', res = 600, type = 'cairo')
+  #png("figures/PNAD/ts_mean_rms.png", 
+  #    width = 16, height = 8.8, units = 'cm', res = 600, type = 'cairo')
   
 ggplot() + 
   geom_line(
@@ -64,72 +64,81 @@ ggplot() +
     breaks = seq(20,50, by = 10)
   ) +
   labs(
-    title = "Condições de mobilidade nas principais regiões metropolitanas brasileiras (2001-2015)",
-    subtitle = 'Tempo médio (em minutos) no deslocamento casa-trabalho',
-    caption = 'Fonte: PNAD (IBGE, 2001-2015).'
+    #title = "Condições de mobilidade nas principais regiões metropolitanas brasileiras (2001-2015)",
+    subtitle = 'Tempo médio (em minutos) no deslocamento casa-trabalho por ano',
+    #caption = 'Fonte: PNAD (IBGE, 2001-2015).'
+    x = 'Ano',
+    y = 'Tempo de deslocamento'
   ) +
   aop_style() +
   coord_cartesian(clip = "off")
   
-  dev.off()
+  ggsave("figures/PNAD/ts_mean_rms.png", 
+         width = 16, height = 8.8, units = "cm", dpi = 300, device = 'png')
+
+  ggsave("figures/PNAD/ts_mean_rms.pdf", 
+         width = 16, height = 8.8, units = "cm", dpi = 300, device = 'pdf')
   
   # * 3.2 - tempo no deslocamento por decil - 2001 vs 2015 ----
   
-  png("figures/PNAD/mean_decil_rms.png", 
-      width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
-  
+
   ggplot(
     data = mean_time_decil %>% filter(ano %in% c(2001, 2015)),
-    aes(x = decilBR, y = commute_time, group = as.factor(ano))
+    aes(
+      x = decilBR, y = commute_time, group = as.factor(ano),
+      colour = as.factor(ano)
+    )
   ) +
-    geom_line(
-      aes(colour = as.factor(reorder(ano, desc(ano)))),
-      size = 0.75
-      ) + 
+    geom_line() +
     geom_point(
-      aes(colour = as.factor(reorder(ano, desc(ano)))),
-      size = 2
-      ) +
+      aes(shape = as.factor(ano))
+    ) +
     geom_text(
       data = mean_time_decil %>% 
         filter(ano %in% c(2015) & decilBR %in% c(1,10)),
-      aes(x = decilBR, y = commute_time + 5, label = as.integer(commute_time), 
-          colour = as.factor(reorder(ano, desc(ano)))),
-      size = 4,
-      #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
+      aes(x = decilBR, y = commute_time, label = as.integer(commute_time)),
+      colour = "#274370",
+      size = 2.81,
+      nudge_y = 8
     ) +
     lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
     aop_style() +
     theme(
-      axis.title.x = element_markdown(
-        size = 16, margin = margin(t = 8, b = 2, unit = 'pt'), colour = "#808080"),
       #panel.grid.major.y = element_blank()
-      #legend.position = 'bottom',
-      ) +
+      legend.position = 'bottom',
+      legend.box.margin = margin(t = -0.5,r = -0.5,b = -0.5,l = -0.5, unit = 'cm')
+    ) +
     scale_x_continuous(breaks = 1:10) +
     scale_y_continuous(
       expand = expansion(mult = c(0,0.05)),
-      limits = c(20,53)
+      limits = c(20,55)
     ) +
     scale_colour_aop(
       values = c('2001' = "#6A9BB3", '2015' = "#274370")
     ) +
+    scale_shape_manual(
+      values = c('2001' = 15, '2015' = 19)
+    ) +
     labs(
-      title = "Diferenças nas condições de mobilidade por renda nas cidades brasileiras entre <b style='color:#6A9BB3'>2001</b> e <b style='color:#274370'>2015</b>",
-      subtitle = "Tempo médio (em minutos) no deslocamento casa-trabalho do 1º (mais pobre) ao 10º (mais rico) decil de Renda domiciliar *per capita*",
-      caption = "Fonte: PNAD (IBGE, 2001 e 2015).",
-      colour = "Renda domiciliar per capita",
+      #title = "Diferenças nas condições de mobilidade por renda nas cidades brasileiras entre <b style='color:#6A9BB3'>2001</b> e <b style='color:#274370'>2015</b>",
+      subtitle = "Tempo médio (em minutos) no deslocamento casa-trabalho do 1º (mais pobre) ao 10º (mais rico) decil de<br>Renda domiciliar *per capita*",
+      #caption = "Fonte: PNAD (IBGE, 2001 e 2015).",
       #linetype = "Ano", shape = "Ano",
-      x = "Decil de renda"
-    ) 
+      x = "Decil de renda",
+      y = "Tempo de deslocamento",
+      colour = 'Ano',
+      shape = 'Ano'
+    ) +
+    coord_cartesian(clip = 'off')
   
-  dev.off()
+
+  ggsave("figures/PNAD/mean_decil_rms.png", 
+         width = 16, height = 10, units = "cm", dpi = 300, device = 'png')
+  
+  ggsave("figures/PNAD/mean_decil_rms.pdf", 
+         width = 16, height = 10, units = "cm", dpi = 300, device = 'pdf')
   
   # * 3.3 - cleveland plot para extremos de renda em cada RM 2001 vs 2015 ----
-  
-    ## Legenda no titulo
-  png("figures/PNAD/clev_1040_mean_sem_legenda_com_media.png", 
-      width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
   
   ggplot(
     data = mean_time_r_10_p_40 %>% 
@@ -151,7 +160,7 @@ ggplot() +
       breaks = seq(20,50, by = 10), limits = c(20,50), expand = expansion(mult = c(0,0.01))
     ) +
     scale_colour_aop(
-      palette = 'animals_mod', reverse = T
+      palette = 'blue_red', reverse = T
     ) +
     aop_style() +
     #theme(panel.grid.minor.y = element_line(
@@ -169,7 +178,12 @@ ggplot() +
       caption = "Fonte: PNAD (IBGE, 2001 e 2015)."
     )
   
-  dev.off()
+  ggsave("figures/PNAD/clev_1040_mean_sem_legenda_com_media.png", 
+         width = 16, height = 10, units = "cm", dpi = 300, device = 'png')
+  
+  ggsave("figures/PNAD/clev_1040_mean_sem_legenda_com_media.pdf", 
+         width = 16, height = 10, units = "cm", dpi = 300, device = 'pdf')
+
   
   
   # * 3.4 - cleveland plot de tempo por escolaridade & sexo em cada RM 2001 vs 2015 ----
