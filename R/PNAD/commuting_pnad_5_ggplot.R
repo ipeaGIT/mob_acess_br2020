@@ -29,43 +29,47 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
   png("figures/PNAD/ts_mean_rms.png", 
       width = 16, height = 8.8, units = 'cm', res = 600, type = 'cairo')
   
-  ggplot() + 
-    geom_line(
-      data = transform(mean_time, regiao = NULL),
-      aes(x = ano, y = commute_time, group = regiao2),
-      colour = 'grey80',
-      alpha = 0.6, 
-      lineend = 'round', linejoin = 'round'
-    ) +
-    geom_line(
-      data = mean_time,
-      aes(x = ano, y = commute_time, group = regiao),
-      size = 1, 
-      lineend = 'round', linejoin = 'round'
-    ) +
-    geom_text(
-      data = mean_time %>% filter(ano %in% c(2001, 2015)),
-      aes(x = ano, y = commute_time + 2.75, label = as.integer(commute_time)),
-      size = 4,
-      #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
-    ) +
-    lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
-    aop_style() +
-    scale_x_continuous(
-      breaks = c(2001,2006,2011,2015)#,
-      #limits = c(2000.5, 2015.5)
-      #expand = expansion(mult = c(0.01, 0.01))
-      ) +
-    scale_y_continuous(
-      expand = expansion(mult = c(0,0.1)),
-      limits = c(20,52),
-      breaks = seq(20,50, by = 10)
-    ) +
-    labs(
-      title = "Condições de mobilidade nas principais regiões metropolitanas brasileiras (2001-2015)",
-      subtitle = 'Tempo médio (em minutos) no deslocamento casa-trabalho',
-      caption = 'Fonte: PNAD (IBGE, 2001-2015).'
-    )
+ggplot() + 
+  geom_line(
+    data = transform(mean_time, regiao = NULL),
+    aes(x = ano, y = commute_time, group = regiao2),
+    colour = 'grey80',
+    alpha = 0.6, 
+    size = 0.25,
+    lineend = 'round', linejoin = 'round'
+  ) +
+  geom_line(
+    data = mean_time,
+    aes(x = ano, y = commute_time, group = regiao),
+    size = 0.5, 
+    colour = '#323232',
+    lineend = 'round', linejoin = 'round'
+  ) +
+  geom_text(
+    data = mean_time %>% filter(ano %in% c(2001, 2015)),
+    aes(x = ano, y = commute_time, label = as.integer(commute_time)),
+    size = 2.81, nudge_y = 5.5,
+    colour = '#323232'
+    #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
+  ) +
+  lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
+  scale_x_continuous(
+    breaks = c(2001,2006,2011,2015)#,
+    #limits = c(2000.5, 2015.5)
+    #expand = expansion(mult = c(0.01, 0.01))
+  ) +
+  scale_y_continuous(
+    expand = expansion(mult = c(0,0.1)),
+    limits = c(20,55),
+    breaks = seq(20,50, by = 10)
+  ) +
+  labs(
+    title = "Condições de mobilidade nas principais regiões metropolitanas brasileiras (2001-2015)",
+    subtitle = 'Tempo médio (em minutos) no deslocamento casa-trabalho',
+    caption = 'Fonte: PNAD (IBGE, 2001-2015).'
+  ) +
+  aop_style() +
+  coord_cartesian(clip = "off")
   
   dev.off()
   
@@ -147,7 +151,7 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
       breaks = seq(20,50, by = 10), limits = c(20,50), expand = expansion(mult = c(0,0.01))
     ) +
     scale_colour_aop(
-      palette = 'animals', reverse = T
+      palette = 'animals_mod', reverse = T
     ) +
     aop_style() +
     #theme(panel.grid.minor.y = element_line(
@@ -215,12 +219,12 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
       limits = c(29.4,50),
       expand = c(0,0)
     ) +
-    scale_colour_manual(
+    scale_colour_aop(
       values = c(
-        "Mulher Negra" = '#872E2B',
-        "Homem Negro" = '#274370',
-        'Mulher Branca' = '#C29365',
-        'Homem Branco' = '#6A9BB3'
+        "Mulher Negra" = '#d08969',
+        "Homem Negro" = '#003338',
+        'Mulher Branca' = '#b69186',
+        'Homem Branco' = '#25677e'
       )
     ) +
     aop_style() +
@@ -228,19 +232,19 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
       axis.line.x = element_line(size = 0.5, color = "grey"),
       #axis.line.x = element_blank(),
       axis.line.y = element_line(size = 0.5, color = "grey"),
-      plot.margin = margin(t = 1.5, r = 14, b = 1.5, l = 14, unit = 'lines'),
+      #plot.margin = margin(t = 1.5, r = 14, b = 1.5, l = 14, unit = 'lines'),
       #panel.grid.major.x = element_line(
       #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
       #),
       legend.position = 'bottom',
       axis.text.y = element_markdown(vjust = 0.5),
-      axis.title.y = element_markdown(
-        size = 16, 
+      #axis.title.y = element_markdown(
+      #  size = 16, 
         #angle = 0,
-        colour = "#808080", 
+      #  colour = "#808080", 
         #vjust = 1
         #margin = margin(t = 8, b = 2, unit = 'pt')
-      )
+      #)
     ) +
     labs(
       colour = "Sexo e Etnia",
@@ -253,6 +257,9 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
       y = "Escolaridade"
     ) +
     guides(colour = guide_legend(reverse = T))
+  
+  ggsave("figures/PNAD/clev_esc_raca_sexo_mean.png", 
+         width = 16, height = 16, units = "cm", dpi = 600, device = 'png')
   
   
   dev.off()

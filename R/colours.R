@@ -83,14 +83,14 @@ aop_colors <- c(
   
   ### animals
   # qualitativo
-  `animals1`       = '#872E2B',
-  `animals2`       = '#A85A3F',
-  `animals3`       = '#C29365',
-  `animals4`       = '#6c6766',
-  `animals4.1`     = '#c8c8c8',
-  `animals5`       = '#6A9BB3',
-  `animals6`       = '#326287',
-  `animals7`       = '#274370'
+  `red1`       = '#872E2B',
+  `red2`       = '#A85A3F',
+  `red3`       = '#C29365',
+  `cinza4`     = '#6c6766',
+  `cinza4.1`   = '#c8c8c8',
+  `blue1`      = '#6A9BB3',
+  `blue2`      = '#326287',
+  `blue3`      = '#274370'
   
   
 )
@@ -122,19 +122,15 @@ aop_palettes <- list(
   
   `ipea`                  = aop_cols(map('ipea', ~paste0(., 1:7))[[1]]),
   
-  `ipea_vermelho`         = aop_cols(map('ipea', ~paste0(., 4:1))[[1]]),
-  
-  `ipea_azul`             = aop_cols(map('ipea', ~paste0(., 4:7))[[1]]),
-  
   `animals`               = aop_cols(map('animals', ~paste0(., 1:7))[[1]]),
   
-  `animals_mod`               = aop_cols(
-    c(map('animals', ~paste0(., 1:3))[[1]], 'animals4.1', map('animals', ~paste0(., 5:7))[[1]])
+  `blue_red`               = aop_cols(
+    c(map('red', ~paste0(., 1:3))[[1]], 'cinza4.1', map('blue', ~paste0(., 1:3))[[1]])
   ),
   
-  `animals_azul`          = aop_cols(map('animals', ~paste0(., 4:7))[[1]]),
+  `blue`          = aop_cols(map('animals', ~paste0(., 4:7))[[1]]),
   
-  `animals_vermelho`          = aop_cols(map('animals', ~paste0(., 4:1))[[1]])#,
+  `red`          = aop_cols(map('animals', ~paste0(., 4:1))[[1]])#,
   
   #`animals_divergente`        = aop_cols(
   #  c(map('animals', ~paste0(., 1:4))[[1]], map('animals', ~paste0(., 6:9))[[1]])
