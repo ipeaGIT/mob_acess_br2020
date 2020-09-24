@@ -1,15 +1,17 @@
 ### Setup ------------------------------------------------------
 
-source("setup.R")
+source("R/setup.R")
 
 # Recover Data ---------------------------------
 
 pof_transporte_urbano <- 
-  readr::read_rds('data/pof_transporte_urbano.rds')
+  readr::read_rds('C:/Users/lucas/Desktop/R/pof/data/pof_transporte_urbano.rds')
 pof_agregado <-
-  readr::read_rds('data/pof_agregado.rds')
+  readr::read_rds('C:/Users/lucas/Desktop/R/pof/data/pof_agregado.rds')
 
 ######## 3. Plot data ----------------------------------------------------------
+
+windowsFonts(Helvetica='Helvetica')
 
 # 0. Evolução dos gastos 
 
@@ -26,25 +28,19 @@ plot0$Grupo <- factor(plot0$Grupo, levels = c('Habitação','Transporte Urbano',
 plot0 %>% 
   ggplot(aes(Ano,prop)) +
   geom_col(aes(fill= Grupo),position = position_dodge(width = .95))+
-  scale_fill_brewer(palette = 'Dark2') +
+  scale_fill_aop(palette = 'original') +
   scale_y_continuous(labels = scales::percent, limits = c(0,.2)) +
   labs(
-    x = 'Ano', y = '% da renda total familiar',
-    fill = 'Categoria'
-    #title = 'Comprometimento da renda familiar: principais despesas'
+    x = 'Ano', y = '% da renda total familiar', fill = 'Categoria'
+    #,title = 'Comprometimento da renda familiar: principais despesas'
   )+
   theme_minimal() +
+  aop_style() +
   theme(
     legend.position = 'bottom',
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.3)),
-    plot.subtitle = element_text(size = rel(1)),
-    axis.title = element_text(size = rel(1)),
-    axis.text = element_text(size = rel(1)),
-    legend.title = element_text(size = rel(1.1)),
-    legend.text = element_text(size = rel(1)))
+    axis.title = element_markdown(size = 8, colour = '#808080'))
 
-ggsave('plot0.png', path = 'img')
+ggsave('plot0.png', path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 
 # 1. Parallel Coord -------------------------
@@ -70,29 +66,22 @@ ggplot() +
     size = 1.1, linetype = 'dashed') + 
   geom_point(
     aes(as.factor(Ano), prop, fill = as.factor(decil_renda)),
-    size = 4.5, alpha = 1, shape = 21)+
-  scale_color_brewer(palette = 'Spectral')+
-  scale_fill_brewer(palette = 'Spectral')+
+    size = 3.5, alpha = 1, shape = 21)+
+  scale_colour_aop(palette = 'blue_red')+
+  scale_fill_aop(palette = 'blue_red')+
   facet_wrap(~Modo, nrow = 1) +
   scale_y_continuous(labels = scales::percent, limits = c(0,1)) +
   labs(
-    y = '% das famílias', x='',
+    y = "% das famílias", x="",
     color = 'Decil de Renda', fill = 'Decil de Renda'
     #,title = 'Famílias com despesas em transporte por tipo: 2002 - 2017',
     #subtitle = 'Evolução da parcela das famílias com despesas em transporte, por modo de transporte e faixa de renda.'
   ) +
-  theme_bw() +
-  theme(
-    legend.position = 'bottom',
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.5)),
-    plot.subtitle = element_text(size = rel(1.2)),
-    axis.title = element_text(size = rel(1.1)),
-    axis.text = element_text(size = rel(1)),
-    legend.title = element_text(size = rel(1)),
-    legend.text = element_text(size = rel(1)))
+  theme_minimal()+
+  aop_style() +
+  theme(legend.position = 'bottom', axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90))
 
-ggsave('plot1.png',path = 'img')
+ggsave('plot1.png',path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 2. Evolução Renda -------------------------
 
@@ -130,24 +119,18 @@ plot2 %>%
       aes(variacao, UF,group = UF),
       linetype = 'dotted') +
     geom_point(
-      aes(variacao, UF, fill = as.factor(quintil_renda)), shape = 21, size = 4.5, alpha = 1) +
-  scale_fill_brewer(palette =  'Spectral') +
+      aes(variacao, UF, fill = as.factor(quintil_renda)), shape = 21, size = 3, alpha = 1) +
+  scale_fill_aop(palette =  'blue_red') +
   theme_minimal() +
   labs(
     #title = "Ganho de renda real no período 2002 - 2017: Fator de multiplicação da renda entre os anos por faixa de renda e UF",
     x = 'Fator de multiplicação', fill = "Quintil de Renda", y=""
     #,subtitle = "Fator igual a 1 equivale dizer que a renda (ajustada pela inflação) permaneceu a mesma no período. \nFator de multiplicação 2 indica que a renda em 2017 é o dobro da de 2002."
   ) +
-  theme(
-    legend.position = 'bottom',panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.5)),
-    plot.subtitle = element_text(size = rel(1.2)),
-    axis.title = element_text(size = rel(1.1)),
-    axis.text = element_text(size = rel(1)),
-    legend.title = element_text(size = rel(1)),
-    legend.text = element_text(size = rel(1)))
+  aop_style() +
+  theme(legend.position = 'bottom', axis.title.x = element_markdown(size = 8, colour = '#808080'))
 
-ggsave('plot2.png',path = 'img')
+ggsave('plot2.png',path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 3. Gasto com Transporte ------------------------------------------
 
@@ -171,15 +154,15 @@ plot3 %>% na.omit() %>%
   mutate(decil_renda = as.factor(decil_renda)) %>% 
   ggplot() +
   geom_hline(
-    aes(yintercept = gastobr, color = Modo), linetype = 'dashed', size = 1, alpha = .95) +
+    aes(yintercept = gastobr, color = Modo), linetype = 'dashed', alpha = .95) +
   geom_line(
     data = plot3 %>% select(-RM) %>% na.omit(),
-    aes(as.factor(decil_renda), gasto_pc_mensal, color = Modo, group = interaction(Modo,names)), alpha = .5) +
+    aes(as.factor(decil_renda), gasto_pc_mensal, color = Modo, group = interaction(Modo,names)), alpha = .5,size=.5) +
   geom_line(
-    aes(decil_renda, gasto_pc_mensal, color = Modo, group = interaction(Modo,RM)), size = 1) +
+    aes(decil_renda, gasto_pc_mensal, color = Modo, group = interaction(Modo,RM)),size=.8) +
   geom_point(
-  aes(decil_renda, gasto_pc_mensal, color = Modo), size = 2) +
-  scale_color_brewer(palette = 'Dark2') +
+  aes(decil_renda, gasto_pc_mensal, color = Modo)) +
+  scale_colour_aop(palette = 'original') +
   scale_y_continuous(limits = c(0,1400), labels = c(0,300,600,900,1200,1500),breaks = c(0,300,600,900,1200,1500)) +
   labs(
     x = 'Decis de Renda', y = 'Gasto familiar per capita mensal (R$)',
@@ -189,17 +172,13 @@ plot3 %>% na.omit() %>%
   ) +
   facet_wrap(~RM, nrow = 4) +
   theme_minimal() +
+  aop_style() +
   theme(
     legend.position = 'bottom',
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.3)),
-    plot.subtitle = element_text(size = rel(1)),
-    axis.title = element_text(size = rel(1.1)),
-    axis.text = element_text(size = rel(.8)),
-    legend.title = element_text(size = rel(1)),
-    legend.text = element_text(size = rel(1))) 
+    axis.title.x = element_markdown(size = 8, colour = '#808080'),
+    axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90))
 
-ggsave('plot3.png',path = 'img')
+ggsave('plot3.png',path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 4 Elasticidade  ------------------------------------------
 
@@ -214,26 +193,22 @@ plot4 <-
 
 plot4 %>% 
   ggplot(aes(renda, gasto, color = Modo, weight = PESO_FINAL)) +
-    geom_jitter(alpha = .1) +
-    geom_smooth(method = 'lm', se = FALSE, alpha = .6) +
-    scale_color_brewer(palette = 'Dark2') +
+    geom_jitter(alpha = .1,size=.8) +
+    geom_smooth(method = 'lm', se = FALSE, alpha = .6,size=.5) +
+    scale_colour_aop(palette = 'original') +
     theme_minimal() +
     labs(
       x = '(log) Renda per capita', y="(log) Gasto per capita"
       #title = 'Elasticidade - Renda do gasto per capita com transporte por tipo'
     )+
+  aop_style() +
   theme(
     legend.position = 'bottom',
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.5)),
-    plot.subtitle = element_text(size = rel(1.2)),
-    axis.title = element_text(size = rel(1.2)),
-    axis.text = element_text(size = rel(1)),
-    legend.title = element_text(size = rel(1.2)),
-    legend.text = element_text(size = rel(1))) +
-  facet_grid(Modo~regiao)
+    axis.title.x = element_markdown(size = 8, colour = '#808080'),
+    axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90)) +
+facet_grid(Modo~regiao)
 
-ggsave('plot4.png', path = 'img')
+ggsave('plot4.png', path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 5. Comprometimento da Renda ------------------------------------------
 
@@ -265,16 +240,15 @@ plot5 %>% na.omit() %>%
   ggplot() +
   geom_line(
     data = plot5 %>% filter(Ano == 2017)%>% na.omit(),
-    aes(decil_renda, prop, color = Modo, group = interaction(Modo,RM)),
-    size = 1) +
+    aes(decil_renda, prop, color = Modo, group = interaction(Modo,RM)),size=.9) +
   geom_point(
     data = plot5 %>% filter(Ano == 2017)%>% na.omit(),
-    aes(decil_renda, prop, color = Modo), size = 2) +
+    aes(decil_renda, prop, color = Modo)) +
   geom_line(
     data = plot5 %>% filter(Ano == 2008)%>% na.omit(),
     aes(decil_renda, prop, color = Modo, group = interaction(Modo,RM)),
-    size = 1, linetype = 'dashed', alpha = .9) +
-  scale_color_brewer(palette = 'Dark2') +
+    size = .9, linetype = 'dashed', alpha = .7) +
+  scale_colour_aop(palette = 'original') +
   scale_y_continuous(labels = scales::percent, limits = c(0,.5)) +
   labs(
     x = 'Decis de Renda', y = '% da renda total familiar',
@@ -284,17 +258,13 @@ plot5 %>% na.omit() %>%
     ) +
   facet_wrap(~RM, nrow = 4) +
   theme_minimal() +
+  aop_style() +
   theme(
     legend.position = 'bottom',
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.3)),
-    plot.subtitle = element_text(size = rel(1)),
-    axis.title = element_text(size = rel(1.1)),
-    axis.text = element_text(size = rel(.8)),
-    legend.title = element_text(size = rel(1)),
-    legend.text = element_text(size = rel(1)))
+    axis.title.x = element_markdown(size = 8, colour = '#808080'),
+    axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90))
 
-ggsave('plot5.png',path = 'img')
+ggsave('plot5.png',path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 6. Cleveland: Cor e Raça: RM x Capital ---------------------------------
 
@@ -331,13 +301,13 @@ plot6 %>%
   geom_path(
     aes(group = interaction(Estrato, genero)),
     position = position_dodge(width = .5),
-    linetype = 'dashed', size = 1, alpha = .9) +
+    linetype = 'dotted', size = 0.8, alpha = .9) +
   geom_point(
     aes(prop, Estrato, fill = grupo, group = genero),
-    size = 4, alpha = 1, shape = 21,
+    size = 3, alpha = 1, shape = 21,
     position = position_dodge(width = .5)) +
-  scale_fill_brewer(palette = 'Paired') +
-  scale_color_brewer(palette = 'Paired') +
+  scale_fill_aop(palette = 'blue_red') +
+  scale_colour_aop(palette = 'blue_red') +
   scale_x_continuous(labels = scales::percent) +
   theme_bw()+
   guides(fill = guide_legend(ncol = 2)) +
@@ -346,17 +316,13 @@ plot6 %>%
     #title = 'Comprometimento da renda com Transporte: 2002 - 2017'
     #subtitle = 'Evolução darcela da renda gasta com transporte urbano por sexo e raça, conforme estrato geográfico.'
     )+
+  aop_style()+
   theme(
     legend.position = 'bottom',
-    panel.grid.minor = element_blank(),
-    plot.title = element_text(size = rel(1.5)),
-    plot.subtitle = element_text(size = rel(1.2)),
-    axis.title = element_text(size = rel(1.2)),
-    axis.text = element_text(size = rel(1)),
-    legend.title = element_text(size = rel(1.2)),
-    legend.text = element_text(size = rel(1))) +
-  facet_grid(Ano ~ Modo)
+    axis.title.x = element_markdown(size = 8, colour = '#808080'),
+    axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90)) +
+facet_grid(Ano ~ Modo)
 
-ggsave('plot6.png',path = 'img')
+ggsave('plot6.png',path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 #==================================================================================================
