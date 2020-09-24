@@ -10,7 +10,6 @@ source("./R/colours.R")
 
 df_pass <- readxl::read_excel('./data/ntu.xlsx', sheet = 'passageiros')
 
-
 plot_pass <- 
   ggplot(data=df_pass) +
   geom_point(aes(x=ano, y=volume, color=mes)) + 
@@ -35,7 +34,6 @@ ggsave(plot_pass, filename = './figures/passageiros_tp.png', width = 16, height 
 
 df_ipk <- readxl::read_excel('./data/ntu.xlsx', sheet = 'ipk')
 
-
 plot_ipk <- 
   ggplot(data=df_ipk) +
   geom_point(aes(x=ano, y=ipk, color=mes)) + 
@@ -55,6 +53,8 @@ ggsave(plot_ipk, filename = './figures/ipk.png', width = 16, height = 10, units 
 
 
 
+
+##### gather both plots --------------------------
 
 ntu <- (plot_pass / plot_ipk) + plot_annotation(tag_levels = 'A')
 ntu
