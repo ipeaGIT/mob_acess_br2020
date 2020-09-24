@@ -1,4 +1,3 @@
-source('R/PNAD/commuting_pnad_0_libraries.R')
 
 aop_style <- function() {
   font <- "Helvetica"
@@ -60,7 +59,7 @@ aop_style <- function() {
     panel.spacing.x = unit(0, "cm"),
     panel.spacing.y = unit(-0.2, "cm"),
     plot.background = ggplot2::element_rect(fill = NA),
-    panel.background = ggplot2::element_rect(fill = NA),
+    panel.background = element_blank(), #ggplot2::element_rect(fill = NA),
     
     # Strip
     # Format strips

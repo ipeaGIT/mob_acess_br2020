@@ -1,5 +1,5 @@
 # Libraries ----
-source('R/PNAD/commuting_pnad_0_libraries.R')
+source("./R/setup.R")
 
 fct_case_when <- function(...) {
   args <- as.list(match.call())

@@ -1,5 +1,5 @@
 # Libraries ----
-source("R/PNAD/commuting_pnad_0_libraries.R")
+source("./R/setup.R")
 
 
 # Read .csv data ----
