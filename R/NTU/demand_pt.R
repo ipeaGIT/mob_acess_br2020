@@ -44,10 +44,14 @@ plot_ipk <-
   scale_y_continuous(limits = c(1, 2.6), breaks = seq(1,3, .2) ) +
   scale_x_continuous(breaks = seq(min(df_pass$ano), max(df_pass$ano), by=2) ) +
   theme_minimal() + 
-  theme(legend.position = 'none')
+  theme(legend.position = 'none') +
+  aop_style() +
+  scale_colour_aop(palette = 'cartola') +
+  theme( panel.grid.major.y = element_line(colour = "gray90"))
+
 
 plot_ipk
-ggsave(plot_ipk, filename = 'ipk.png', width = 16, height = 10, units = 'cm', dpi=200)
+ggsave(plot_ipk, filename = './figures/ipk.png', width = 16, height = 10, units = 'cm', dpi=200)
 
 
 
@@ -55,4 +59,4 @@ ggsave(plot_ipk, filename = 'ipk.png', width = 16, height = 10, units = 'cm', dp
 ntu <- (plot_pass / plot_ipk) + plot_annotation(tag_levels = 'A')
 ntu
 
-ggsave(ntu, filename = 'plot_ntu.png', width = 16, height = 14, units = 'cm', dpi=200)
+ggsave(ntu, filename = './figures/plot_ntu.png', width = 16, height = 14, units = 'cm', dpi=300)
