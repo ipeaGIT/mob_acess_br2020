@@ -83,6 +83,7 @@ aop_colors <- c(
   
   ### animals
   # qualitativo
+  `red0`       = '#620C1A',
   `red1`       = '#872E2B',
   `red2`       = '#A85A3F',
   `red3`       = '#C29365',
@@ -90,7 +91,8 @@ aop_colors <- c(
   `cinza4.1`   = '#c8c8c8',
   `blue1`      = '#6A9BB3',
   `blue2`      = '#326287',
-  `blue3`      = '#274370'
+  `blue3`      = '#274370',
+  `blue4`      = '#111F4F'
   
   
 )
@@ -108,32 +110,32 @@ aop_palettes <- list(
   
   `original`           = aop_cols('beje','laranja','rosa','lilas','roxo','petroleo'),
   
-  `crimson`               = aop_cols(map('crimson', ~paste0(., 1:5))[[1]]),
+  `crimson`               = aop_cols(purrr::map('crimson', ~paste0(., 1:5))[[1]]),
   
-  `orpheu`               = aop_cols(map('orpheu', ~paste0(., 1:6))[[1]]),
+  `orpheu`               = aop_cols(purrr::map('orpheu', ~paste0(., 1:6))[[1]]),
   
-  `cartola`               = aop_cols(map('cartola', ~paste0(., 1:6))[[1]]),
+  `cartola`               = aop_cols(purrr::map('cartola', ~paste0(., 1:6))[[1]]),
   
-  `caqui`               = aop_cols(map('caqui', ~paste0(., 1:6))[[1]]),
+  `caqui`               = aop_cols(purrr::map('caqui', ~paste0(., 1:6))[[1]]),
   
-  `post`               = aop_cols(map('post', ~paste0(., 1:6))[[1]]),
+  `post`               = aop_cols(purrr::map('post', ~paste0(., 1:6))[[1]]),
   
-  `wrapper`               = aop_cols(map('wrapper', ~paste0(., 1:5))[[1]]),
+  `wrapper`               = aop_cols(purrr::map('wrapper', ~paste0(., 1:5))[[1]]),
   
-  `ipea`                  = aop_cols(map('ipea', ~paste0(., 1:7))[[1]]),
+  `ipea`                  = aop_cols(purrr::map('ipea', ~paste0(., 1:7))[[1]]),
   
-  `animals`               = aop_cols(map('animals', ~paste0(., 1:7))[[1]]),
+  `animals`               = aop_cols(purrr::map('animals', ~paste0(., 1:7))[[1]]),
   
   `blue_red`               = aop_cols(
-    c(map('red', ~paste0(., 1:3))[[1]], 'cinza4.1', map('blue', ~paste0(., 1:3))[[1]])
+    c(purrr::map('red', ~paste0(., 1:3))[[1]], 'cinza4.1', purrr::map('blue', ~paste0(., 1:3))[[1]])
   ),
   
-  `blue`          = aop_cols('cinza4.1', 'blue1', 'blue2', 'blue3'),
+  `blue`          = aop_cols('blue1', 'blue2', 'blue3', 'blue4'),
   
-  `red`          = aop_cols('cinza4.1', 'red3', 'red2', 'red1')#,
+  `red`          = aop_cols('red3', 'red2', 'red1', 'red0')#,
   
   #`animals_divergente`        = aop_cols(
-  #  c(map('animals', ~paste0(., 1:4))[[1]], map('animals', ~paste0(., 6:9))[[1]])
+  #  c(purrr::map('animals', ~paste0(., 1:4))[[1]], purrr::map('animals', ~paste0(., 6:9))[[1]])
   #  )
   
 )
