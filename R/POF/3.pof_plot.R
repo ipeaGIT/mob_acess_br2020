@@ -119,7 +119,7 @@ plot2 %>%
       aes(variacao, UF,group = UF),
       linetype = 'dotted') +
     geom_point(
-      aes(variacao, UF, fill = as.factor(quintil_renda)), shape = 21, size = 3, alpha = 1) +
+      aes(variacao, UF, fill = as.factor(quintil_renda)), shape = 21, size = 2.5, alpha = 1) +
   scale_fill_aop(palette =  'blue_red') +
   theme_minimal() +
   labs(
@@ -171,7 +171,6 @@ plot3 %>% na.omit() %>%
     #subtitle = 'Gasto familiar mensal médio por pessoa, por modo de transporte e faixa de renda. \nLinhas pontilhadas representam o gasto médio nacional para todos as faixas de renda.'
   ) +
   facet_wrap(~RM, nrow = 4) +
-  theme_minimal() +
   aop_style() +
   theme(
     legend.position = 'bottom',
@@ -196,7 +195,6 @@ plot4 %>%
     geom_jitter(alpha = .1,size=.8) +
     geom_smooth(method = 'lm', se = FALSE, alpha = .6,size=.5) +
     scale_colour_aop(palette = 'original') +
-    theme_minimal() +
     labs(
       x = '(log) Renda per capita', y="(log) Gasto per capita"
       #title = 'Elasticidade - Renda do gasto per capita com transporte por tipo'
@@ -257,7 +255,6 @@ plot5 %>% na.omit() %>%
     #subtitle = 'Parcela da renda familiar destinada a despesas com transporte, por modo de transporte e faixa de renda \nMédias para regiões metropolitanas em 2017 e 2008 (linha pontilhada)'
     ) +
   facet_wrap(~RM, nrow = 4) +
-  theme_minimal() +
   aop_style() +
   theme(
     legend.position = 'bottom',
@@ -304,12 +301,11 @@ plot6 %>%
     linetype = 'dotted', size = 0.8, alpha = .9) +
   geom_point(
     aes(prop, Estrato, fill = grupo, group = genero),
-    size = 3, alpha = 1, shape = 21,
+    size = 2.5, alpha = 1, shape = 21,
     position = position_dodge(width = .5)) +
   scale_fill_aop(palette = 'blue_red') +
   scale_colour_aop(palette = 'blue_red') +
   scale_x_continuous(labels = scales::percent) +
-  theme_bw()+
   guides(fill = guide_legend(ncol = 2)) +
   labs(
     x = '% da renda destinada a despesas com transporte', y="", fill = '' 
