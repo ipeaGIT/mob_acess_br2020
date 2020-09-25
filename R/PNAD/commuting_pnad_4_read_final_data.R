@@ -17,79 +17,79 @@ fct_case_when <- function(...) {
   
   ## 10% richer vs. 40%  poorer
   
-  # Brasil Urbano (aggregate)
-  dt_prop_r_10_p_40_BR <- left_join(
-    pnads[
-      !is.na(v9057) & !(r_10_p_40 == "Restante"),
-      .(total_trips = sum(v4729, na.rm = T)),
-      by = .(ano, r_10_p_40)
-      ][, regiao := "Brasil Urbano"] %>% 
-      select(1,4,2,3),
-    pnads[
-      v9057 %in% c(5,7) & !(r_10_p_40 == "Restante"),
-      .(above1h = sum(v4729, na.rm = T)),
-      by = .(ano, r_10_p_40)
-      ][, regiao := "Brasil Urbano"] %>% 
-      select(1,4,2,3)
-  )[order(ano, r_10_p_40)]
+  ## Brasil Urbano (aggregate)
+  #dt_prop_r_10_p_40_BR <- left_join(
+  #  pnads[
+  #    !is.na(v9057) & !(r_10_p_40 == "Restante"),
+  #    .(total_trips = sum(v4729, na.rm = T)),
+  #    by = .(ano, r_10_p_40)
+  #    ][, regiao := "Brasil Urbano"] %>% 
+  #    select(1,4,2,3),
+  #  pnads[
+  #    v9057 %in% c(5,7) & !(r_10_p_40 == "Restante"),
+  #    .(above1h = sum(v4729, na.rm = T)),
+  #    by = .(ano, r_10_p_40)
+  #    ][, regiao := "Brasil Urbano"] %>% 
+  #    select(1,4,2,3)
+  #)[order(ano, r_10_p_40)]
+  
+  ## Calculate above1h ratio
+  #setDT(dt_prop_r_10_p_40_BR)[, above1h_p := (above1h / total_trips) , by = .(r_10_p_40)]
+  
+  ## RMs (aggregate)
+  #dt_prop_r_10_p_40_RMs <- left_join(
+  #  pnads[
+  #    !is.na(v9057) & metropol == "RM" & !(r_10_p_40 == "Restante"),
+  #    .(total_trips = sum(v4729, na.rm = T)),
+  #    by = .(ano, r_10_p_40)
+  #    ][, regiao := "Regiões Metropol."] %>% 
+  #    select(1,4,2,3),
+  #  pnads[
+  #    v9057 %in% c(5,7) & metropol == "RM" & !(r_10_p_40 == "Restante"),
+  #    .(above1h = sum(v4729, na.rm = T)),
+  #    by = .(ano, r_10_p_40)
+  #    ][, regiao := "Regiões Metropol."] %>% 
+  #    select(1,4,2,3)
+  #)[order(ano, r_10_p_40)]
   
   # Calculate above1h ratio
-  setDT(dt_prop_r_10_p_40_BR)[, above1h_p := (above1h / total_trips) , by = .(r_10_p_40)]
+  #setDT(dt_prop_r_10_p_40_RMs)[, above1h_p := (above1h / total_trips) , by = .(r_10_p_40)]
   
-  # RMs (aggregate)
-  dt_prop_r_10_p_40_RMs <- left_join(
-    pnads[
-      !is.na(v9057) & metropol == "RM" & !(r_10_p_40 == "Restante"),
-      .(total_trips = sum(v4729, na.rm = T)),
-      by = .(ano, r_10_p_40)
-      ][, regiao := "Regiões Metropol."] %>% 
-      select(1,4,2,3),
-    pnads[
-      v9057 %in% c(5,7) & metropol == "RM" & !(r_10_p_40 == "Restante"),
-      .(above1h = sum(v4729, na.rm = T)),
-      by = .(ano, r_10_p_40)
-      ][, regiao := "Regiões Metropol."] %>% 
-      select(1,4,2,3)
-  )[order(ano, r_10_p_40)]
+  ## By RMs
+  #dt_prop_r_10_p_40_regiao <- left_join(
+  #  pnads[
+  #    !is.na(v9057) & !(r_10_p_40 == "Restante") & !regiao == "Urbano Não-Metropolitano",
+  #    .(total_trips = sum(v4729, na.rm = T)),
+  #    by = .(ano, regiao, r_10_p_40)
+  #    ],
+  #  pnads[
+  #    v9057 %in% c(5,7) & !(r_10_p_40 == "Restante") & !regiao == "Urbano Não-Metropolitano",
+  #    .(above1h = sum(v4729, na.rm = T)),
+  #    by = .(ano, regiao, r_10_p_40)
+  #    ]
+  #)
   
   # Calculate above1h ratio
-  setDT(dt_prop_r_10_p_40_RMs)[, above1h_p := (above1h / total_trips) , by = .(r_10_p_40)]
+  #setDT(dt_prop_r_10_p_40_regiao)[, above1h_p := (above1h / total_trips) , by = .(r_10_p_40)]
   
-  # By RMs
-  dt_prop_r_10_p_40_regiao <- left_join(
-    pnads[
-      !is.na(v9057) & !(r_10_p_40 == "Restante") & !regiao == "Urbano Não-Metropolitano",
-      .(total_trips = sum(v4729, na.rm = T)),
-      by = .(ano, regiao, r_10_p_40)
-      ],
-    pnads[
-      v9057 %in% c(5,7) & !(r_10_p_40 == "Restante") & !regiao == "Urbano Não-Metropolitano",
-      .(above1h = sum(v4729, na.rm = T)),
-      by = .(ano, regiao, r_10_p_40)
-      ]
-  )
+  ## Row-bind dts
+  #dt_prop_r_10_p_40_total <- data.table::rbindlist(
+  #  list(dt_prop_r_10_p_40_BR,dt_prop_r_10_p_40_RMs, dt_prop_r_10_p_40_regiao)
+  #)[order(ano)] %>% 
+  #  mutate(
+  #    regiao = factor(
+  #      regiao, 
+  #      levels = c(
+  #        "Belém","Brasil Urbano",'Porto Alegre','Salvador','Curitiba','Fortaleza','Recife',
+  #        'Belo Horizonte',"Regiões Metropol.","Brasília",'Rio de Janeiro','São Paulo'
+  #      ),
+  #    )
+  #  )
+  ## rm
+  #rm(dt_prop_r_10_p_40_BR, dt_prop_r_10_p_40_RMs, dt_prop_r_10_p_40_regiao)
   
-  # Calculate above1h ratio
-  setDT(dt_prop_r_10_p_40_regiao)[, above1h_p := (above1h / total_trips) , by = .(r_10_p_40)]
-  
-  # Row-bind dts
-  dt_prop_r_10_p_40_total <- data.table::rbindlist(
-    list(dt_prop_r_10_p_40_BR,dt_prop_r_10_p_40_RMs, dt_prop_r_10_p_40_regiao)
-  )[order(ano)] %>% 
-    mutate(
-      regiao = factor(
-        regiao, 
-        levels = c(
-          "Belém","Brasil Urbano",'Porto Alegre','Salvador','Curitiba','Fortaleza','Recife',
-          'Belo Horizonte',"Regiões Metropol.","Brasília",'Rio de Janeiro','São Paulo'
-        ),
-      )
-    )
-  # rm
-  rm(dt_prop_r_10_p_40_BR, dt_prop_r_10_p_40_RMs, dt_prop_r_10_p_40_regiao)
-  
-  # remover (por nao ser utilizada no momento)
-  rm(dt_prop_r_10_p_40_total)
+  ## remover (por nao ser utilizada no momento)
+  #rm(dt_prop_r_10_p_40_total)
   
   # Tabelas utilizadas --------
   
@@ -225,6 +225,22 @@ fct_case_when <- function(...) {
       )
     )
   
+  mean_time_r_10_p_40 <- data.table::rbindlist(
+    l = list(
+      mean_time_r_10_p_40 %>% select(-regiao),
+      mean_time %>% 
+        select(-c(regiao, regiao2)) %>% 
+        mutate(r_10_p_40 = "Média") %>% 
+        select(ano, r_10_p_40, commute_time, regiao_wrap)
+    )
+  ) %>% 
+    mutate(
+      r_10_p_40 = factor(
+        r_10_p_40, levels = c("40% mais pobres", "Média", "10% mais ricos"), ordered = T
+      )
+    ) %>% 
+    arrange(ano, regiao_wrap)
+    
   
   # 3.4 - Mean time escolaridade, raca_sexo: Brasil Urbano + Media RMs + por RM ----
   

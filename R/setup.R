@@ -40,7 +40,7 @@ library(gridExtra)
 library(ggplotify)
 library(grid)
 library(PNADcIBGE)
-
+library(ggtext)
 
 # disable scientific notation
 options(scipen=10000)

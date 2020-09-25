@@ -32,18 +32,18 @@ aop_style <- function() {
     
     # Axis
     # Formats axis text, ticks, line and titles. Axis titles are formated, but can be excluded with axis.title.x or y = element_blank()
-    axis.text = element_markdown(size = 8, colour = '#808080'),
+    axis.text = ggtext::element_markdown(size = 8, colour = '#808080'),
     axis.ticks = element_blank(),
     axis.line.x = element_line(size = 0.5, color = "grey"),
     axis.line.y = element_blank(),
-    axis.title.y = element_markdown(
+    axis.title.y = ggtext::element_markdown(
       size = 8, 
       margin = margin(r = 0.25, unit = 'cm'), 
       lineheight = 0.5,
       colour = "#575757",
       hjust = 1
     ),
-    axis.title.x = element_markdown(
+    axis.title.x = ggtext::element_markdown(
       size = 8, 
       margin = margin(t = 0.25, b = 0, unit = 'cm'), 
       lineheight = 0.5,

@@ -107,7 +107,9 @@ ggplot() +
     theme(
       #panel.grid.major.y = element_blank()
       legend.position = 'bottom',
-      legend.box.margin = margin(t = -0.5,r = -0.5,b = -0.5,l = -0.5, unit = 'cm')
+      legend.box.margin = margin(t = -0.5,r = -0.5,b = -0.5,l = -0.5, unit = 'cm'),
+      #legend.spacing.x = unit(0, 'cm'),
+      #legend.spacing.y = unit(-0.25, 'cm'),
     ) +
     scale_x_continuous(breaks = 1:10) +
     scale_y_continuous(
@@ -130,7 +132,11 @@ ggplot() +
       colour = 'Ano',
       shape = 'Ano'
     ) +
-    coord_cartesian(clip = 'off')
+    coord_cartesian(clip = 'off') #+
+    #guides(
+    #  colour = guide_legend(ncol = 1, reverse = T),
+    #  shape = guide_legend(ncol = 1, reverse = T)
+    #  )
   
 
   ggsave("figures/PNAD/mean_decil_rms.png", 
@@ -141,57 +147,83 @@ ggplot() +
   
   # * 3.3 - cleveland plot para extremos de renda em cada RM 2001 vs 2015 ----
   
+  regiao_labels <- c(
+    `Brasil Urbano` = 'Brasil\nUrbano', 
+    `Belém` = 'Belém',
+    `Fortaleza` = 'Fortaleza',
+    `Porto Alegre` = 'Porto\nAlegre',
+    `Salvador` = 'Salvador',
+    `Curitiba` = 'Curitiba',
+    `Belo\nHorizonte` = 'Belo\nHorizonte',
+    `Recife` = 'Recife',
+    `Regiões\nMetropol.` = 'Regiões\nMetrop.',
+    `Brasília` = 'Brasília',
+    `Rio de\nJaneiro` = 'Rio de\nJaneiro',
+    `São Paulo` = 'São\nPaulo'
+  )
+  
   ggplot(
     data = mean_time_r_10_p_40 %>% 
       filter(ano %in% c(2001,2015)),
     aes(x = as.factor(ano), y = commute_time)
   ) +
-    geom_line(aes(group = ano), colour = '#bfbfbf') +
+    geom_line(aes(group = ano), colour = '#bfbfbf', size = 0.4) +
     geom_point(
-      data = mean_time %>% filter(ano %in% c(2001, 2015)),
-      colour = '#9a9a9a', size = 3, alpha = 0.9
+      aes(colour = r_10_p_40),
+      size = 2, alpha = 0.9
     ) +
-    geom_point(aes(colour = r_10_p_40), size = 3, alpha = 0.9) +
-    lemon::facet_rep_grid(~regiao_wrap)  +
-    #scale_x_continuous(
-    #  position = 'top',
-    #  breaks = c(20,30,40), limits = c(20,50), expand = expansion(c(0,0))
-    #) +
+    facet_grid(
+      ~regiao_wrap, 
+      labeller = as_labeller(regiao_labels)
+    ) +
+    #lemon::facet_rep_grid(
+    #  ~regiao_wrap, repeat.tick.labels = F,
+    #  labeller = as_labeller(regiao_labels)
+    #  ) +
     scale_y_continuous(
-      breaks = seq(20,50, by = 10), limits = c(20,50), expand = expansion(mult = c(0,0.01))
+      breaks = seq(20,50, by = 10), limits = c(20,50), expand = expansion(mult = c(0,0.05))
+    ) +
+    scale_x_discrete(
+      labels = c('2001' = '01', '2015' = '15')
     ) +
     scale_colour_aop(
-      palette = 'blue_red', reverse = T
+      palette = 'blue_red', reverse = F
     ) +
     aop_style() +
-    #theme(panel.grid.minor.y = element_line(
-    #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
-    #)) +
     theme(
-      legend.position = 'none',
-      panel.spacing.x = unit(-0.05, "lines"),
-      #strip.text = element_text(size = 13, face = "plain", colour = "#808080")
-      ) +
+      legend.position = 'bottom',
+      panel.spacing.x = unit(0.05, "cm"),
+      plot.margin = unit(c(t = 0.5,r = 0.25, b = 0.5, l = 0.25), "cm"),
+      legend.box.margin = margin(t = -0.5,r = -0.5,b = -0.5,l = -0.5, unit = 'cm'),
+      legend.spacing.x = unit(0, 'cm'),
+      axis.title.y = ggtext::element_markdown(margin = margin(r = 0.1,l = 0,unit = 'cm')),
+      axis.text.y = ggtext::element_markdown(margin = margin(r = 0,l = 0.05, unit = 'cm')),
+      #axis.text.x = ggtext::element_markdown(size = 7)
+      strip.text = element_text(hjust = 0.5)
+    ) +
     labs(
       colour = "Renda domiciliar per capita",
-      title = "Diferenças nas mobilidades entre os <b style='color:#274370'>10% mais ricos</b>, <b style='color:#9a9a9a'>a média</b> e os <b style='color:#872E2B'>40% mais pobres</b> das cidades brasileiras",
-      subtitle = "Tempo médio (em minutos) no deslocamento casa-trabalho, de acordo com a Renda domiciliar *per capita* (2001 e 2015)",
-      caption = "Fonte: PNAD (IBGE, 2001 e 2015)."
-    )
+      #title = "Diferenças nas mobilidades entre os <b style='color:#274370'>10% mais ricos</b>, <b style='color:#9a9a9a'>a média</b> e os <b style='color:#872E2B'>40% mais pobres</b> das cidades brasileiras",
+      subtitle = "Tempo médio (em minutos) no deslocamento casa-trabalho por Renda domiciliar *per capita* (2001 e 2015)",
+      #caption = "Fonte: PNAD (IBGE, 2001 e 2015)."
+      x = 'Ano',
+      y = 'Tempo de deslocamento'
+    ) +
+    coord_cartesian(clip = 'off') 
+    #coord_fixed(ratio = , clip = 'off')
   
-  ggsave("figures/PNAD/clev_1040_mean_sem_legenda_com_media.png", 
-         width = 16, height = 10, units = "cm", dpi = 300, device = 'png')
+  ggsave("figures/PNAD/clev_1040_mean.png", 
+         width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
   
-  ggsave("figures/PNAD/clev_1040_mean_sem_legenda_com_media.pdf", 
-         width = 16, height = 10, units = "cm", dpi = 300, device = 'pdf')
+  ggsave("figures/PNAD/clev_1040_mean.pdf", 
+         width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
   
   
   # * 3.4 - cleveland plot de tempo por escolaridade & sexo em cada RM 2001 vs 2015 ----
   
     # Eixo y = factor(ano)
-  png("figures/PNAD/clev_esc_raca_sexo_mean.png", 
-      width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
+
   
   anotacoes <- data.frame(
     anotacao = c('primeira', 'segunda', 'terceira'),
@@ -200,7 +232,7 @@ ggplot() +
     commute_time = c(32.5, 47, 45),
     legenda = c(
       "Elevação no tempo de<br>deslocamento de<br>todos os grupos em<br>2015...",
-      "...especialmente para <br> <b style='color:#274370'>Homens Negros</b><br>e <b style='color:#872E2B'>Mulheres Negras</b>...",
+      "...especialmente para <br> <b style='color:#326287'>Homens Negros</b><br>e <b style='color:#872e2b'>Mulheres Negras</b>...",
       #"...Porém, alguns<br>grupos foram<br>afetados de maneira<br>desproporcional.<br>Particularmente,<br><b style='color:#872E2B'> Mulheres Negras</b> de<br>baixa escolaridade."
       "...aumentando a desigualdade<br>já existente em todos os<br>níveis de escolaridade em 2001."
     )
@@ -212,15 +244,15 @@ ggplot() +
     aes(x = commute_time, y = escolaridade) #as.factor(ano)
   ) +
     geom_line(aes(group = escolaridade), colour = '#bfbfbf') +
-    geom_point(aes(colour = raca_sexo), size = 3.5#, alpha = 0.85
+    geom_point(aes(colour = raca_sexo), size = 2#, alpha = 0.85
     ) +
     ggtext::geom_richtext(
       data = anotacoes,
       aes(x = commute_time, y = escolaridade, label = legenda),
-      colour = 'black',
+      colour = '#323232',
       #fontface = 'bold',
-      family = "Roboto",
-      size = 4,
+      family = "Helvetica",
+      size = 2.81,
       fill = NA, label.color = NA, # remove background and outline
     #  label.padding = grid::unit(rep(0, 4), "pt") # remove padding
     ) +
@@ -230,16 +262,16 @@ ggplot() +
       scales = "free_x",repeat.tick.labels = T
     )  +
     scale_x_continuous(
-      position = 'top',
+      position = 'bottom',
       limits = c(29.4,50),
       expand = c(0,0)
     ) +
     scale_colour_aop(
       values = c(
-        "Mulher Negra" = '#d08969',
-        "Homem Negro" = '#003338',
-        'Mulher Branca' = '#b69186',
-        'Homem Branco' = '#25677e'
+        "Mulher Negra" = '#872e2b',
+        "Homem Negro" = '#326287',
+        'Mulher Branca' = '#c29365',
+        'Homem Branco' = '#6a9bb3'
       )
     ) +
     aop_style() +
@@ -253,6 +285,10 @@ ggplot() +
       #),
       legend.position = 'bottom',
       axis.text.y = element_markdown(vjust = 0.5),
+      panel.spacing.y = unit(0.5, "cm"),
+      legend.spacing.x = unit(0, 'cm'),
+      legend.spacing.y = unit(-0.25, 'cm'),
+      legend.box.margin = margin(t = -0.5,b = -0.25, unit = 'cm'),
       #axis.title.y = element_markdown(
       #  size = 16, 
         #angle = 0,
@@ -263,21 +299,29 @@ ggplot() +
     ) +
     labs(
       colour = "Sexo e Etnia",
-      title = "Condições de mobilidade e características sociodemográficas",
+      #title = "Condições de mobilidade e características sociodemográficas",
       subtitle = 
         #expression(paste('Tempo médio (em minutos) no deslocamento por grau de ', escolaridade^1,', de acordo com sexo e etnia')),
-        "Deslocamento médio (em minutos) por grau de escolaridade<sup>1</sup>, de acordo com sexo e etnia<br>nas Regiões Metropolitanas brasileiras (2001 e 2015)",
-      caption = "Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Ensino Fundamental; Média: Ensino Médio; Alta: Ensino Superior.",
+        #"Deslocamento médio (em minutos) por grau de escolaridade<sup>1</sup>, de acordo com sexo e etnia<br>nas Regiões Metropolitanas brasileiras (2001 e 2015)",
+        "Tempo médio (em minutos) no deslocamento por grau de escolaridade, de acordo com sexo e etnia, nas<br>Regiões Metropolitanas brasileiras (2001 e 2015)",
+      #caption = "Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Ensino Fundamental; Média: Ensino Médio; Alta: Ensino Superior.",
       #"Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Até 7 anos de estudo; Média: 8 à 14 anos de estudo; Alta: 15 ou mais anos de estudo."
-      y = "Escolaridade"
+      y = "Escolaridade",
+      x = 'Tempo de deslocamento'
     ) +
-    guides(colour = guide_legend(reverse = T))
+    guides(colour = guide_legend(reverse = F, ncol = 2))
+  
   
   ggsave("figures/PNAD/clev_esc_raca_sexo_mean.png", 
          width = 16, height = 16, units = "cm", dpi = 600, device = 'png')
   
+  ggsave("figures/PNAD/clev_esc_raca_sexo_mean.pdf", 
+         width = 16, height = 16, units = "cm", dpi = 600, device = 'pdf')
   
-  dev.off()
+  
+  #png("figures/PNAD/clev_esc_raca_sexo_mean.png", 
+  #    width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
+  #dev.off()
   
   
   
