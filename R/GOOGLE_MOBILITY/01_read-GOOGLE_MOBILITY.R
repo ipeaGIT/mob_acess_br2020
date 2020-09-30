@@ -5,9 +5,15 @@
 rm(list=ls())
 gc(reset = T)
 library(XLConnect)
+library(patchwork)
+library(cowplot)
 library(gganimate)  # install.packages("gganimate")
 library(ggrepel)
 source("R/PNS/0_loadpackages.R",local = TRUE)
+source("R/colours.R")
+source("R/DENATRAN/colors_plot.R")
+source("R/style.R")
+source("R/DENATRAN/aop_style1.R")
 `%nin%` = Negate(`%in%`)
 
 # generate cities geometries from geobr
@@ -29,7 +35,7 @@ toupper_noaccent <- function(i){
 ls_initial_list <- c("google","activities","%nin%","toupper_noaccent")
 # first manipulation
 
-statebr <- geobr::read_state() %>% data.table::setDT()
+statebr <- geobr::read_state(code_state = "all") %>% data.table::setDT()
 statebr[,name_state := toupper_noaccent(name_state)]
 
 google <- data.table::fread("data-raw/GOOGLE/Global_Mobility_Report.csv")
@@ -56,9 +62,6 @@ description <- c('Tendências de mobilidade de lugares como restaurantes, cafés
                  'Tendências de mobilidade de lugares como terminais de transporte público,\n tipo estações de metrô, ônibus e trem',
                  'Tendências de mobilidade de locais de trabalho',
                  'Tendências de mobilidade de áreas residenciais')
-lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
-rm(list = lista)
-
 #
 # check names-------------
 #
@@ -84,7 +87,11 @@ google1 <- data.table::melt(data = google,
                                                               'transit_stations_percent_change_from_baseline',
                                                               'workplaces_percent_change_from_baseline',
                                                               'residential_percent_change_from_baseline')))
-label_x <- c("15/02","01/03","01/04","01/05","01/06","01/07","01/08")
+label_x <- c("15/02","01/03","15/03","01/04","15/04",
+             "01/05","15/05","01/06","15/06","01/07","15/07",
+             "01/08","15/08","01/09","11/09")
+label_x <- paste0("01/0",3:9)
+label_plot <- paste0("01/",c('Mar','Abr','Mai','Jun','Jul','Ago','Set'))
 break_x <- google[day_month %in% label_x,unique(day_month_id)]
 limits_x <- c(min(google1$day_month_id),max(google1$day_month_id))
 
@@ -107,23 +114,41 @@ for(i in 1:length(activities)){ # i = 1
   orderuf <- orderuf$state_abrev
   google2[,state_abrev := factor(state_abrev,orderuf)]
   
-  plot1 <- ggplot(data = google2, aes(x = day_month_id,y = state_abrev)) + 
+  google2[,grp := .GRP, by = state_abrev]
+  labels_y <- google2[,.SD[1], by = state_abrev][, state_abrev]
+  breaks_y <- google2[,.SD[1], by = state_abrev][, grp]
+  range_fill <- seq(min(google2$value),max(google2$value),length.out = 6)
+  
+  
+  plot1 <- ggplot(data = google2, aes(x = day_month_id,y = grp)) + 
     geom_tile(aes(fill = value),colour = "white") +
-    viridis::scale_fill_viridis(option = "A",direction = -1) +  
+    viridis::scale_fill_viridis("Mudança em relação \n ao período base",
+                                option = "A",
+                                limits = c(min(range_fill),max(range_fill)),
+                                direction = -1,
+                                breaks = round(range_fill,0)) +
     scale_x_continuous(breaks = break_x,
-                       labels = label_x) +
+                       labels = label_plot) +
+    scale_y_continuous(NULL,breaks = breaks_y,
+                       labels = labels_y,
+                       sec.axis = sec_axis(~ .,
+                                           breaks = breaks_y,
+                                           labels = labels_y)) + 
     labs(title = local_categories[i],
          subtitle = description[i],
          x = NULL, y = "Estados",
          fill = "Mudança em \nrelação ao \nperíodo base") +
-    theme_bw() +
+    aop_style1() +
     theme(legend.position = 'right',
+          axis.ticks = element_line(
+            colour = "black",
+            size = 0.5,
+            linetype = 1),
           axis.text.x = element_text(angle = 0, hjust = 0,size=8),
           axis.text.y = element_text(angle = 0, hjust = 1,size=8),
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) + 
     coord_cartesian(xlim = limits_x, expand = FALSE)
-  
   
   #
   # boxplot
@@ -131,6 +156,7 @@ for(i in 1:length(activities)){ # i = 1
   avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = day_month_id]
   avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
   
+
   plot2 <- ggplot() + 
     geom_boxplot(data = google2, aes(x = day_month_id, y = value,
                                      group = day_month_id, fill = value)) + 
@@ -139,17 +165,26 @@ for(i in 1:length(activities)){ # i = 1
          y = "Mudança em relação \n ao período base",
          caption = 'Fonte: Google COVID-19 Community Mobility Reports') + 
     scale_x_continuous(breaks = break_x,
-                       labels = label_x) + 
-    theme_bw() +
+                       labels = label_plot) + 
+    scale_y_continuous(breaks = range_fill,
+                       labels = round(range_fill,0)) + 
+    #theme_bw() +
+    aop_style1() +
     theme(axis.text.x = element_text(angle = 0, hjust = 0,size=8),
           axis.text.y = element_text(angle = 0, hjust = 1,size=8),
-          #panel.grid.major = element_blank(),
-          panel.grid.minor = element_blank())
+          axis.line.x = element_line(size = 0.5, color = "grey"),
+          axis.ticks = element_line(
+            colour = "black",
+            size = 0.5,
+            linetype = 1),
+          panel.grid.major.x = element_line(size = 0.15, color = "grey"),
+          panel.grid.minor = element_blank())+
+    coord_cartesian(xlim = limits_x, expand = FALSE)
   
   pf <- plot1 / plot2
-  
+  pf
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".png"),
-         width = 23.7, height = 17.6, units = "cm")
+         width = 23.7, height = 17.6,dpi = 300, units = "cm")
   
 }
 
