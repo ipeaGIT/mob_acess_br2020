@@ -14,14 +14,15 @@ plot_pass <-
   ggplot(data=df_pass) +
   geom_point(aes(x=ano, y=volume, color=mes)) + 
   geom_line(aes(x=ano, y=volume, color=mes)) +
-  labs(x= 'Ano', y='Passageiros equivalentes\n por veículo por dia') +
+  labs(x= 'Ano', y='Passageiros equivalentes\n por veículo por dia', color='Mês') +
   scale_y_continuous(limits = c(100, 650), breaks = seq(100,700, 100) ) +
   scale_x_continuous(breaks = seq(min(df_pass$ano), max(df_pass$ano), by=2) ) +
   theme_minimal() +
-  theme(legend.position = 'top') +
   aop_style() +
   scale_colour_aop(palette = 'cartola') +
-  theme( panel.grid.major.y = element_line(colour = "gray90"))
+  theme( panel.grid.major.y = element_line(colour = "gray90")) +
+  theme(legend.position = 'top')
+  
   
 plot_pass
 ggsave(plot_pass, filename = './figures/passageiros_tp.png', width = 16, height = 10, units = 'cm', dpi=200)
@@ -38,7 +39,7 @@ plot_ipk <-
   ggplot(data=df_ipk) +
   geom_point(aes(x=ano, y=ipk, color=mes)) + 
   geom_line(aes(x=ano, y=ipk, color=mes)) +
-  labs(x= 'Ano', y='IPK') +
+  labs(x= 'Ano', y='Índice de Passageiros\n por Quilômetro (IPK)') +
   scale_y_continuous(limits = c(1, 2.6), breaks = seq(1,3, .2) ) +
   scale_x_continuous(breaks = seq(min(df_pass$ano), max(df_pass$ano), by=2) ) +
   theme_minimal() + 
@@ -56,7 +57,10 @@ ggsave(plot_ipk, filename = './figures/ipk.png', width = 16, height = 10, units 
 
 ##### gather both plots --------------------------
 
-ntu <- (plot_pass / plot_ipk) + plot_annotation(tag_levels = 'A')
+ntu <- (plot_pass + theme(legend.position = 'top') ) / 
+        plot_ipk + plot_annotation(tag_levels = 'A') +
+  labs(color='Mês')
+
 ntu
 
 ggsave(ntu, filename = './figures/plot_ntu.png', width = 16, height = 14, units = 'cm', dpi=300)
