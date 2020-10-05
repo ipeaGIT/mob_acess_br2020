@@ -87,7 +87,7 @@ rm(list = lista)
 #
 
 temp_pns <- denatran[!is.na(name_metro_pns),]
-temp_nmetro <- denatran[is.na(name_metro_pns),][,name_metro_pns := "BRASIL NÃO-METROPOLITANO"]
+temp_nmetro <- denatran[is.na(name_metro_pns),][,name_metro_pns := "BRASIL URBANO \nNÃO-METROPOLITANO"]
 temp_metro <- denatran[!is.na(name_metro_pns),][,name_metro_pns := "BRASIL METROPOLITANO"]
 
 temp_den <- list(temp_pns,temp_nmetro,temp_metro) %>% data.table::rbindlist()
@@ -115,6 +115,10 @@ temp_den <- data.table::melt(data = temp_den,
 temp_den[,name_metro_pns := stringr::str_to_title(name_metro_pns)]
 temp_den[,name_metro_pns := gsub("Rm ","",name_metro_pns)]
 temp_den[,name_metro_pns := gsub("De","de",name_metro_pns)]
+# put accents
+temp_den[name_metro_pns %in% "Sao Paulo",name_metro_pns := "São Paulo"]
+temp_den[name_metro_pns %in% "Belem",name_metro_pns := "Belém"]
+temp_den[name_metro_pns %in% "Brasilia",name_metro_pns := "Brasília"]
 
 temp_den[,TOTAL_y := -1*diff(TOTAL), by = .(ANO,name_metro_pns)]
 temp_den[TYPE %in% "MOTOS_PER_POP",TOTAL_y := TOTAL]
@@ -127,23 +131,35 @@ temp_den[name_metro_pns %in% "Curitiba" & ANO %in% 2020,]
 p1 <- ggplot(temp_den,
              aes(x = ANO,y = TOTAL_y,fill = as.factor(TYPE))) +
   geom_area(colour = "black", size=.3, alpha=.8) +
-  geom_text(data = temp_den[ANO %in% c("2001"),],
+  geom_text(data = temp_den[ANO %in% c("2001") & # 2001
+                              name_metro_pns %in% "Belém" & 
+                              TYPE %in% "MOTOS_PER_POP",],
+            aes(y = TOTAL,label = round(TOTAL,2)),
+            vjust = -0.3, hjust = 0.15,size = 2.5) + 
+  geom_text(data = temp_den[ANO %in% c("2001") & 
+                              name_metro_pns %in% "Belém" & 
+                              TYPE %in% "AUTOS_PER_POP",],
             aes(y = TOTAL,label = round(TOTAL,2)),
             vjust = -0.7, hjust = 0.15,size = 2.5) + 
-  geom_text(data = temp_den[TYPE %in% "AUTOS_PER_POP" & 
+  geom_text(data = temp_den[ANO %in% c("2001") & 
+                              name_metro_pns %nin% "Belém",],
+            aes(y = TOTAL,label = round(TOTAL,2)),
+            vjust = -0.7, hjust = 0.15,size = 2.5) + 
+  geom_text(data = temp_den[TYPE %in% "AUTOS_PER_POP" & # 2020
                               ANO %in% c("2020"),],
             aes(y = TOTAL,label = round(TOTAL,2)),
             vjust = -0.7, hjust = 0.75,size = 2.5) +
   geom_text(data = temp_den[TYPE %in% "MOTOS_PER_POP" & 
-                              name_metro_pns %in% "Belem" & 
+                              name_metro_pns %in% "Belém" & 
                               ANO %in% c("2020"),],
             aes(y = TOTAL_y,label = round(TOTAL,2)),
             vjust = +1.45, hjust = 0.75,size = 2.5) + 
   geom_text(data = temp_den[TYPE %in% "MOTOS_PER_POP" & 
-                              name_metro_pns %nin% "Belem" & 
+                              name_metro_pns %nin% "Belém" & 
                               ANO %in% c("2020"),],
             aes(y = TOTAL_y,label = round(TOTAL,2)),
             vjust = -0.7, hjust = 0.75,size = 2.5) +
+  scale_x_continuous(breaks = c(2001,2010,2020)) + #,labels = c("01","10","20")) + 
   ylim(c(0,max(temp_den$TOTAL) * 1.1)) +
   labs(x = NULL,y = "Taxa de motorização (veículos/hab.)",
        title = "Taxa de motorização",
@@ -158,11 +174,14 @@ p1 <- ggplot(temp_den,
                     labels = c("Automóvel","Motocicleta")) + 
   theme( panel.grid.major.y = element_line(colour = "gray90"),
          legend.position = "bottom",
-         #axis.title.y = element_text(vjust=-0.5)
-  ) + 
+         axis.text.x = ggtext::element_markdown(size = 8, 
+                                                colour = "#808080",
+                                                hjust = c(0.10,0.0,0.85),
+                                                angle = 0)) + 
   guides(fill = guide_legend(override.aes = list(shape = NA)))
 
-ggsave("figures/DENATRAN/rm_taxa-motorizacao.png", width = 25, 
+  p1
+  ggsave("figures/DENATRAN/rm_taxa-motorizacao.png", width = 25, 
        height = 18, scale = 0.8, units = "cm", dpi = 300, device = 'png')
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
