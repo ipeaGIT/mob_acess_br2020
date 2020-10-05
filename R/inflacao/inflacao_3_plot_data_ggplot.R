@@ -1,4 +1,5 @@
 # Libraries ----
+source("./R/setup.R")
 source('R/colours.R')
 # funcoes -----
 
@@ -24,7 +25,7 @@ tab_1419 <- readRDS(file = "data/inflacao/sidra_1419_cleaned.rds")
 
 # Bases ----
 
-# Bases Grupos -----
+# * Bases Grupos -----
 tab_1419_grupos <- tab_1419 %>% 
   filter(
     regiao %in% 'Brasil' & tipo %in% c('Índice geral',"Grupo") & variavel %in% "IPCA - Variação mensal"
@@ -70,7 +71,7 @@ ultimo_facets_transportes <- tab_1419_grupos %>%
   )
 
 
-# Bases Brasil Subitens (facets = subitens) ----
+# * Bases Brasil Subitens (facets = subitens) ----
   ## Base filtrada
 tab_1419_subitens <- tab_1419 %>% 
   filter(
@@ -114,7 +115,7 @@ ultimo_subitens <- tab_1419 %>%
     acumulada_novo = c(0.675,0.425,0,0.185,0.7,0.915)
   )
 
-# Bases RMs ----
+# * Bases RMs ----
 
 ## Base filtrada RMs
 tab_1419_RMs <- tab_1419 %>% 
@@ -159,88 +160,7 @@ ultimo_RMs <- data.table(
 
 # Graficos utilizados ----
 
-# Grafico: Acumulada Brasil - GRUPOS - ATUALIZAR DEPOIS -----
-# testar cowplot (transportes (com outros grupos), facet(itens de transporte))
-
-png("figures/inflacao/acumulada_brasil_grupos_facets.png", 
-    width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
-
-ggplot(
-  data = tab_1419_grupos %>% filter(!componente=='IPCA')
-) + 
-  geom_line(
-    data = transform(tab_1419_grupos %>% filter(!componente=='IPCA'), componente = NULL),
-    aes(mes, acumulada, group = componente2), 
-    colour = 'grey80',
-    alpha = 0.6, 
-    size = 0.75,
-    lineend = 'round', linejoin = 'round'
-  ) +
-  geom_line(
-    data = transform(tab_1419_grupos %>% filter(componente=='IPCA'), componente = NULL),
-    aes(mes, acumulada, group = componente2), 
-    colour = '#323232',
-    alpha = 0.9, size = 1,
-    linetype = 'twodash',lineend = 'round', linejoin = 'round'
-  ) +
-  ggtext::geom_richtext(
-    data = ultimo_facets_grupo,
-    aes(mes_legenda, acumulada, label = legenda),
-    colour = '#323232',
-    family = "Helvetica",
-    size = 5.5, 
-    fontface = 'bold',
-    fill = NA, label.color = NA, # remove background and outline
-    label.padding = grid::unit(rep(0, 4), "pt") # remove padding
-  ) +
-  geom_line(
-    aes(mes, acumulada, group = componente, colour = componente),
-    size = 1
-  ) +
-  ggtext::geom_richtext(
-    data = ultimo_facets_transportes,
-    aes(mes_legenda, acumulada, label = legenda),
-    colour = '#444e86',
-    family = "Helvetica",
-    size = 5.5, 
-    fontface = 'bold',
-    fill = NA, label.color = NA, # remove background and outline
-    label.padding = grid::unit(rep(0, 4), "pt") # remove padding
-  ) +
-  lemon::facet_rep_wrap(~factor(componente), ncol = 3) +
-  hrbrthemes::scale_y_percent(
-    expand = expansion(add = 0.05)
-  ) +
-  ggplot2::scale_x_date(
-    #date_breaks = "24 months", 
-    limits = as.Date(c('2012-01-01','2021-01-01')),
-    date_labels = "%b/%Y"#,
-    #breaks = function(x) seq.Date(from = min(x), to = max(x), by = "24 months")
-  ) + 
-  scale_colour_manual(
-    values = c(
-      # Menor (automovel novo -> Maior (Oleo diesel)
-      "Educação" = 'black',"Despesas pessoais" = 'black',"Saúde e cuidados pessoais" = 'black',
-      "Alimentação e bebidas" = 'black','Habitação' = 'black','IPCA' = '#323232',
-      'Transportes' = '#444e86', 'Vestuário' = 'black','Artigos de residência' = 'black',
-      'Comunicação' = 'black'
-    )
-  ) +
-  aop_style() +
-  theme(
-    plot.margin = unit(c(0.5,0.5,0.5,0.5), "cm")
-  ) +
-  labs(
-    title = "Trajetória dos níveis de preços dos <b style='color:#444e86'>Transportes</b> e do restante dos componentes do IPCA na última década",
-    subtitle = "Inflação acumulada dos componentes (grupos) do <b style='color:#323232'>IPCA</b> para todo o Brasil (2012-2019)",
-    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA)."
-  )
-
-dev.off()
-
-
-
-# Grafico: Infl. acumulada; Brasil; facets = Subitens ----
+# * Grafico: Infl. acumulada; Brasil; facets = Subitens ----
 
 # base para criar linhas verticais
 linhas_vert_BR <- data.table(
@@ -257,43 +177,42 @@ linhas_vert_BR <- data.table(
 
 # Com facets (componente)
 
-png("figures/inflacao/acumulada_brasil_transportes_facets.png", 
-    width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
-
-gg_BR <- ggplot(
+gg_BR <- 
+  ggplot(
   data = tab_1419_subitens %>% filter(!componente=='IPCA')
 ) + 
   geom_vline(
     data = linhas_vert_BR,
     aes(xintercept = mes),
-    linetype = 'dotted', colour = '#808080', size = 0.25
+    linetype = 'dotted', colour = '#575757', size = 0.25
   ) +
   geom_line(
     data = transform(tab_1419_subitens %>% filter(!componente=='IPCA'), componente = NULL),
     aes(mes, acumulada, group = componente2), 
     colour = 'grey80',
     alpha = 0.6, 
-    size = 0.75,
+    #size = 0.75,
     lineend = 'round', linejoin = 'round'
   ) +
   geom_line(
     data = transform(tab_1419_subitens %>% filter(componente=='IPCA'), componente = NULL),
     aes(mes, acumulada, group = componente2), 
     colour = '#323232',
-    alpha = 0.9, size = 1,
+    alpha = 0.9, 
+    size = 0.75,
     linetype = 'twodash',lineend = 'round', linejoin = 'round'
   ) +
   ggtext::geom_richtext(
     data = ultimo_subitens,
     aes(mes_legenda, acumulada_novo, colour = componente, label = legenda),
     family = "Helvetica",
-    size = 4.5, 
-    fill = NA, label.color = NA, # remove background and outline
-    label.padding = grid::unit(rep(0, 4), "pt") # remove padding
+    size = 2.81, 
+    fill = NA, label.color = NA#, # remove background and outline
+    #label.padding = grid::unit(rep(0, 4), "pt") # remove padding
   ) +
   geom_line(
     aes(mes, acumulada, group = componente, colour = componente),
-    size = 1
+    size = 0.75
   )  +
   lemon::facet_rep_wrap(
     ~factor(componente), ncol = 3, 
@@ -321,17 +240,19 @@ gg_BR <- ggplot(
   ) +
   aop_style() +
   theme(
-    plot.margin = margin(t = 0.5, r = 2.75, b = 0.5, l = 0.5, unit = 'cm'),
+    #plot.margin = margin(t = 0.5, r = 2.75, b = 0.5, l = 0.5, unit = 'cm'),
     strip.text = element_blank(),
-    panel.spacing.x = unit(1, "cm"),
+    #panel.spacing.x = unit(1, "cm"),
     plot.subtitle = element_markdown(
-      margin = margin(t = 0., r = 0, b = 2, l = 0, unit = 'cm')
+      margin = margin(t = 0., r = 0, b = 1, l = 0, unit = 'cm')
     )
   ) +
   labs(
-    title = 'Encarecimento relativo do transporte público e barateamento do transporte privado no Brasil',
+    #title = 'Encarecimento relativo do transporte público e barateamento do transporte privado no Brasil',
     subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte (2012-2019)",
-    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).<br>Nota: Unidade territorial de cálculo do índice: Brasil."
+    #caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).<br>Nota: Unidade territorial de cálculo do índice: Brasil."
+    x = 'Ano',
+    y = 'Inflação acumulada'
   )
 
 # Lista testGrobs
@@ -552,13 +473,15 @@ grid.newpage()
 grid.draw(gt_BR)
 
 
-dev.off()
+# Save plot
+ggsave("figures/inflacao/acumulada_brasil_transportes_facets.png", 
+       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
+
+ggsave("figures/inflacao/acumulada_brasil_transportes_facets.pdf", 
+       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
 
-# Grafico: Infl. acumulada; facets = RMs ----
-
-png("figures/inflacao/acumulada_transportes_rms_facets.png", 
-    width = 15.3, height = 8.3, units = 'in', res = 300, type = 'cairo')
+# * Grafico: Infl. acumulada; facets = RMs ----
 
 gg_RMs <- ggplot(
   data = tab_1419_RMs %>% 
@@ -701,9 +624,12 @@ grid.newpage()
 grid.draw(gt_RMs)
 
 
-dev.off()
+# Save plot
+ggsave("figures/inflacao/acumulada_transportes_rms_facets.png", 
+       width = 16, height = 8.8, units = "cm", dpi = 300, device = 'png')
 
-
+ggsave("figures/inflacao/acumulada_transportes_rms_facets.pdf", 
+       width = 16, height = 8.8, units = "cm", dpi = 300, device = 'pdf')
 
 # Remover tudo ----
 #rm(list = ls())

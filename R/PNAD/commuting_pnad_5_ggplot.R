@@ -1,6 +1,7 @@
 # Libraries ----
-source('R/colours.R')
 source("./R/setup.R")
+source('R/colours.R')
+
 
 
 # Create tables ----
