@@ -41,6 +41,7 @@ library(ggplotify)
 library(grid)
 library(PNADcIBGE)
 library(ggtext)
+library(measurements)
 
 # disable scientific notation
 options(scipen=10000)

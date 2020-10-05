@@ -112,7 +112,7 @@ ultimo_subitens <- tab_1419 %>%
   mutate(
     mes_legenda = as.Date('2019-12-01'),
     legenda = c("62%",'48%','7%','13%','65%','86%'),
-    acumulada_novo = c(0.675,0.425,0,0.185,0.7,0.915)
+    acumulada_novo = c(0.685,0.41,0,0.195,0.7,0.925)
   )
 
 # * Bases RMs ----
@@ -177,14 +177,21 @@ linhas_vert_BR <- data.table(
 
 # Com facets (componente)
 
-gg_BR <- 
-  ggplot(
+png("figures/inflacao/acumulada_brasil_transportes_facets.png", 
+    width = 16, height = 10, units = 'cm', res = 300, type = 'cairo')
+
+pdf("figures/inflacao/acumulada_brasil_transportes_facets.pdf", 
+    width = measurements::conv_unit(16, 'cm', 'inch'), 
+    height = measurements::conv_unit(10, 'cm', 'inch')
+    ) 
+
+gg_BR <- ggplot(
   data = tab_1419_subitens %>% filter(!componente=='IPCA')
 ) + 
   geom_vline(
     data = linhas_vert_BR,
     aes(xintercept = mes),
-    linetype = 'dotted', colour = '#575757', size = 0.25
+    linetype = 'dotted', colour = '#575757', size = 0.35
   ) +
   geom_line(
     data = transform(tab_1419_subitens %>% filter(!componente=='IPCA'), componente = NULL),
@@ -240,11 +247,11 @@ gg_BR <-
   ) +
   aop_style() +
   theme(
-    #plot.margin = margin(t = 0.5, r = 2.75, b = 0.5, l = 0.5, unit = 'cm'),
+    plot.margin = margin(t = 0.5, r = 1.5, b = 0.5, l = 0.25, unit = 'cm'),
     strip.text = element_blank(),
     #panel.spacing.x = unit(1, "cm"),
     plot.subtitle = element_markdown(
-      margin = margin(t = 0., r = 0, b = 1, l = 0, unit = 'cm')
+      margin = margin(t = 0, r = 0, b = 1.25, l = 0, unit = 'cm')
     )
   ) +
   labs(
@@ -258,91 +265,91 @@ gg_BR <-
 # Lista testGrobs
 lista_grob_BR <- list(
   oleo = textGrob(
-    label = "Óleo diesel",
-    gp = grid::gpar(fontsize = 14, col = '#872E2B', lineheight = 0.75, fontface = 'bold',
+    label = "Óleo\ndiesel",
+    gp = grid::gpar(fontsize = 8, col = '#872E2B', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   gasolina = textGrob(
     label = "Gasolina",
-    gp = grid::gpar(fontsize = 14, col = '#a85a3f', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#a85a3f', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   onibus = textGrob(
     label = "Ônibus\nurbano",
-    gp = grid::gpar(fontsize = 14, col = '#c29365', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#c29365', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   ipca_text_grob = textGrob(
     label = "IPCA",
-    gp = grid::gpar(fontsize = 14, col = '#323232', lineheight = 0.5, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.5, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   ipca_number_grob = textGrob(
     label = "56%",
-    gp = grid::gpar(fontsize = 13, col = '#323232', lineheight = 0.5,
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.5,
                     fontfamily = "Helvetica")
   ),
   metro = textGrob(
     label = "Metrô",
-    gp = grid::gpar(fontsize = 14, col = '#6c6766', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#6c6766', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   motocicleta = textGrob(
     label = "Motocicleta",
-    gp = grid::gpar(fontsize = 14, col = '#6a9bb3', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#6a9bb3', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   automovel = textGrob(
     label = "Automóvel\nnovo",
-    gp = grid::gpar(fontsize = 14, col = '#326287', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#326287', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   jun2016_data = textGrob(
     label = "Jun/2016", 
     just = 'right',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75,
                     fontfamily = "Helvetica")
   ),
   jun2016_texto = textGrob(
     label = "Fim da política de\ncontrole de preços",
     just = 'right',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   jun2017_data = textGrob(
     label = "Jun/2017",
     just = 'left',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75,
                     fontfamily = "Helvetica")
   ),
   jun2017_texto = textGrob(
-    label = "Aumento na frequência\nde reajustes",
+    label = "Maior frequência\nde reajustes",
     just = 'left',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   maio2018_data = textGrob(
     label = "Maio/2018",
-    just = 'left',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
+    just = 'right',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75,
                     fontfamily = "Helvetica")
   ),
   maio2018_texto = textGrob(
     label = "Greve dos\ncaminhoneiros",
-    just = 'left',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
+    just = 'right',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   jun_2013_data = textGrob(
     label = "Jun/2013",
     just = 'left',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75,
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75,
                     fontfamily = "Helvetica")
   ),
   jun_2013_texto = textGrob(
     label = "Protestos contra aumentos\nno transporte público",
     just = 'left',
-    gp = grid::gpar(fontsize = 12, col = 'black', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   )
 )
@@ -351,115 +358,116 @@ lista_grob_BR <- list(
 gg_annotation_BR <- gg_BR + 
   annotation_custom2(
     grob = lista_grob_BR$ipca_text_grob,
-    xmin = as.Date('2020-08-01'), xmax = as.Date("2020-08-01"),
-    ymin = 0.6, ymax = 0.6, data = data.frame(componente = "Óleo diesel")
+    xmin = as.Date('2020-10-01'), xmax = as.Date("2020-10-01"),
+    ymin = 0.56, ymax = 0.56, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$ipca_number_grob, 
-    xmin = as.Date('2020-09-01'), xmax = as.Date("2020-09-01"),
-    ymin = 0.535, ymax = 0.535, data = data.frame(componente = "Óleo diesel")
+    xmin = as.Date('2019-12-01'), xmax = as.Date("2019-12-01"),
+    ymin = 0.46, ymax = 0.46, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$oleo, 
-    xmin = as.Date('2021-03-01'), xmax = as.Date("2021-03-01"),
-    ymin = 0.86, ymax = 0.86, data = data.frame(componente = "Óleo diesel")
+    xmin = as.Date('2020-10-01'), xmax = as.Date("2020-10-01"),
+    ymin = 0.79, ymax = 0.79, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$gasolina, 
-    xmin = as.Date('2021-01-01'), xmax = as.Date("2021-01-01"),
-    ymin = 0.65, ymax = 0.65, data = data.frame(componente = "Gasolina")
+    xmin = as.Date('2021-06-01'), xmax = as.Date("2021-06-01"),
+    ymin = 0.61, ymax = 0.61, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$onibus, 
-    xmin = as.Date('2021-02-01'), xmax = as.Date("2021-02-01"),
+    xmin = as.Date('2021-08-01'), xmax = as.Date("2021-08-01"),
     ymin = 0.62, ymax = 0.62, data = data.frame(componente = "Ônibus urbano")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$metro, 
-    xmin = as.Date('2020-08-01'), xmax = as.Date("2020-08-01"),
-    ymin = 0.5, ymax = 0.5, data = data.frame(componente = "Metrô")
+    xmin = as.Date('2020-12-01'), xmax = as.Date("2020-12-01"),
+    ymin = 0.52, ymax = 0.52, data = data.frame(componente = "Metrô")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$motocicleta, 
     xmin = as.Date('2019-12-01'), xmax = as.Date("2019-12-01"),
-    ymin = 0.275, ymax = 0.275, data = data.frame(componente = "Motocicleta")
+    ymin = 0.3, ymax = 0.3, data = data.frame(componente = "Motocicleta")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$automovel, 
-    xmin = as.Date('2021-02-01'), xmax = as.Date("2021-02-01"),
+    xmin = as.Date('2021-08-01'), xmax = as.Date("2021-08-01"),
     ymin = 0.075, ymax = 0.075, data = data.frame(componente = "Automóvel novo")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2016_data, 
     xmin = as.Date('2016-06-01'), xmax = as.Date("2016-06-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Gasolina")
+    ymin = 1.04, ymax = 1.04, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2016_texto, 
     xmin = as.Date('2016-06-01'), xmax = as.Date("2016-06-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Gasolina")
+    ymin = 1.2, ymax = 1.2, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2017_data, 
     xmin = as.Date('2017-06-01'), xmax = as.Date("2017-06-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Gasolina")
+    ymin = 1.04, ymax = 1.04, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun2017_texto, 
     xmin = as.Date('2017-06-01'), xmax = as.Date("2017-06-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Gasolina")
+    ymin = 1.2, ymax = 1.2, data = data.frame(componente = "Gasolina")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$maio2018_data, 
     xmin = as.Date('2018-05-01'), xmax = as.Date("2018-05-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Óleo diesel")
+    ymin = 1.04, ymax = 1.04, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$maio2018_texto, 
     xmin = as.Date('2018-05-01'), xmax = as.Date("2018-05-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Óleo diesel")
+    ymin = 1.2, ymax = 1.2, data = data.frame(componente = "Óleo diesel")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun_2013_data, 
     xmin = as.Date('2013-06-01'), xmax = as.Date("2013-06-01"),
-    ymin = 1.01, ymax = 1.01, data = data.frame(componente = "Ônibus urbano")
+    ymin = 1.04, ymax = 1.04, data = data.frame(componente = "Ônibus urbano")
   ) +
   annotation_custom2(
     grob = lista_grob_BR$jun_2013_texto, 
     xmin = as.Date('2013-06-01'), xmax = as.Date("2013-06-01"),
-    ymin = 1.12, ymax = 1.12, data = data.frame(componente = "Ônibus urbano")
+    ymin = 1.2, ymax = 1.2, data = data.frame(componente = "Ônibus urbano")
   ) +
-  # lines ; ref: https://stackoverflow.com/a/40622343/12707859
+  
+  ## lines ; ref: https://stackoverflow.com/a/40622343/12707859
   
   # jun/2016
   annotation_custom2(
-    grob = linesGrob(y = c(0, 0), x = c(0.37, 0.535),  
-                     gp = gpar(col = "#808080", lwd = 1, lty="solid")),
-    ymin = 0.975, ymax = 0.975, 
+    grob = linesGrob(y = c(0, 0), x = c(0.235, 0.535),  
+                     gp = gpar(col = "#575757", lwd = 1, lty="solid")),
+    ymin = 0.985, ymax = 0.985, 
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Gasolina")
   ) +
   # jun/2017
   annotation_custom2(
-    grob = linesGrob(y = c(0, 0), x = c(0.6575, 0.82),  
-                     gp = gpar(col = "#808080", lwd = 1, lty="solid")),
-    ymin = 0.975, ymax = 0.975, 
+    grob = linesGrob(y = c(0, 0), x = c(0.6575, 0.9575),  
+                     gp = gpar(col = "#575757", lwd = 1, lty="solid")),
+    ymin = 0.985, ymax = 0.985, 
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Gasolina")
   ) +
   # maio/2018
   annotation_custom2(
-    grob = linesGrob(y = c(0, 0), x = c(0.7675, 0.955),  
-                     gp = gpar(col = "#808080", lwd = 1, lty="solid")),
-    ymin = 0.975, ymax = 0.975, 
+    grob = linesGrob(y = c(0, 0), x = c(0.4245, 0.7675),  
+                     gp = gpar(col = "#575757", lwd = 1, lty="solid")),
+    ymin = 0.985, ymax = 0.985, 
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Óleo diesel")
   ) +
   # jun/2013
   annotation_custom2(
-    grob = linesGrob(y = c(0, 0), x = c(0.1725, 0.34),  
-                     gp = gpar(col = "#808080", lwd = 1, lty="solid")),
-    ymin = 0.975, ymax = 0.975, 
+    grob = linesGrob(y = c(0, 0), x = c(0.1725, 0.4725),  
+                     gp = gpar(col = "#575757", lwd = 1, lty="solid")),
+    ymin = 0.985, ymax = 0.985, 
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Ônibus urbano")
   )
@@ -472,16 +480,25 @@ gt_BR$layout[grepl("panel", gt_BR$layout$name), ]$clip <- "off"
 grid.newpage()
 grid.draw(gt_BR)
 
+dev.off()
 
 # Save plot
-ggsave("figures/inflacao/acumulada_brasil_transportes_facets.png", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
+#ggsave("figures/inflacao/teste.png", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/inflacao/acumulada_brasil_transportes_facets.pdf", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
+#ggsave("figures/inflacao/acumulada_brasil_transportes_facets.pdf", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
 
 # * Grafico: Infl. acumulada; facets = RMs ----
+
+png("figures/inflacao/acumulada_transportes_rms_facets.png", 
+    width = 16, height = 12, units = 'cm', res = 300, type = 'cairo')
+
+pdf("figures/inflacao/acumulada_transportes_rms_facets.pdf", 
+    width = measurements::conv_unit(16, 'cm', 'inch'), 
+    height = measurements::conv_unit(12, 'cm', 'inch')
+) 
 
 gg_RMs <- ggplot(
   data = tab_1419_RMs %>% 
@@ -491,7 +508,7 @@ gg_RMs <- ggplot(
 ) +
   geom_line(
     aes(mes, acumulada, group = componente, colour = componente, linetype = componente),
-    size = 1
+    size = 0.75
   ) +
   lemon::facet_rep_wrap(~factor(regiao), nrow = 4) +
   hrbrthemes::scale_y_percent(
@@ -502,7 +519,8 @@ gg_RMs <- ggplot(
   ggplot2::scale_x_date(
     #date_breaks = "24 months", 
     #limits = as.Date(c('2012-01-01','2021-01-01')),
-    #expand = expansion(mult = c(0,0.15)),
+    limits = as.Date(c('2012-01-01','2020-01-01')),
+    expand = expansion(mult = c(0,0.032)),
     date_labels = "%Y"#,
     #breaks = function(x) seq.Date(from = min(x), to = max(x), by = "24 months")
   ) + 
@@ -526,51 +544,55 @@ gg_RMs <- ggplot(
   ) +
   aop_style() +
   theme(
-    plot.margin = margin(t = 0.5, r = 3, b = 0.5, l = 0.5, unit = 'cm'),
+    #plot.margin = margin(t = 0.5, r = 3, b = 0.5, l = 0.5, unit = 'cm'),
+    plot.margin = margin(t = 0.5, r = 1.55, b = 0.5, l = 0.25, unit = 'cm'),
+    panel.spacing.x = unit(-0.25, "cm"),
   ) +
   labs(
-    title = 'Encarecimento relativo do transporte público e barateamento do transporte privado nas cidades brasileiras',
-    subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte (2012-2019)",
-    caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).<br>Nota: Unidades territoriais de cálculo do índice: regiões metropolitanas de Belém (PA), Fortaleza (CE), Recife (PE), Salvador (BA), Belo Horizonte (MG), Grande Vitória (ES), Rio de Janeiro (RJ),<br>São Paulo (SP), Curitiba (PR) e Porto Alegre (RS) e municípios de Goiânia (GO) e Brasília (DF).",
+    #title = 'Encarecimento relativo do transporte público e barateamento do transporte privado nas cidades brasileiras',
+    subtitle = "Inflação acumulada dos subitens do <b style='color:#323232'>IPCA</b> associados ao Transporte por região metropolitana (2012-2019)",
+    #caption = "Fonte: IBGE - Índice Nacional de Preços ao Consumidor Amplo (IPCA).<br>Nota: Unidades territoriais de cálculo do índice: regiões metropolitanas de Belém (PA), Fortaleza (CE), Recife (PE), Salvador (BA), Belo Horizonte (MG), Grande Vitória (ES), Rio de Janeiro (RJ),<br>São Paulo (SP), Curitiba (PR) e Porto Alegre (RS) e municípios de Goiânia (GO) e Brasília (DF).",
     colour = "Componente",
-    linetype = "Componente"
+    linetype = "Componente",
+    x = 'Ano',
+    y = 'Inflação acumulada'
   )
 
 # Lista testGrobs
 lista_grob_RMs <- list(
   oleo = textGrob(
     label = "Óleo diesel",
-    gp = grid::gpar(fontsize = 14, col = '#872E2B', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#872E2B', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   gasolina = textGrob(
     label = "Gasolina",
-    gp = grid::gpar(fontsize = 14, col = '#a85a3f', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#a85a3f', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   onibus = textGrob(
     label = "Ônibus\nurbano",
-    gp = grid::gpar(fontsize = 14, col = '#c29365', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#c29365', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   ipca = textGrob(
     label = "IPCA",
-    gp = grid::gpar(fontsize = 14, col = '#323232', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#323232', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   metro = textGrob(
     label = "Metrô",
-    gp = grid::gpar(fontsize = 14, col = '#6c6766', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#6c6766', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   motocicleta = textGrob(
     label = "Motocicleta",
-    gp = grid::gpar(fontsize = 14, col = '#6a9bb3', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#6a9bb3', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   ),
   automovel = textGrob(
     label = "Automóvel\nnovo",
-    gp = grid::gpar(fontsize = 14, col = '#326287', lineheight = 0.75, fontface = 'bold',
+    gp = grid::gpar(fontsize = 8, col = '#326287', lineheight = 0.75, fontface = 'bold',
                     fontfamily = "Helvetica")
   )
 )
@@ -586,31 +608,31 @@ lista_regiao <- list(
 # Add annotations
 gg_annotation_RMs <- gg_RMs + 
   annotation_custom2(
-    lista_grob_RMs$onibus, xmin = as.Date('2021-01-01'), xmax = as.Date("2021-01-01"),
+    lista_grob_RMs$onibus, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.70, ymax = 0.7, data = lista_regiao$data_df
   ) +
   annotation_custom2(
-    lista_grob_RMs$oleo, xmin = as.Date('2021-03-01'), xmax = as.Date("2021-03-01"),
+    lista_grob_RMs$oleo, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.925, ymax = 0.925, data = lista_regiao$data_go
   ) +
   annotation_custom2(
-    lista_grob_RMs$gasolina, xmin = as.Date('2021-01-01'), xmax = as.Date("2021-01-01"),
+    lista_grob_RMs$gasolina, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.625, ymax = 0.625, data = lista_regiao$data_go
   ) +
   annotation_custom2(
-    lista_grob_RMs$ipca, xmin = as.Date('2021-01-01'), xmax = as.Date("2021-01-01"),
+    lista_grob_RMs$ipca, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.6, ymax = 0.6, data = lista_regiao$data_pe
   ) +
   annotation_custom2(
-    lista_grob_RMs$motocicleta, xmin = as.Date('2021-03-01'), xmax = as.Date("2021-03-01"),
+    lista_grob_RMs$motocicleta, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.225, ymax = 0.225, data = lista_regiao$data_pe
   ) +
   annotation_custom2(
-    lista_grob_RMs$metro, xmin = as.Date('2021-01-01'), xmax = as.Date("2021-01-01"),
+    lista_grob_RMs$metro, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.50, ymax = 0.50, data = lista_regiao$data_sp
   ) +
   annotation_custom2(
-    lista_grob_RMs$automovel, xmin = as.Date('2021-02-01'), xmax = as.Date("2021-02-01"),
+    lista_grob_RMs$automovel, xmin = as.Date('2021-09-01'), xmax = as.Date("2021-09-01"),
     ymin = 0.075, ymax = 0.075, data = lista_regiao$data_sp
   )
 
@@ -623,13 +645,14 @@ gt_RMs$layout[grepl("panel", gt_RMs$layout$name), ]$clip <- "off"
 grid.newpage()
 grid.draw(gt_RMs)
 
+dev.off()
 
 # Save plot
-ggsave("figures/inflacao/acumulada_transportes_rms_facets.png", 
-       width = 16, height = 8.8, units = "cm", dpi = 300, device = 'png')
+#ggsave("figures/inflacao/acumulada_transportes_rms_facets.png", 
+#       width = 16, height = 8.8, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/inflacao/acumulada_transportes_rms_facets.pdf", 
-       width = 16, height = 8.8, units = "cm", dpi = 300, device = 'pdf')
+#ggsave("figures/inflacao/acumulada_transportes_rms_facets.pdf", 
+#       width = 16, height = 8.8, units = "cm", dpi = 300, device = 'pdf')
 
 # Remover tudo ----
 #rm(list = ls())
