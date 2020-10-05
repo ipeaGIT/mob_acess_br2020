@@ -51,14 +51,20 @@ google[,sub_region_2_fix := toupper_noaccent(sub_region_2)]
 google[statebr,on = c('sub_region_1_fix' = 'name_state'), state_abrev := i.abbrev_state]
 google[,name_muni := paste0(sub_region_2_fix,"-",state_abrev)]
 
-activities <- c("retail_and_recreation","grocery_and_pharmacy",
-                "parks","transit_stations","workplaces","residential")
-local_categories <- c('Varejo e lazer','Mercados e farmácias',
-                      'Parques','Estações de transporte público',
+activities <- c("retail_and_recreation",
+                #"grocery_and_pharmacy",
+                #"parks",
+                "transit_stations",
+                "workplaces",
+                "residential")
+local_categories <- c('Varejo e lazer',
+                      #'Mercados e farmácias',
+                      #'Parques',
+                      'Estações de transporte público',
                       'Locais de trabalho','Residencial')
 description <- c('Tendências de mobilidade de lugares como restaurantes, cafés, \n shopping centers, parques temáticos, museus, bibliotecas e cinemas.',
-                 'Tendências de mobilidade de lugares como mercados, armazéns de \n alimentos, feiras, lojas especializadas em alimentos, drogarias e farmácias.',
-                 'Tendências de mobilidade de lugares como parques locais e nacionais, \n praias públicas, marinas, parques para cães, praças e jardins públicos.',
+                 #'Tendências de mobilidade de lugares como mercados, armazéns de \n alimentos, feiras, lojas especializadas em alimentos, drogarias e farmácias.',
+                 #'Tendências de mobilidade de lugares como parques locais e nacionais, \n praias públicas, marinas, parques para cães, praças e jardins públicos.',
                  'Tendências de mobilidade de lugares como terminais de transporte público,\n tipo estações de metrô, ônibus e trem',
                  'Tendências de mobilidade de locais de trabalho',
                  'Tendências de mobilidade de áreas residenciais')
@@ -74,7 +80,7 @@ google$census_fips_code %>% unique()
 google$date %>% unique()
 google$state_abrev %>% unique()
 
-break()
+
 # 
 # general graph-------------
 #
@@ -95,25 +101,25 @@ label_plot <- paste0("01/",c('Mar','Abr','Mai','Jun','Jul','Ago','Set'))
 break_x <- google[day_month %in% label_x,unique(day_month_id)]
 limits_x <- c(min(google1$day_month_id),max(google1$day_month_id))
 
-activities
-
-for(i in 1:length(activities)){ # i = 1
+break()
+# exclude groceries and parks
+my_pallete <- c("E","D","B","A")
+for(i in 1:length(activities)){ # i = 4
   
   message(activities[i])
-  # i = 1
+  # i = 2
   google2 <- data.table::copy(google1)[variable %like% activities[i] & 
                                          sub_region_2 %in% "" & 
                                          state_abrev %nin% "" & 
                                          !is.na(state_abrev),]
   # orderuf
   
-  orderuf <- google2[data.table::between(date_fix,"2020-03-15","2020-08-01"),
+  orderuf <- google2[data.table::between(date_fix,"2020-07-01","2020-09-11"),
                      lapply(.SD,sum),
-                     .SDcols = 'value',by = state_abrev]
-  setorder(orderuf,value)
-  orderuf <- orderuf$state_abrev
-  google2[,state_abrev := factor(state_abrev,orderuf)]
-  
+                     .SDcols = 'value',by = state_abrev][order(value),state_abrev]
+  orderuf <- as.character(orderuf)
+  data.table::setkey(google2,state_abrev)
+  google2 <- google2[data.table::data.table(orderuf)]
   google2[,grp := .GRP, by = state_abrev]
   labels_y <- google2[,.SD[1], by = state_abrev][, state_abrev]
   breaks_y <- google2[,.SD[1], by = state_abrev][, grp]
@@ -123,7 +129,7 @@ for(i in 1:length(activities)){ # i = 1
   plot1 <- ggplot(data = google2, aes(x = day_month_id,y = grp)) + 
     geom_tile(aes(fill = value),colour = "white") +
     viridis::scale_fill_viridis("Mudança em relação \n ao período base",
-                                option = "A",
+                                option = my_pallete[i],
                                 limits = c(min(range_fill),max(range_fill)),
                                 direction = -1,
                                 breaks = round(range_fill,0)) +
@@ -149,14 +155,13 @@ for(i in 1:length(activities)){ # i = 1
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) + 
     coord_cartesian(xlim = limits_x, expand = FALSE)
-  
   #
   # boxplot
   #
   avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = day_month_id]
   avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
   
-
+  
   plot2 <- ggplot() + 
     geom_boxplot(data = google2, aes(x = day_month_id, y = value,
                                      group = day_month_id, fill = value)) + 
@@ -181,8 +186,8 @@ for(i in 1:length(activities)){ # i = 1
           panel.grid.minor = element_blank())+
     coord_cartesian(xlim = limits_x, expand = FALSE)
   
-  pf <- plot1 / plot2
-  pf
+  pf <- plot1 / plot2 +  plot_layout(heights = c(3, 2.0))
+
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".png"),
          width = 23.7, height = 17.6,dpi = 300, units = "cm")
   
