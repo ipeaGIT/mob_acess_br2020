@@ -41,6 +41,11 @@ library(ggplotify)
 library(grid)
 library(PNADcIBGE)
 library(ggtext)
+library(XLConnect)
+library(cowplot)
+library(gganimate)  # install.packages("gganimate")
+library(ggrepel)
+library(ggnewscale)
 
 # disable scientific notation
 options(scipen=10000)
