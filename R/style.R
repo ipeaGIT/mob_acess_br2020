@@ -57,7 +57,7 @@ aop_style <- function() {
     panel.grid.minor = element_blank(),
     panel.border = element_blank(),
     panel.spacing.x = unit(0, "cm"),
-    panel.spacing.y = unit(-0.2, "cm"),
+    panel.spacing.y = unit(0, "cm"),
     plot.background = element_blank(), #ggplot2::element_rect(fill = NA),
     panel.background = element_blank(), #ggplot2::element_rect(fill = NA),
     
