@@ -1,16 +1,10 @@
-#
-# initial config----------------
-#
-
+# Libraries ----
 rm(list=ls())
 gc(reset = T)
-library(XLConnect)
-library(patchwork)
-library(cowplot)
-library(gganimate)  # install.packages("gganimate")
-library(ggrepel)
-source("R/PNS/0_loadpackages.R",local = TRUE)
-source("R/colours.R")
+source('R/colours.R')
+source("R/setup.R")
+
+# source("R/PNS/0_loadpackages.R",local = TRUE)
 source("R/DENATRAN/colors_plot.R")
 source("R/style.R")
 source("R/DENATRAN/aop_style1.R")
