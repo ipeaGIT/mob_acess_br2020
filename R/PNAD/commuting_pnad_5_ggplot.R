@@ -47,10 +47,16 @@ ggplot() +
     colour = '#323232',
     lineend = 'round', linejoin = 'round'
   ) +
+  geom_point(
+    data = mean_time %>% filter(ano %in% c(2001, 2015)),
+    aes(x = ano, y = commute_time),
+    size = 1.5, 
+    colour = '#323232'
+  ) +
   geom_text(
     data = mean_time %>% filter(ano %in% c(2001, 2015)),
     aes(x = ano, y = commute_time, label = as.integer(commute_time)),
-    size = 2.81, nudge_y = 5.5,
+    size = 2.81, nudge_y = 6,
     colour = '#323232'
     #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
   ) +
@@ -76,10 +82,10 @@ ggplot() +
   coord_cartesian(clip = "off")
   
   ggsave("figures/PNAD/ts_mean_rms.png", 
-         width = 16, height = 8.8, units = "cm", dpi = 300, device = 'png')
+         width = 16, height = 10, units = "cm", dpi = 300, device = 'png')
 
   ggsave("figures/PNAD/ts_mean_rms.pdf", 
-         width = 16, height = 8.8, units = "cm", dpi = 300, device = 'pdf')
+         width = 16, height = 10, units = "cm", dpi = 300, device = 'pdf')
   
   # * 3.2 - tempo no deslocamento por decil - 2001 vs 2015 ----
   
@@ -247,16 +253,16 @@ ggplot() +
     geom_line(aes(group = escolaridade), colour = '#bfbfbf') +
     geom_point(aes(colour = raca_sexo), size = 2#, alpha = 0.85
     ) +
-    ggtext::geom_richtext(
-      data = anotacoes,
-      aes(x = commute_time, y = escolaridade, label = legenda),
-      colour = '#323232',
+    #ggtext::geom_richtext(
+    #  data = anotacoes,
+    #  aes(x = commute_time, y = escolaridade, label = legenda),
+    #  colour = '#323232',
       #fontface = 'bold',
-      family = "Helvetica",
-      size = 2.81,
-      fill = NA, label.color = NA, # remove background and outline
+    #  family = "Helvetica",
+    #  size = 2.81,
+    #  fill = NA, label.color = NA, # remove background and outline
     #  label.padding = grid::unit(rep(0, 4), "pt") # remove padding
-    ) +
+    #) +
     lemon::facet_rep_wrap(
       ~reorder(as.factor(ano), desc(as.factor(ano))), 
       nrow = 2,
@@ -264,7 +270,8 @@ ggplot() +
     )  +
     scale_x_continuous(
       position = 'bottom',
-      limits = c(29.4,50),
+      limits = c(29, 46),
+      #limits = c(29.4,50), # c(29.4,50) -> para anotacoes
       expand = c(0,0)
     ) +
     scale_colour_aop(
@@ -280,7 +287,7 @@ ggplot() +
       axis.line.x = element_line(size = 0.5, color = "grey"),
       #axis.line.x = element_blank(),
       axis.line.y = element_line(size = 0.5, color = "grey"),
-      #plot.margin = margin(t = 1.5, r = 14, b = 1.5, l = 14, unit = 'lines'),
+      plot.margin = margin(t = 0.5, r = 1, b = 0.5, l = 1, unit = 'cm'),
       #panel.grid.major.x = element_line(
       #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
       #),
@@ -314,10 +321,10 @@ ggplot() +
   
   
   ggsave("figures/PNAD/clev_esc_raca_sexo_mean.png", 
-         width = 16, height = 16, units = "cm", dpi = 600, device = 'png')
+         width = 16, height = 14, units = "cm", dpi = 600, device = 'png')
   
   ggsave("figures/PNAD/clev_esc_raca_sexo_mean.pdf", 
-         width = 16, height = 16, units = "cm", dpi = 600, device = 'pdf')
+         width = 16, height = 14, units = "cm", dpi = 600, device = 'pdf')
   
   
   #png("figures/PNAD/clev_esc_raca_sexo_mean.png", 
@@ -326,7 +333,120 @@ ggplot() +
   
   
   
+  # * 3.4.1 - Escolaridade + raca_sexo -> versao linhas + facet grid ----
   
+  esc_filtro <- mean_time_esc_raca_sexo
+  esc_filtro$raca_sexo2 <- esc_filtro$raca_sexo
+  esc_filtro <- esc_filtro %>% 
+    filter(regiao == "Regiões Metropol.")
+  
+  raca_sexo_labels <- c(
+    `Mulher Negra` = 'Mulher<br>Negra',
+    `Mulher Branca` = 'Mulher<br>Branca',
+    `Homem Negro` = 'Homem<br>Negro',
+    `Homem Branco` = 'Homem<br>Branco',
+    `Baixa\nEscolaridade` = 'Baixa\nEscolaridade',
+    `Média\nEscolaridade` = 'Média\nEscolaridade',
+    `Alta\nEscolaridade` = 'Alta\nEscolaridade'
+  )
+  
+  ggplot() +
+    geom_line(
+      data = transform(esc_filtro, raca_sexo = NULL),
+      aes(x = ano, y = commute_time, group = raca_sexo2),
+      colour = 'grey80',
+      alpha = 0.6, 
+      size = 0.5,
+      lineend = 'round', linejoin = 'round'
+    ) +
+    geom_line(
+      data = esc_filtro,
+      aes(x = ano, y = commute_time, group = raca_sexo, colour = raca_sexo),
+      size = 0.75
+    ) +
+    geom_point(
+      data = esc_filtro %>% filter(ano %in% c(2001, 2015)),
+      aes(x = ano, y = commute_time, fill = raca_sexo),
+      shape = 21,
+      size = 1.5,
+      colour = 'black'
+    ) +
+    geom_text(
+      data = esc_filtro %>% filter(ano %in% c(2001, 2015)),
+      aes(x = ano, y = commute_time, label = as.integer(commute_time), colour = raca_sexo),
+      size = 2.81, nudge_y = 3,
+      show.legend = F
+    ) +
+    lemon::facet_rep_grid(
+      raca_sexo ~ escolaridade2, 
+      repeat.tick.labels = F, 
+      labeller = as_labeller(raca_sexo_labels)
+    ) +
+    scale_colour_aop(
+      values = c(
+        "Mulher Negra" = '#872e2b',
+        "Homem Negro" = '#326287',
+        'Mulher Branca' = '#c29365',
+        'Homem Branco' = '#6a9bb3'
+      )
+    ) +
+    scale_fill_aop(
+      values = c(
+        "Mulher Negra" = '#872e2b',
+        "Homem Negro" = '#326287',
+        'Mulher Branca' = '#c29365',
+        'Homem Branco' = '#6a9bb3'
+      )
+    ) +
+    scale_y_continuous(
+      expand = expansion(mult = c(0,0.1)),
+      limits = c(28,48),
+      breaks = seq(30,45, by = 5)
+    ) +
+    scale_x_continuous(
+      #expand = c(0,0),
+      breaks = c(2001,2006,2011,2015)
+    ) +
+    aop_style() +
+    theme(
+      axis.line.x = element_line(size = 0.5, color = "grey"),
+      #axis.line.x = element_blank(),
+      #axis.line.y = element_line(size = 0.5, color = "grey"),
+      #plot.margin = margin(t = 0.5, r = 1, b = 0.5, l = 1, unit = 'cm'),
+      #panel.grid.major.x = element_line(
+      #  linetype = "dotted",colour = '#bfbfbf',size = 0.25
+      #),
+      legend.position = 'bottom',
+      #axis.text.y = element_markdown(vjust = 0.5),
+      panel.spacing.y = unit(0.5, "cm"),
+      legend.spacing.x = unit(0.25, 'cm'),
+      legend.spacing.y = unit(-0.25, 'cm'),
+      legend.box.margin = margin(t = -0.25,b = -0.25, unit = 'cm'),
+      strip.text.y = ggtext::element_markdown(angle = 0)
+    ) +
+    labs(
+      colour = "Sexo e Etnia",
+      fill = "Sexo e Etnia",
+      #title = "Condições de mobilidade e características sociodemográficas",
+      subtitle = 
+        #expression(paste('Tempo médio (em minutos) no deslocamento por grau de ', escolaridade^1,', de acordo com sexo e etnia')),
+        #"Deslocamento médio (em minutos) por grau de escolaridade<sup>1</sup>, de acordo com sexo e etnia<br>nas Regiões Metropolitanas brasileiras (2001 e 2015)",
+        "Tempo médio (em minutos) no deslocamento por grau de escolaridade, de acordo com sexo e etnia, nas<br>Regiões Metropolitanas brasileiras (2001 e 2015)",
+      #caption = "Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Ensino Fundamental; Média: Ensino Médio; Alta: Ensino Superior.",
+      #"Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Até 7 anos de estudo; Média: 8 à 14 anos de estudo; Alta: 15 ou mais anos de estudo."
+      y = "Tempo de deslocamento",
+      x = 'Ano'
+    ) +
+    guides(
+      colour = guide_legend(reverse = F, ncol = 2, 
+                            override.aes = list(size = 1, shape = NA))
+    )
+  
+  ggsave("figures/PNAD/teste_esc2.png", 
+         width = 16, height = 16, units = "cm", dpi = 600, device = 'png')
+  
+  ggsave("figures/PNAD/teste_esc2.pdf", 
+         width = 16, height = 16, units = "cm", dpi = 600, device = 'pdf')
   
   
   
