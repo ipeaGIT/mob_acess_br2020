@@ -240,8 +240,8 @@ source("./R/setup.R")
         .x,
         esc = v4703 - 1,
         escolaridade = dplyr::case_when(
-          esc <= 7 ~ "Baixa",
-          esc >= 8 & esc <= 14 ~ "Média",
+          esc <= 8 ~ "Baixa",
+          esc >= 9 & esc <= 14 ~ "Média",
           esc == 15 ~ "Alta",
           TRUE ~ "Não aplicável"
         )
@@ -253,8 +253,8 @@ source("./R/setup.R")
         .x,
         esc = v4803 -1,
         escolaridade = dplyr::case_when(
-          esc <= 7 ~ "Baixa",
-          esc >= 8 & esc <= 14 ~ "Média",
+          esc <= 8 ~ "Baixa",
+          esc >= 9 & esc <= 14 ~ "Média",
           esc == 15 ~ "Alta",
           TRUE ~ "Não aplicável"
         )
