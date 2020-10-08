@@ -165,15 +165,15 @@ ultimo_RMs <- data.table(
 # base para criar linhas verticais
 linhas_vert_BR <- data.table(
   componente = c(
-    rep(c("Óleo diesel", 'Gasolina'),3), c("Ônibus urbano", 'Metrô')
+    "Óleo diesel", rep('Gasolina',2), "Ônibus urbano", 'Metrô'
   ),
   mes = c(
-    rep(as.Date('2016-06-01'),2),
-    rep(as.Date('2017-06-01'),2),
-    rep(as.Date('2018-05-01'),2),
+    as.Date('2018-05-01'),
+    as.Date('2016-06-01'),
+    as.Date('2017-06-01'),
     rep(as.Date('2013-06-06'),2)
-          )
-)
+    )
+  )
 
 # Com facets (componente)
 

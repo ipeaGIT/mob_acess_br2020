@@ -7,7 +7,7 @@ source('R/colours.R')
 # Create tables ----
 
   source(file = "R/PNAD/commuting_pnad_4_read_final_data.R")
-
+# Functions ----
 
 fct_case_when <- function(...) {
   args <- as.list(match.call())
@@ -23,6 +23,8 @@ annotation_custom2 <- function (grob, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax
                                           xmin = xmin, xmax = xmax, 
                                           ymin = ymin, ymax = ymax))
 }
+
+
 
 # Graficos utilizados ----
   
@@ -56,11 +58,31 @@ ggplot() +
   geom_text(
     data = mean_time %>% filter(ano %in% c(2001, 2015)),
     aes(x = ano, y = commute_time, label = as.integer(commute_time)),
-    size = 2.81, nudge_y = 6,
+    size = 2.81, 
+    nudge_y = 6,
+    nudge_x = 0.1,
     colour = '#323232'
     #point.padding = 0.5, segment.colour = NA # for ggrepel::geom_text_repel
   ) +
-  lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
+  lemon::facet_rep_wrap(
+    ~reorder(regiao, desc(regiao)),
+    labeller = as_labeller(
+      c(
+        `Belém` = 'Belém',
+        `Belo Horizonte` = 'Belo Horizonte',
+        `Brasília` = 'Brasília',
+        `Curitiba` = 'Curitiba',
+        `Fortaleza` = 'Fortaleza',
+        `Porto Alegre` = 'Porto Alegre',
+        `Recife` = 'Recife',
+        `Regiões Metropolitanas` = 'Regiões Metropolitanas',
+        `Rio de Janeiro` = 'Rio de Janeiro',
+        `Salvador` = 'Salvador',
+        `São Paulo` = 'São Paulo',
+        `Urbano Não-Metropolitano` = 'Urbano Não-Metropol.'
+        )
+      )
+    ) +
   scale_x_continuous(
     breaks = c(2001,2006,2011,2015)#,
     #limits = c(2000.5, 2015.5)
@@ -79,13 +101,16 @@ ggplot() +
     y = 'Tempo de deslocamento'
   ) +
   aop_style() +
-  coord_cartesian(clip = "off")
+  coord_cartesian(clip = "off") +
+  theme(
+    #plot.margin = unit(c(0.5,0.35,0.5,0.35), "cm")
+  )
   
   ggsave("figures/PNAD/ts_mean_rms.png", 
-         width = 16, height = 10, units = "cm", dpi = 300, device = 'png')
+         width = 16, height = 11, units = "cm", dpi = 300, device = 'png')
 
   ggsave("figures/PNAD/ts_mean_rms.pdf", 
-         width = 16, height = 10, units = "cm", dpi = 300, device = 'pdf')
+         width = 16, height = 11, units = "cm", dpi = 300, device = 'pdf')
   
   # * 3.2 - tempo no deslocamento por decil - 2001 vs 2015 ----
   
@@ -107,9 +132,28 @@ ggplot() +
       aes(x = decilBR, y = commute_time, label = as.integer(commute_time)),
       colour = "#274370",
       size = 2.81,
-      nudge_y = 8
+      nudge_y = 8,
+      nudge_x = 0.1
     ) +
-    lemon::facet_rep_wrap(~reorder(regiao, desc(regiao))) +
+    lemon::facet_rep_wrap(
+      ~reorder(regiao, desc(regiao)),
+      labeller = as_labeller(
+        c(
+          `Belém` = 'Belém',
+          `Belo Horizonte` = 'Belo Horizonte',
+          `Brasília` = 'Brasília',
+          `Curitiba` = 'Curitiba',
+          `Fortaleza` = 'Fortaleza',
+          `Porto Alegre` = 'Porto Alegre',
+          `Recife` = 'Recife',
+          `Regiões Metropolitanas` = 'Regiões Metropolitanas',
+          `Rio de Janeiro` = 'Rio de Janeiro',
+          `Salvador` = 'Salvador',
+          `São Paulo` = 'São Paulo',
+          `Urbano Não-Metropolitano` = 'Urbano Não-Metropol.'
+        )
+      )
+      ) +
     aop_style() +
     theme(
       #panel.grid.major.y = element_blank()
@@ -121,7 +165,7 @@ ggplot() +
     scale_x_continuous(breaks = 1:10) +
     scale_y_continuous(
       expand = expansion(mult = c(0,0.05)),
-      limits = c(20,55)
+      limits = c(18,54)
     ) +
     scale_colour_aop(
       values = c('2001' = "#6A9BB3", '2015' = "#274370")
@@ -147,27 +191,12 @@ ggplot() +
   
 
   ggsave("figures/PNAD/mean_decil_rms.png", 
-         width = 16, height = 10, units = "cm", dpi = 300, device = 'png')
+         width = 16, height = 11, units = "cm", dpi = 300, device = 'png')
   
   ggsave("figures/PNAD/mean_decil_rms.pdf", 
-         width = 16, height = 10, units = "cm", dpi = 300, device = 'pdf')
+         width = 16, height = 11, units = "cm", dpi = 300, device = 'pdf')
   
   # * 3.3 - cleveland plot para extremos de renda em cada RM 2001 vs 2015 ----
-  
-  regiao_labels <- c(
-    `Brasil Urbano` = 'Brasil\nUrbano', 
-    `Belém` = 'Belém',
-    `Fortaleza` = 'Fortaleza',
-    `Porto Alegre` = 'Porto\nAlegre',
-    `Salvador` = 'Salvador',
-    `Curitiba` = 'Curitiba',
-    `Belo\nHorizonte` = 'Belo\nHorizonte',
-    `Recife` = 'Recife',
-    `Regiões\nMetropol.` = 'Regiões\nMetrop.',
-    `Brasília` = 'Brasília',
-    `Rio de\nJaneiro` = 'Rio de\nJaneiro',
-    `São Paulo` = 'São\nPaulo'
-  )
   
   ggplot(
     data = mean_time_r_10_p_40 %>% 
@@ -180,11 +209,26 @@ ggplot() +
       size = 2, alpha = 0.9
     ) +
     facet_grid(
-      ~regiao_wrap, 
-      labeller = as_labeller(regiao_labels)
+      ~regiao, 
+      labeller = as_labeller(
+        c(
+          `Belém` = 'Belém',
+          `Belo Horizonte` = 'Belo\nHorizonte',
+          `Brasília` = 'Brasília',
+          `Curitiba` = 'Curitiba',
+          `Fortaleza` = 'Fortaleza',
+          `Porto Alegre` = 'Porto\nAlegre',
+          `Recife` = 'Recife',
+          `Regiões Metropolitanas` = 'Regiões\nMetrop.',
+          `Rio de Janeiro` = 'Rio de\nJaneiro',
+          `Salvador` = 'Salvador',
+          `São Paulo` = 'São\nPaulo',
+          `Urbano Não-Metropolitano` = 'Urb. Não\nMetrop.'
+        )
+      )
     ) +
     #lemon::facet_rep_grid(
-    #  ~regiao_wrap, repeat.tick.labels = F,
+    #  ~regiao, repeat.tick.labels = F,
     #  labeller = as_labeller(regiao_labels)
     #  ) +
     scale_y_continuous(
@@ -247,7 +291,7 @@ ggplot() +
   
   ggplot(
     data = mean_time_esc_raca_sexo %>% 
-      filter(ano %in% c(2001,2015) & regiao == "Regiões Metropol."),
+      filter(ano %in% c(2001,2015) & regiao == "Regiões Metropolitanas"),
     aes(x = commute_time, y = escolaridade) #as.factor(ano)
   ) +
     geom_line(aes(group = escolaridade), colour = '#bfbfbf') +
@@ -338,7 +382,7 @@ ggplot() +
   esc_filtro <- mean_time_esc_raca_sexo
   esc_filtro$raca_sexo2 <- esc_filtro$raca_sexo
   esc_filtro <- esc_filtro %>% 
-    filter(regiao == "Regiões Metropol.")
+    filter(regiao == "Regiões Metropolitanas")
   
   raca_sexo_labels <- c(
     `Mulher Negra` = 'Mulher<br>Negra',
