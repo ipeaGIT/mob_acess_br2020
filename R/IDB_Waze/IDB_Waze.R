@@ -73,7 +73,8 @@ daily <- fread(
   "http://tiny.cc/idb-traffic-daily",
   colClasses = c(
     rep('character', 7), 'integer', 'character', rep('integer', 5), rep('double', 2)
-  )
+  ),
+  encoding = "UTF-8"
   )
 
 # filter BR
@@ -307,7 +308,7 @@ gg_heatmap_cities <-
     option = 'A', direction = -1,
     limits = c(-100, 100),
     breaks = c(-100, 0, 100),#seq(-100, 100, by = 100),
-    values = rescale(c(-100, -50, 0, 50, 100, 200)),
+    values = scales::rescale(c(-100, -50, 0, 50, 100, 200)),
     oob = scales::squish,
     labels = c(-100, 0, '100 ou mais')
   ) +
