@@ -36,6 +36,8 @@ statebr[,name_state := toupper_noaccent(name_state)]
 
 google <- data.table::fread("../../data-raw/GOOGLE/Global_Mobility_Report.csv", encoding = "UTF-8")
 google <- google[country_region %in% "Brazil",]
+google <- google[date < as.Date("2020-10-01"),]
+
 google[,sub_region_1_fix := toupper_noaccent(sub_region_1) %>% 
          stringr::str_remove_all("STATE OF ")]
 google[sub_region_1_fix %in% "FEDERAL DISTRICT",sub_region_1_fix := "DISTRITO FEDERAL"]
@@ -109,7 +111,6 @@ for(i in 1:length(activities)){ # i = 4
                                          state_abrev %nin% "" & 
                                          !is.na(state_abrev),]
   # orderuf
-  
   orderuf <- google2[data.table::between(date_fix,"2020-07-01","2020-09-11"),
                      lapply(.SD,sum),
                      .SDcols = 'value',by = state_abrev][order(value),state_abrev]
@@ -158,9 +159,6 @@ for(i in 1:length(activities)){ # i = 4
   #
   # errorbar
   #
-  avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = day_month_id]
-  avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
-  
   google2[, value := as.numeric(value)]
   google3 <- google2[, .(median = median(value, na.rm=T),
                          # q25 = quantile(x=value,probs = .25, na.rm=T),
@@ -168,6 +166,9 @@ for(i in 1:length(activities)){ # i = 4
                          lo = mean(value, na.rm=T) - 2*sd(value, na.rm=T),
                          hi = mean(value, na.rm=T) + 2*sd(value, na.rm=T)),
                      by= .(date_fix, day_month_id)]
+  
+  avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = .(date_fix, day_month_id)]
+  avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
   
   plot2 <-
     ggplot(data=google3,  aes(x = day_month_id )) +
@@ -203,6 +204,9 @@ for(i in 1:length(activities)){ # i = 4
   # # boxplot
   # #
   # 
+  # avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = day_month_id]
+  # avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
+  # 
   # plot2 <- ggplot() + 
   #   geom_boxplot(data = google2, aes(x = day_month_id, y = value,
   #                                    group = day_month_id, fill = value), color='gray40') + 
@@ -231,8 +235,8 @@ for(i in 1:length(activities)){ # i = 4
   # 
   # plot2
   
-  # pf <- plot1 / plot2 +  plot_layout(heights = c(3, 2.0))
-  pf <- plot_grid(plot1, plot2, labels = c('A', 'B'), ncol = 1, align = "v")
+  pf <- plot1 / plot2 +  plot_layout(heights = c(3, 2.0)) + plot_annotation(tag_levels = 'A')
+  # pf <- plot_grid(plot1, plot2, labels = c('A', 'B'), ncol = 1, align = "v")
             
 
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".png"),
