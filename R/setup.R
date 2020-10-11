@@ -16,6 +16,10 @@ library(RColorBrewer) # paleta de cores
 library(extrafont)    # fontes de texto
 #loadfonts()
 
+library(XLConnect)
+library(gganimate)  # install.packages("gganimate")
+library(ggrepel)
+
 library(furrr)
 library(purrr)
 library(dplyr)
