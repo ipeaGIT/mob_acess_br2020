@@ -1,4 +1,7 @@
 # Setup ----
+rm(list=ls())
+gc(reset = T)
+
 source('R/setup.R')
 source('R/colours.R')
 source('R/style.R')
@@ -287,7 +290,7 @@ limits_x <- c(min(cities$date),max(cities$date))
 
 gg_heatmap_cities <- 
   ggplot(
-  cities,
+  data=cities,
   aes(x = date, y = region_name, fill = tcp)
 ) +
   geom_tile(
@@ -330,9 +333,9 @@ gg_heatmap_cities <-
   labs(
     #title = 'Evolução do impacto da pandemia no congestionamento nas cidades brasileiras',
     #'Evolução temporal dos impactos do Covid-19 na mobilidade urbana brasiliera'
-    subtitle = "Variações percentuais diárias em Intensidade de Congestionamento no Trânsito em cidades brasileiras",
+    # subtitle = "Variações percentuais diárias em Intensidade de Congestionamento no Trânsito em cidades brasileiras",
     #caption = "Fonte: Inter-American Development Bank and IDB Invest Coronavirus Impact Dashboard, 2020.<br>Nota: Variações percentuais diárias na Intensidade de Congestionamento no Trânsito, calculadas para capitiais selecionadas com relação à semana de referência de 02 à 08 de Março de 2020.",
-    fill = 'Variação (%)<br> em relação<br>ao período base',
+    fill = 'Variação<br>relativa (%)<br>',
     y = '',
     x = ''
   ) +
@@ -342,8 +345,8 @@ gg_heatmap_cities <-
 ggsave("figures/waze_IDB/heatmap_cidades.png", 
        width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/waze_IDB/heatmap_cidades.pdf", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
+# ggsave("figures/waze_IDB/heatmap_cidades.pdf", 
+#        width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
 
 # heatmap estados ----
@@ -429,10 +432,11 @@ gg_boxplot <-
   ) +
   geom_line(
     data = avg_df,
-    aes(x = date, y = frollmean7, colour = coluna),
-    size = 1
+    aes(x = date, y = frollmean7, colour = coluna)
+    # , size = 1
     #colour = "#872e2b"
   ) +
+  geom_hline(yintercept = 0, color= "black", linetype='dotted') +
   ggtext::geom_richtext(
     data = anotacoes,
     aes(x = date, y = tcp, label = legenda),
@@ -478,7 +482,7 @@ gg_boxplot <-
   labs(
     #title = 'Evolução do impacto da pandemia no congestionamento nas cidades brasileiras',
     #'Evolução temporal dos impactos do Covid-19 na mobilidade urbana brasiliera'
-    subtitle = "Distribuição das variações percentuais diárias em Intensidade de Congestionamento no Trânsito em<br>cidades brasileiras",
+    # subtitle = "Distribuição das variações percentuais diárias em Intensidade de Congestionamento no Trânsito em<br>cidades brasileiras",
     #caption = "Fonte: Inter-American Development Bank and IDB Invest Coronavirus Impact Dashboard, 2020.<br>Nota: Variações percentuais diárias na Intensidade de Congestionamento no Trânsito, calculadas para capitiais selecionadas com relação à semana de referência de 02 à 08 de Março de 2020.",
     y = 'Variação diária (%)',
     x = 'Dia/Mês'
@@ -500,7 +504,8 @@ gg_boxplot <-
   coord_cartesian(clip = "off", xlim = limits_x#, expand = F)
   )
 
-ggsave("figures/waze_IDB/boxplot.png", 
+ggsave(gg_boxplot,
+       filename = "figures/waze_IDB/boxplot.png", 
        width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
 
 ggsave("figures/waze_IDB/boxplot.pdf", 
@@ -508,9 +513,117 @@ ggsave("figures/waze_IDB/boxplot.pdf",
 
 
 
-# patchwork ----
-#gg_heatmap_cities / gg_boxplot
 
+
+# Errorbar -----
+
+cities[, tcp := as.numeric(tcp)]
+cities2 <- cities[, .(median = median(tcp, na.rm=T),
+                       # q25 = quantile(x=value,probs = .25, na.rm=T),
+                       # q75 = quantile(x=value,probs = .75, na.rm=T)),
+                       lo = mean(tcp, na.rm=T) - 2*sd(tcp, na.rm=T),
+                       hi = mean(tcp, na.rm=T) + 2*sd(tcp, na.rm=T)),
+                   by= .(date)]
+
+avg_df <- cities[, lapply(.SD, mean), .SDcols = 'tcp', by = date]
+avg_df[, frollmean7 := data.table::frollmean(tcp,n = 7)]
+avg_df$coluna <- 'valor2'
+
+cities$coluna <- 'valor1'
+
+anotacoes <- data.frame(
+  anotacao = c('primeira', 'segunda'),
+  date = c(as.Date('2020-03-18'), as.Date('2020-08-01')),
+  tcp = c(-5, 220),
+  legenda = c(
+    "<b style='color:#872e2b'>Média móvel<br>(7 dias)</b>",
+    "<b style='color:#323232'>*Outliers*</b>"
+  )
+)
+
+gg_errorbar <- 
+  ggplot(data=cities2,  aes(x = date )) +
+  geom_errorbar( aes(ymax = lo, ymin = hi),
+                 size = .5, width = 0, color='gray40') +
+  geom_point( aes(y=median), size = 1.5) +
+
+    geom_line(
+    data = avg_df,
+    aes(x = date, y = frollmean7), color='red'
+    # , size = 1
+    #colour = "#872e2b"
+  ) +
+  geom_hline(yintercept = 0, color= "black", linetype='dotted') +
+  ggtext::geom_richtext(
+    data = anotacoes,
+    aes(x = date, y = tcp, label = legenda),
+    colour = '#323232',
+    #fontface = 'bold',
+    family = "Helvetica",
+    size = 2.81,
+    fill = NA, label.color = NA, # remove background and outline
+    #  label.padding = grid::unit(rep(0, 4), "pt") # remove padding
+    hjust = 0
+  ) +
+scale_x_date(
+  expand = expansion(mult = c(0,0.02)),
+  #expand = c(0,0.1),
+  breaks = monthly,
+  date_labels = "%d/%b"
+) +
+  scale_y_continuous(
+    breaks = seq(-100, 100, by = 50),
+    limits = c(-100, 100)
+  ) +
+  scale_colour_aop(
+    values = c('valor1' = '#323232', 'valor2' = "#872e2b")
+  ) +
+  #scale_colour_aop(
+  #  values = 
+  #)
+  aop_style() +
+  labs(
+    #title = 'Evolução do impacto da pandemia no congestionamento nas cidades brasileiras',
+    #'Evolução temporal dos impactos do Covid-19 na mobilidade urbana brasiliera'
+    # subtitle = "Distribuição das variações percentuais diárias em Intensidade de Congestionamento no Trânsito em<br>cidades brasileiras",
+    #caption = "Fonte: Inter-American Development Bank and IDB Invest Coronavirus Impact Dashboard, 2020.<br>Nota: Variações percentuais diárias na Intensidade de Congestionamento no Trânsito, calculadas para capitiais selecionadas com relação à semana de referência de 02 à 08 de Março de 2020.",
+    y = 'Variação diária (%)',
+    x = 'Dia/Mês'
+    #colour = 'Média móvel:<br>7 dias'
+  ) +
+  theme(
+    #legend.position = 'bottom'
+    axis.text.y = ggtext::element_markdown(
+      margin = margin(r = 0.25,l = 0, unit = 'cm'),
+      #vjust = 0
+    ),
+    #panel.grid.major.x = element_line(size = 0.15, color = "grey"),
+    axis.ticks.x = element_line(colour = 'grey', size = 0.5, linetype = 1),
+    #axis.ticks.y = element_line(colour = 'grey', size = 0.5, linetype = 1),
+    #axis.ticks.length.y = unit(0.5, 'cm'),
+    axis.text.x = ggtext::element_markdown(hjust = 0),
+    plot.margin = unit(c(0.25,0.5,0.25,0.5), "cm")
+  ) +
+  coord_cartesian(clip = "off", xlim = limits_x#, expand = F)
+  )
+
+ggsave(gg_errorbar,
+       filename = "figures/waze_IDB/errorbar.png", 
+       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
+
+ggsave("figures/waze_IDB/boxplot.pdf", 
+       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
+
+
+# patchwork ----
+
+# Errorbar
+pf <- gg_heatmap_cities / gg_errorbar +  plot_layout(heights = c(3, 2.0)) + plot_annotation(tag_levels = 'A')
+ggsave(pf,
+       filename = "figures/waze_IDB/heatmap_errobar.png", 
+       width = 16, height = 16, units = "cm", dpi = 300, device = 'png')
+
+# Boxplot
 wrap_elements(full = gg_heatmap_cities) / wrap_elements(full = gg_boxplot) + 
   plot_layout(ncol = 1) &
   theme(plot.margin = unit(c(0,0.25,0,0.25), "cm"))
@@ -519,7 +632,8 @@ wrap_elements(full = gg_heatmap_cities) / wrap_elements(full = gg_boxplot) +
 gg_heatmap_cities / gg_boxplot &
   theme(plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm"))
 
-ggsave("figures/waze_IDB/heatmap_boxplot.png", 
+
+ggsave(filename = "figures/waze_IDB/heatmap_boxplot.png", 
        width = 16, height = 18, units = "cm", dpi = 300, device = 'png')
 
 ggsave("figures/waze_IDB/heatmap_boxplot.pdf", 

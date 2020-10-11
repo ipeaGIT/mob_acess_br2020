@@ -125,7 +125,7 @@ for(i in 1:length(activities)){ # i = 4
   
   plot1 <- ggplot(data = google2, aes(x = day_month_id,y = grp)) + 
     geom_tile(aes(fill = value),colour = "white") +
-    viridis::scale_fill_viridis("Mudança\nrelativa",
+    viridis::scale_fill_viridis("Mudança\nrelativa (%)",
                                 option = my_pallete[i],
                                 limits = c(min(range_fill),max(range_fill)),
                                 direction = -1,
@@ -140,7 +140,7 @@ for(i in 1:length(activities)){ # i = 4
     labs( title = local_categories[i],
           # subtitle = description[i],
          x = NULL, y = "Estados",
-         fill = "Mudança\nrelativa") +
+         fill = "Mudança\nrelativa (%)") +
     aop_style1() +
     theme(legend.position = 'right',
           axis.ticks = element_line(
