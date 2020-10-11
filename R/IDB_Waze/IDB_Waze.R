@@ -619,8 +619,9 @@ ggsave("figures/waze_IDB/boxplot.pdf",
 
 # Errorbar
 pf <- gg_heatmap_cities / gg_errorbar +  plot_layout(heights = c(3, 2.0)) + plot_annotation(tag_levels = 'A')
+pf <- plot_grid(gg_heatmap_cities, gg_errorbar, labels = c('A', 'B'), ncol = 1, align = "v")
 ggsave(pf,
-       filename = "figures/waze_IDB/heatmap_errobar.png", 
+       filename = "figures/waze_IDB/heatmap_errobar2.png", 
        width = 16, height = 16, units = "cm", dpi = 300, device = 'png')
 
 # Boxplot
