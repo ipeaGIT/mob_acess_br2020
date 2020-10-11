@@ -1,19 +1,15 @@
-#
-# initial config----------------
-#
-
+# Setup ----
 rm(list=ls())
 gc(reset = T)
-library(XLConnect)
-library(patchwork)
-library(cowplot)
-library(gganimate)  # install.packages("gganimate")
-library(ggrepel)
-source("R/PNS/0_loadpackages.R",local = TRUE)
-source("R/colours.R")
+
+source('R/setup.R')
+source('R/colours.R')
+source('R/style.R')
 source("R/DENATRAN/colors_plot.R")
-source("R/style.R")
 source("R/DENATRAN/aop_style1.R")
+
+
+# source("R/PNS/0_loadpackages.R",local = TRUE)
 `%nin%` = Negate(`%in%`)
 
 # generate cities geometries from geobr
@@ -38,7 +34,7 @@ ls_initial_list <- c("google","activities","%nin%","toupper_noaccent")
 statebr <- geobr::read_state(code_state = "all") %>% data.table::setDT()
 statebr[,name_state := toupper_noaccent(name_state)]
 
-google <- data.table::fread("data-raw/GOOGLE/Global_Mobility_Report.csv")
+google <- data.table::fread("../../data-raw/GOOGLE/Global_Mobility_Report.csv", encoding = "UTF-8")
 google <- google[country_region %in% "Brazil",]
 google[,sub_region_1_fix := toupper_noaccent(sub_region_1) %>% 
          stringr::str_remove_all("STATE OF ")]
