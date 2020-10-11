@@ -119,12 +119,12 @@ for(i in 1:length(activities)){ # i = 4
   google2[,grp := .GRP, by = state_abrev]
   labels_y <- google2[,.SD[1], by = state_abrev][, state_abrev]
   breaks_y <- google2[,.SD[1], by = state_abrev][, grp]
-  range_fill <- seq(min(google2$value),max(google2$value),length.out = 6)
+  range_fill <- seq(min(google2$value, na.rm=T),max(google2$value, na.rm=T),length.out = 6)
   
   
   plot1 <- ggplot(data = google2, aes(x = day_month_id,y = grp)) + 
     geom_tile(aes(fill = value),colour = "white") +
-    viridis::scale_fill_viridis("Mudança em relação \n ao período base",
+    viridis::scale_fill_viridis("Mudança\nrelativa",
                                 option = my_pallete[i],
                                 limits = c(min(range_fill),max(range_fill)),
                                 direction = -1,
@@ -136,10 +136,10 @@ for(i in 1:length(activities)){ # i = 4
                        sec.axis = sec_axis(~ .,
                                            breaks = breaks_y,
                                            labels = labels_y)) + 
-    labs(title = local_categories[i],
-         subtitle = description[i],
+    labs( title = local_categories[i],
+          # subtitle = description[i],
          x = NULL, y = "Estados",
-         fill = "Mudança em \nrelação ao \nperíodo base") +
+         fill = "Mudança\nrelativa") +
     aop_style1() +
     theme(legend.position = 'right',
           axis.ticks = element_line(
@@ -151,20 +151,35 @@ for(i in 1:length(activities)){ # i = 4
           panel.grid.major = element_blank(),
           panel.grid.minor = element_blank()) + 
     coord_cartesian(xlim = limits_x, expand = FALSE)
+  
+  
+  
+  
   #
-  # boxplot
+  # errorbar
   #
   avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = day_month_id]
   avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
   
+  google2[, value := as.numeric(value)]
+  google3 <- google2[, .(median = median(value, na.rm=T),
+                         # q25 = quantile(x=value,probs = .25, na.rm=T),
+                         # q75 = quantile(x=value,probs = .75, na.rm=T)),
+                         lo = mean(value, na.rm=T) - 2*sd(value, na.rm=T),
+                         hi = mean(value, na.rm=T) + 2*sd(value, na.rm=T)),
+                     by= .(date_fix, day_month_id)]
   
-  plot2 <- ggplot() + 
-    geom_boxplot(data = google2, aes(x = day_month_id, y = value,
-                                     group = day_month_id, fill = value)) + 
+  plot2 <-
+    ggplot(data=google3,  aes(x = day_month_id )) +
+    geom_errorbar( aes(ymax = lo, ymin = hi),
+                   size = .5, width = 0, color='gray40') +
+    geom_point( aes(y=median), size = 1.5) +
     geom_line(data = avg_df,aes(x = day_month_id, y = frollmean7),color = 'red') +
+    geom_hline(yintercept = 0, color= "black", linetype='dotted') +
     labs(x = NULL, 
-         y = "Mudança em relação \n ao período base",
-         caption = 'Fonte: Google COVID-19 Community Mobility Reports') + 
+         y = "Mudança relativa"
+         #, caption = 'Fonte: Google COVID-19 Community Mobility Reports'
+    ) + 
     scale_x_continuous(breaks = break_x,
                        labels = label_plot) + 
     scale_y_continuous(breaks = range_fill,
@@ -182,7 +197,43 @@ for(i in 1:length(activities)){ # i = 4
           panel.grid.minor = element_blank())+
     coord_cartesian(xlim = limits_x, expand = FALSE)
   
-  pf <- plot1 / plot2 +  plot_layout(heights = c(3, 2.0))
+  plot2
+  
+  # #
+  # # boxplot
+  # #
+  # 
+  # plot2 <- ggplot() + 
+  #   geom_boxplot(data = google2, aes(x = day_month_id, y = value,
+  #                                    group = day_month_id, fill = value), color='gray40') + 
+  #   geom_line(data = avg_df,aes(x = day_month_id, y = frollmean7),color = 'red') +
+  #   geom_hline(yintercept = 0, color= "black", linetype='dotted') +
+  #   labs(x = NULL, 
+  #        y = "Mudança em relação <br> ao período base"
+  #        #, caption = 'Fonte: Google COVID-19 Community Mobility Reports'
+  #        ) + 
+  #   scale_x_continuous(breaks = break_x,
+  #                      labels = label_plot) + 
+  #   scale_y_continuous(breaks = range_fill,
+  #                      labels = round(range_fill,0)) + 
+  #   #theme_bw() +
+  #   aop_style1() +
+  #   theme(axis.text.x = element_text(angle = 0, hjust = 0,size=8),
+  #         axis.text.y = element_text(angle = 0, hjust = 1,size=8),
+  #         axis.line.x = element_line(size = 0.5, color = "grey"),
+  #         axis.ticks = element_line(
+  #           colour = "black",
+  #           size = 0.5,
+  #           linetype = 1),
+  #         panel.grid.major.x = element_line(size = 0.15, color = "grey"),
+  #         panel.grid.minor = element_blank())+
+  #   coord_cartesian(xlim = limits_x, expand = FALSE)
+  # 
+  # plot2
+  
+  # pf <- plot1 / plot2 +  plot_layout(heights = c(3, 2.0))
+  pf <- plot_grid(plot1, plot2, labels = c('A', 'B'), ncol = 1, align = "v")
+            
 
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".png"),
          width = 23.7, height = 17.6,dpi = 300, units = "cm")
