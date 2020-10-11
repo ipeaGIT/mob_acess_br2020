@@ -124,7 +124,7 @@ daily_br <- daily_br[
   by = .(mes)
 ]
 
-daily_br <- daily_br[
+daily_br[
   ,
   c('total_dias_mes') := list(
     ultimo_dia_mes - primeiro_dia_mes
@@ -133,7 +133,7 @@ daily_br <- daily_br[
   ]
 
 
-daily_br <- daily_br[
+daily_br[
   ,
   c('n_dias_total') := .(
     date - as.Date('2020-03-08')
@@ -141,7 +141,7 @@ daily_br <- daily_br[
   by = .(date)
 ]
 
-daily_br <- daily_br[
+daily_br[
   ,
   c('n_dias_mes') := list(
     date - primeiro_dia_mes + 1
@@ -149,7 +149,7 @@ daily_br <- daily_br[
   by = .(mes)
   ]
 
-daily_br <- daily_br[
+daily_br[
   ,
   c('media_cum_tcp') := .(
     cumsum(tcp) / as.numeric(n_dias_total)
@@ -157,7 +157,7 @@ daily_br <- daily_br[
   by = .(region_name)
 ]
 
-daily_br <- daily_br[
+daily_br[
   ,
   c('media_cum_tcp_mes') := .(
     cumsum(tcp) / as.numeric(n_dias_mes)
@@ -170,7 +170,7 @@ daily_br <- daily_br[
   cities <- daily_br %>% 
     filter(region_type == 'city' #& 
              #!region_slug %in% c('saojosedoscampos', 'sorocaba', 'santos', 'campinas')
-           ) 
+           )
   
   # Maiores variações % (total e no ultimo mes) 
   
@@ -332,7 +332,7 @@ gg_heatmap_cities <-
     #'Evolução temporal dos impactos do Covid-19 na mobilidade urbana brasiliera'
     subtitle = "Variações percentuais diárias em Intensidade de Congestionamento no Trânsito em cidades brasileiras",
     #caption = "Fonte: Inter-American Development Bank and IDB Invest Coronavirus Impact Dashboard, 2020.<br>Nota: Variações percentuais diárias na Intensidade de Congestionamento no Trânsito, calculadas para capitiais selecionadas com relação à semana de referência de 02 à 08 de Março de 2020.",
-    fill = 'Variação diária<br>(%) em relação<br>ao período base',
+    fill = 'Variação (%)<br> em relação<br>ao período base',
     y = '',
     x = ''
   ) +
