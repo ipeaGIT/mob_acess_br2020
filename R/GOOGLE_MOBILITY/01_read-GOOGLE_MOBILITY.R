@@ -111,7 +111,7 @@ for(i in 1:length(activities)){ # i = 4
                                          state_abrev %nin% "" & 
                                          !is.na(state_abrev),]
   # orderuf
-  orderuf <- google2[data.table::between(date_fix,"2020-07-01","2020-09-11"),
+  orderuf <- google2[data.table::between(date_fix,"2020-07-01","2020-10-01"),
                      lapply(.SD,sum),
                      .SDcols = 'value',by = state_abrev][order(value),state_abrev]
   orderuf <- as.character(orderuf)
@@ -157,7 +157,7 @@ for(i in 1:length(activities)){ # i = 4
   
   
   #
-  # errorbar
+  # errorbar ------------------
   #
   google2[, value := as.numeric(value)]
   google3 <- google2[, .(median = median(value, na.rm=T),
@@ -168,7 +168,9 @@ for(i in 1:length(activities)){ # i = 4
                      by= .(date_fix, day_month_id)]
   
   avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = .(date_fix, day_month_id)]
+  avg_df <- avg_df[order(day_month_id)]
   avg_df[,frollmean7 := data.table::frollmean(value,n = 7)]
+  subset(avg_df, frollmean7==min(frollmean7, na.rm=T))
   
   plot2 <-
     ggplot(data=google3,  aes(x = day_month_id )) +
@@ -249,6 +251,67 @@ for(i in 1:length(activities)){ # i = 4
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
 
+
+
+
+
+
+
+# Errorbar separate -----
+
+google2 <- data.table::copy(google1)[ variable %like% c("retail_and_recreation|transit_stations|workplaces") &
+                                        sub_region_2 %in% "" & 
+                                        state_abrev %nin% "" & 
+                                        !is.na(state_abrev),]
+
+
+google2[, variable := fcase( variable %like% "retail_and_recreation", "Varejo e lazer",
+                             variable %like% "workplaces", "Locais de trabalho",
+                             variable %like% "transit_stations", "Estações de TP")]
+
+
+avg_df <- google2[,lapply(.SD,mean), .SDcols = 'value', by = .(state_abrev, variable, date_fix, day_month_id)]
+avg_df <- avg_df[order(state_abrev, variable, day_month_id)]
+avg_df[,frollmean7 := data.table::frollmean(value,n = 7), by = .(state_abrev, variable)]
+subset(avg_df, frollmean7==min(frollmean7, na.rm=T))
+
+
+
+plot2 <-
+  ggplot( ) +
+  # geom_point( aes(y=median), size = 1, color='gray60', aplha=.3) +
+  geom_line(data = avg_df,aes(x = day_month_id, y = frollmean7, color = variable)) +
+  geom_hline(yintercept = 0, color= "black", linetype='dotted') +
+  facet_wrap(.~state_abrev, ncol = 4) +
+  labs(x = NULL, 
+       y = "Mudança relativa"
+       #, caption = 'Fonte: Google COVID-19 Community Mobility Reports'
+  ) + 
+  scale_x_continuous(breaks = break_x,
+                     labels = label_plot) + 
+  scale_y_continuous(breaks = range_fill,
+                     labels = round(range_fill,0)) + 
+  #theme_bw() +
+  aop_style1() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0,size=8),
+        axis.text.y = element_text(angle = 0, hjust = 1,size=8),
+        axis.line.x = element_line(size = 0.5, color = "grey"),
+        axis.ticks = element_line(
+          colour = "black",
+          size = 0.5,
+          linetype = 1),
+        panel.grid.major.x = element_line(size = 0.15, color = "grey"),
+        panel.grid.minor = element_blank()) +
+  coord_cartesian(xlim = limits_x, expand = FALSE) +
+  theme(legend.position="top")
+
+plot2
+
+ggsave(plot2,
+       filename = "figures/GOOGLE/line_separate.png", 
+       width = 16, height = 20, units = "cm", dpi = 300, device = 'png')
+
+
 #
 # cities analysis-----
 #
@@ -272,5 +335,7 @@ google1 <- data.table::melt(data = google,
                                                               'transit_stations_percent_change_from_baseline',
                                                               'workplaces_percent_change_from_baseline',
                                                               'residential_percent_change_from_baseline')))
+
+
 
 
