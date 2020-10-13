@@ -486,10 +486,10 @@ ggplot() +
                             override.aes = list(size = 1, shape = NA))
     )
   
-  ggsave("figures/PNAD/teste_esc2.png", 
+  ggsave("figures/PNAD/teste_escolaridade.png", 
          width = 16, height = 16, units = "cm", dpi = 600, device = 'png')
   
-  ggsave("figures/PNAD/teste_esc2.pdf", 
+  ggsave("figures/PNAD/teste_escolaridade.pdf", 
          width = 16, height = 16, units = "cm", dpi = 600, device = 'pdf')
   
   
