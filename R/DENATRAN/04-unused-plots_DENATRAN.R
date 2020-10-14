@@ -106,3 +106,106 @@ ggplot(temp_br,aes(x = ANO,y = value)) +
 
 ggsave("figures/DENATRAN/rm_taxa_city_adjust.png",scale=0.8,
        width = 25,height = 15,units = "cm")
+
+
+
+#
+# pib / urban motorization------
+#
+
+pib <- openxlsx::read.xlsx(xlsxFile = "data-raw/PIB/tabela5938.xlsx",startRow = 4)
+names(pib) <- c("nivel","code_muni","name","pib","units")
+pib <- data.table::setDT(pib)[nivel %in% "MU",]
+
+temp_denatran <- denatran[ANO %in% 2017 & CODE %in% 
+                            unique(pib$code_muni),]
+# class pop
+temp_denatran[POP < 5e3, class_pop := "< 5 mil"]
+temp_denatran[POP >= 5e3 & POP < 10e3, class_pop := "5 mil  - 10 mil"]
+temp_denatran[POP >= 10e3 & POP < 20e3, class_pop := "10 mil - 20 mil"]
+temp_denatran[POP >= 20e3 & POP < 50e3, class_pop := "20 mil - 50 mil"]
+temp_denatran[POP >= 50e3 & POP < 100e3, class_pop := "50 mil - 100 mil"]
+temp_denatran[POP >= 100e3 & POP < 500e3, class_pop := "100 mil - 500 mil"]
+temp_denatran[POP >= 500e3, class_pop := "> 500 mil"]
+# merge
+temp_denatran[pib,on = c('CODE' = 'code_muni'), pib := i.pib]
+temp_denatran[,pib_cap := pib * 1000 / POP]
+
+#
+#city_annotation <- temp_denatran[order(TOTAL_AUTOS,decreasing = TRUE),]$CODE[1:4] 
+
+ggplot(data = temp_denatran[pib_cap < 100000,])  + 
+  geom_point(aes(x = pib_cap,y = MOTO_RATE, 
+                 fill = name_region),shape = 21,size=2.5,alpha = 1) +
+  labs(x = "PIB per capita (R$/hab.)",
+       y = "Taxa de motorização (veículos/hab.)",
+       fill = "Região",caption = "Fonte: DENATRAN (2017) e IBGE (2017).") + 
+  #scale_x_continuous(breaks = seq(from = 0,to = 20000,by = 2500)) + 
+  facet_wrap(~name_region) + 
+  scale_y_continuous(breaks = seq(0,1.2,by= 0.1)) + 
+  scale_fill_viridis_d(option = "A") + 
+  theme_bw() + 
+  theme(legend.position = c(0.85,0.25))
+#theme(legend.position = c(0.85,0.75))
+
+ggsave("figures/DENATRAN/motorizacao_x_densidade.png",scale = 0.9,
+       width = 20,height = 12,units = "cm")
+
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
+
+#
+# tx moto/ aggregated population / 2001-2020--------------
+#
+
+names(denatran)
+temp <- data.table::copy(denatran)
+temp[POP < 5e3, class_pop := "< 5 mil"]
+temp[POP >= 5e3 & POP < 10e3, class_pop := "5 mil  - 10 mil"]
+temp[POP >= 10e3 & POP < 20e3, class_pop := "10 mil - 20 mil"]
+temp[POP >= 20e3 & POP < 50e3, class_pop := "20 mil - 50 mil"]
+temp[POP >= 50e3 & POP < 100e3, class_pop := "50 mil - 100 mil"]
+temp[POP >= 100e3 & POP < 500e3, class_pop := "100 mil - 500 mil"]
+temp[POP >= 500e3, class_pop := "> 500 mil"]
+
+temp <- temp[,lapply(.SD,mean), by = .(ANO,class_pop), 
+             .SDcols = c('AUTOS_PER_POP','MOTOS_PER_POP')]
+
+temp_br <- data.table::melt(data = temp,
+                            id.vars = c('ANO','class_pop'),
+                            measure.vars =  c('AUTOS_PER_POP','MOTOS_PER_POP'))
+
+order_classpop <- c("< 5 mil","5 mil  - 10 mil","10 mil - 20 mil","20 mil - 50 mil",
+                    "50 mil - 100 mil","100 mil - 500 mil","> 500 mil")
+temp_br$class_pop <- factor(temp_br$class_pop,order_classpop)
+
+temp_br[,TOTAL_city := sum(value), by = .(ANO,class_pop)]
+temp_br[variable %in% "MOTOS_PER_POP",TOTAL_city := value]
+temp_br <- temp_br[!is.na(class_pop),]
+ggplot(temp_br,aes(x = ANO,y = value,fill = variable)) +
+  geom_area(colour="black", size=.3, alpha=.8) +
+  scale_fill_brewer(palette="Blues",labels = c("Automóvel","Motocicleta"))+
+  
+  geom_point(data = temp_br[ANO %in% c("2001","2020"),],
+             aes(x = ANO,y = TOTAL_city), shape = 3,size = 0.75) + 
+  geom_text(data = temp_br[ANO %in% "2001",],
+            aes(y = TOTAL_city,label = round(value,2)),
+            vjust = -0.7, hjust = 0.15,size = 2.5) + 
+  geom_text(data = temp_br[ANO %in% "2020",],
+            aes(y = TOTAL_city,label = round(value,2)),
+            vjust = -0.7, hjust = 0.75,size = 2.5) + 
+  labs(x = NULL,y = "Taxa de motorização (veículos/hab.)",
+       title = "Taxa de motorização",
+       subtitle = "Relação veículo/habitante por tamanho de município",
+       fill="Tipo de veículo") + 
+  facet_wrap(~class_pop,ncol = 4)+
+  theme_bw()+
+  theme(legend.position = "bottom") + 
+  ylim(c(0,max(temp_br$TOTAL_city) * 1.05)) + 
+  guides(fill = guide_legend(override.aes = list(shape = NA)))
+
+ggsave("figures/DENATRAN/rm_taxa_city.png",scale=0.8,
+       width = 25,height = 15,units = "cm")
+
+lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
+rm(list = lista)
