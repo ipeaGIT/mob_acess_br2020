@@ -158,7 +158,7 @@ p1 <- ggplot(temp_den,
   labs(x = NULL,y = "Taxa de motorização (veículos/hab.)",
        title = "Taxa de motorização",
        subtitle = "Relação veículo/habitante por Região Metropolitana de 2001 a 2020",
-       caption = "Fonte: DENATRAN (2020) e IBGE (2020).",
+       #caption = "Fonte: DENATRAN (2020) e IBGE (2020).",
        fill="Tipo de veículo") + 
   geom_point(data = temp_den[ANO %in% c("2001","2020"),],
              aes(x = ANO,y = TOTAL), shape = 3,size = 0.75) + 
@@ -197,69 +197,48 @@ max(denatran$MOTOS_PER_POP,na.rm = TRUE)
 #map_br <- sf::st_as_sf(map_br[UF %in% 'AC',])
 map_br <- sf::st_as_sf(map_br)
 
+my_labeller <- as_labeller(c(
+  'MOTOS_PER_POP' = "Motocicletas",
+  'AUTOS_PER_POP' = "Automóveis",
+  '2001' = '2001',
+  '2010' = '2010',
+  '2020' = '2020'))
 pf <- ggplot() + 
   facet_grid(rows = vars(variable), 
              cols = vars(ANO),
              switch = "y",
-             labeller = as_labeller(c(
-               'MOTOS_PER_POP' = "Motocicletas",
-               'AUTOS_PER_POP' = "Automóveis",
-               '2001' = '2001',
-               '2010' = '2010',
-               '2020' = '2020'))) + 
-  
+             labeller = my_labeller) + 
   geom_sf(data = map_br[map_br$variable %in% 'AUTOS_PER_POP',],
           aes(fill = value),size=0) +
-  viridis::scale_fill_viridis("Automóveis\n(veículos/habitantes)\n ",
+  viridis::scale_fill_viridis("Automóveis\n(veículos/habitantes)\n",
                               limits = c(0,1.1),
                               breaks = seq(0,1.1,by = 0.15),
-                              option = "D"
-                              #limits = c(0,0.6),
-                              #breaks = seq(0,0.6,by = 0.1),
-                              #option = "B"
-  ) +
+                              option = "D") +
   ggnewscale::new_scale_fill() + 
-  
   geom_sf(data = map_br[map_br$variable %in% 'MOTOS_PER_POP',],
           aes(fill = value),size=0) +
   viridis::scale_fill_viridis("Motocicletas\n(veículos/habitantes)\n",
-                               #limits = c(0,1.1),
-                              #  breaks = seq(0,1.1,by = 0.15),
-                               option = "A",
+                              option = "A",
                               limits = c(0,0.6),
-                              breaks = seq(0,0.6,by = 0.1),
-                              #option = "B"
-  ) +
-  # viridis::scale_fill_viridis("Automóveis\n(veículos/habitante)\n ",limits = c(0,1.1),
-  #                              breaks = seq(0,1.1,by = 0.15),option = "D") +
-  #geom_sf(data = state_map,fill = NA, color = 'white') +
-  aop_style() +
-  #theme_bw() + 
+                              breaks = seq(0,0.6,by = 0.1)) +
+  aop_style1() +
   labs(title = 'Taxa de motorização',
-       subtitle = 'Número de veículos por habitante',
-       caption = "Fonte: DENATRAN (2020) e IBGE (2020).") + 
+       subtitle = 'Número de veículos por habitante') + 
   theme(axis.ticks = element_blank(),
         axis.line.x = element_blank(),
         axis.line.y = element_blank(),
         axis.text.x = element_blank(),
         axis.text.y = element_blank(),
-        axis.title.y = ggtext::element_markdown(
-          size = 15,
-          margin = margin(r = 0.25, unit = 'cm'),
-          lineheight = 0.5,
-          colour = "#575757",
-          hjust = 0,
-          vjust = 1),
         legend.position = "right",
-        legend.title = element_text(size = 8, colour = "#575757"),
-        strip.text.y =  element_text(size = 8,
-                                     face = "plain",
-                                     colour = "#575757",
-                                     hjust = 1)) 
+        legend.title = element_text(size = 8,colour = "#575757"),
+        legend.text = element_text(size = 8,colour = "#575757"),
+        strip.text.y =  element_text(size = 8,face = "plain",colour = "#575757",hjust = 1),
+        axis.title.y = ggtext::element_markdown(size = 15,margin = margin(r = 0.25, unit = 'cm'),
+                                                lineheight = 0.5,colour = "#575757",hjust = 0,vjust = 1)) 
 
 pf
 ggsave("figures/DENATRAN/map_years_BR21.png",
-       scale = 1,width = 23.5,height = 15,dpi = 300, units = "cm")
+       scale = 0.9,width = 23.5,height = 13,dpi = 300, units = "cm")
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
@@ -378,13 +357,13 @@ ggrepel::geom_label_repel(data = temp_denatran[MUNI_UF %in% "MANAUS-AM"],
                             segment.size = 0.25,
                             label.size = 0.05,
                             size = my_size) + 
-  ggrepel::geom_label_repel(data = temp_denatran[MUNI_UF %in% "SAO JOSE DO RIO PRETO-SP"],
+  ggrepel::geom_label_repel(data = temp_denatran[MUNI_UF %in% "PORTO ALEGRE-RS"],
                             aes(x = pop_dens,
                                 y = MOTO_RATE,
-                                label = "São José do Rio Preto-SP"), 
+                                label = "Porto\nAlegre-RS"), 
                             color = 'black',
-                            nudge_x = +3000, 
-                            nudge_y = 0.05,
+                            nudge_x = -1700, 
+                            nudge_y = 0.045,
                             segment.size = 0.25,
                             label.size = 0.05,
                             size = my_size) +
@@ -527,7 +506,7 @@ p2 <- ggplot(temp_br[variable %like% "rel",],aes(x = ANO,y = value, group = clas
             vjust = +0.75, hjust = -0.5,size = 2.5) +
   labs(x = NULL,y = "Aumento com relação a 2001",
        title = NULL,
-       caption = "Fonte: DENATRAN e IBGE (2020).",
+       #caption = "Fonte: DENATRAN e IBGE (2020).",
        subtitle = NULL,
        color="Tamanho do \nmunicípio",fill = NULL) +
   facet_wrap(facets = vars(variable),nrow = 1,
@@ -542,6 +521,6 @@ p2 <- ggplot(temp_br[variable %like% "rel",],aes(x = ANO,y = value, group = clas
   guides(fill = guide_legend(override.aes = list(shape = NA)))
 
 pf <- (p1 / p2) + plot_annotation(tag_levels = 'A')
-
+pf
 ggsave("figures/DENATRAN/rm_taxa_city_adjust_facetveh.png",scale=1,
        width = 20,height = 15,dpi = 300,units = "cm")
