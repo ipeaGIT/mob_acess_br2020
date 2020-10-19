@@ -2,13 +2,25 @@
 
 source("setup.R")
 
+# Root directory
+root_dir <- here::here('R','POF')
+setwd(root_dir)
+# Folders with raw data
+dir_2017 <- paste0("./data-raw/","2017")
+dir_2008 <- paste0("./data-raw/","2008")
+dir_2002 <- paste0("./data-raw/","2002")
+# Folders to save clean data
+destdir_clean_2017 <- paste0("./data/","2017")
+destdir_clean_2008 <- paste0("./data/","2008")
+destdir_clean_2002 <- paste0("./data/","2002")
+
 ######## 1. Dowload and Clean data ----------------------------------------------------------
 
 ######################################################################
 ### POF 2017-2018 ####################################################
 ######################################################################
 
-setwd("~/POF/2017_2018")
+setwd(dir_2017)
 
 # Despesa Individual ----------------
 
@@ -153,15 +165,15 @@ pof_2017_total_familias$UF <-
   "51" =  "MT", "52" =  "GO", "53" =  "DF"
   )
 
-setwd("C:/Users/lucas/Desktop/R/pof")
-readr::write_rds(pof_2017_total_familias, 'pof_agregado_2017.rds')
+setwd(destdir_clean_2017)
+readr::write_rds(pof_2017_total_familias,'pof_agregado_2017.rds')
 
 ############################################
 ############################################
 ### POF 2008-2009 ##########################
 ############################################
 
-setwd("~/POF/2008_2009")
+setwd(dir_2008)
 
 despesa_individual <-
   # Recuperando microdados de despesa
@@ -317,7 +329,7 @@ pof_2008_total_familias$UF <-
   "51" =  "MT", "52" =  "GO", "53" =  "DF"
   )
 
-setwd("C:/Users/lucas/Desktop/R/pof")
+setwd(destdir_clean_2008)
 readr::write_rds(pof_2008_total_familias, 'pof_agregado_2008.rds')
 
 ############################################
@@ -325,7 +337,7 @@ readr::write_rds(pof_2008_total_familias, 'pof_agregado_2008.rds')
 ### POF 2002-2003 ##########################
 ############################################
 
-setwd("~/POF/2002_2003")
+setwd(dir_2002)
 
 despesa_individual <-
   readRDS("DESPESA_INDIVIDUAL.rds")
@@ -476,15 +488,16 @@ pof_2002_total_familias$UF <-
   "51" =  "MT", "52" =  "GO", "53" =  "DF"
   )
 
-setwd("C:/Users/lucas/Desktop/R/pof")
+setwd(destdir_clean_2002)
 readr::write_rds(pof_2002_total_familias, 'pof_agregado_2002.rds')
 
 ######## 3. Merge and Group data -------------------------------------------
 
+setwd(root_dir)
 
-pof_2002_agregado <- readr::read_rds("pof_agregado_2002.rds")
-pof_2008_agregado <- readr::read_rds("pof_agregado_2008.rds")
-pof_2017_agregado <- readr::read_rds("pof_agregado_2017.rds")
+pof_2002_agregado <- readr::read_rds(paste0(destdir_clean_2002,"/pof_agregado_2002.rds"))
+pof_2008_agregado <- readr::read_rds(paste0(destdir_clean_2008,"/pof_agregado_2008.rds"))
+pof_2017_agregado <- readr::read_rds(paste0(destdir_clean_2017,"/pof_agregado_2017.rds"))
 
 pof_agregado <- 
   dplyr::bind_rows(

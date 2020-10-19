@@ -1,6 +1,24 @@
 ### Setup
 
-source("setup.R")
+source("R/setup.R")
+
+# Root directory
+root_dir <- here::here('R','POF')
+setwd(root_dir)
+
+# Folders with raw data
+dir_2017 <- paste0("./data-raw/","2017")
+dir_2008 <- paste0("./data-raw/","2008")
+dir_2002 <- paste0("./data-raw/","2002")
+
+# Create folders to save clean data
+dir.create("./data", showWarnings = FALSE)
+destdir_clean_2017 <- paste0("./data/","2017")
+destdir_clean_2008 <- paste0("./data/","2008")
+destdir_clean_2002 <- paste0("./data/","2002")
+dir.create(destdir_clean_2017)
+dir.create(destdir_clean_2008)
+dir.create(destdir_clean_2002)
 
 ######## 1. Dowload and Clean data ----------------------------------------------------------
 
@@ -8,7 +26,7 @@ source("setup.R")
 ### POF 2017-2018 ####################################################
 ######################################################################
 
-setwd("~/POF/2017_2018")
+setwd(dir_2017)
 
 # Despesa Individual ----------------
 
@@ -206,7 +224,7 @@ pof_2017_transporte <-
   )
 
 # Salva df e limpa memória
-setwd("C:/Users/lucas/Desktop/R/pof")
+setwd(destdir_clean_2017)
 readr::write_rds(pof_2017_total, "pof_2017_total.rds")
 readr::write_rds(pof_2017_transporte, "pof_2017_transporte.rds")
 rm(list = ls())
@@ -215,7 +233,7 @@ rm(list = ls())
 ### POF 2008-2009 #############################################
 ###############################################################
 
-setwd("C:/Users/lucas/Documents/POF/2008_2009")
+setwd(dir_2008)
 
 # Despesa Individual ----------------------
 
@@ -389,7 +407,7 @@ pof_2008_transporte <-
       COD_ITEM >= 2302001 & COD_ITEM <= 2302304 , "Transporte Coletivo", "Transporte Individual")
   )
 
-setwd("C:/Users/lucas/Desktop/R/pof")
+setwd(destdir_clean_2008)
 readr::write_rds(pof_2008_total, "pof_2008_total.rds")
 readr::write_rds(pof_2008_transporte, "pof_2008_transporte.rds")
 rm(list = ls())
@@ -398,7 +416,7 @@ rm(list = ls())
 ### POF 2002-2003 #############################################
 ###############################################################
 
-setwd("C:/Users/lucas/Documents/POF/2002_2003")
+setwd(dir_2002)
 
 # Despesa Individual ----------------------
 
@@ -571,16 +589,18 @@ pof_2002_transporte <-
     COD_ITEM == 2302901 ,"Transporte Coletivo", "Transporte Individual"),
   )
 
-setwd("C:/Users/lucas/Desktop/R/pof")
+setwd(destdir_clean_2002)
 readr::write_rds(pof_2002_total, "pof_2002_total.rds")
 readr::write_rds(pof_2002_transporte, "pof_2002_transporte.rds")
 rm(list = ls())
 
 ######## 3. Merge and Group data -------------------------------------------
 
-pof_2002_total <- readr::read_rds("pof_2002_total.rds") %>% select(-COD_ITEM)
-pof_2008_total <- readr::read_rds("pof_2008_total.rds") %>% select(-COD_ITEM)
-pof_2017_total <- readr::read_rds("pof_2017_total.rds") %>% select(-COD_ITEM)
+setwd(root_dir)
+
+pof_2002_total <- readr::read_rds(paste0(destdir_clean_2002,"/pof_2002_total.rds"))# %>% #select(-COD_ITEM)
+pof_2008_total <- readr::read_rds(paste0(destdir_clean_2008,"/pof_2008_total.rds"))# %>% #select(-COD_ITEM)
+pof_2017_total <- readr::read_rds(paste0(destdir_clean_2017,"/pof_2017_total.rds"))# %>% #select(-COD_ITEM)
 
 pof_total <- 
   dplyr::bind_rows(
@@ -589,9 +609,9 @@ pof_total <-
 
 readr::write.rds(pof_total, "pof_total.rds")
 
-pof_2002_transporte <- readr::read_rds("pof_2002_transporte.rds") %>% select(-COD_ITEM)
-pof_2008_transporte <- readr::read_rds("pof_2008_transporte.rds") %>% select(-COD_ITEM)
-pof_2017_transporte <- readr::read_rds("pof_2017_transporte.rds") %>% select(-COD_ITEM)
+pof_2002_transporte <- readr::read_rds(paste0(destdir_clean_2002,"/pof_2002_transporte.rds"))#%>% #select(-COD_ITEM)
+pof_2008_transporte <- readr::read_rds(paste0(destdir_clean_2008,"/pof_2008_transporte.rds"))# %>% #select(-COD_ITEM)
+pof_2017_transporte <- readr::read_rds(paste0(destdir_clean_2017,"/pof_2017_transporte.rds")) #%>% #select(-COD_ITEM)
 
 pof_transporte <- 
   dplyr::bind_rows(
