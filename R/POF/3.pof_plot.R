@@ -3,6 +3,7 @@
 source("R/setup.R")
 source("R/style.R")
 source("R/colours.R")
+
 # Root directory
 root_dir <- here::here('R','POF')
 setwd(root_dir)
@@ -56,15 +57,15 @@ plot1 <-
   # Arrange df
   pof_transporte_urbano %>% 
   #select(-V1,-V1) %>%
-  filter(QUADRO == 23) %>% 
-  group_by(Ano, decil_renda) %>% 
-  mutate(n_t  = n_distinct(ID_FAMILIA)) %>% 
-  ungroup() %>% 
-  group_by(Ano, Modo, decil_renda) %>% 
-  summarise(
-    n = n_distinct(ID_FAMILIA),
+  dplyr::filter(QUADRO == 23) %>% 
+  dplyr::group_by(Ano, decil_renda) %>% 
+  dplyr::mutate(n_t  = dplyr::n_distinct(ID_FAMILIA)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Ano, Modo, decil_renda) %>% 
+  dplyr::summarise(
+    n = dplyr::n_distinct(ID_FAMILIA),
     prop = mean(n/n_t)
-  )
+  ) 
 
 plot1 %>% na.omit() %>% 
 ggplot() +
@@ -75,19 +76,22 @@ ggplot() +
     size = 2.5, alpha = 1, shape = 21)+
   scale_colour_aop(palette = 'blue_red')+
   scale_fill_aop(palette = 'blue_red')+
-  facet_wrap(~Modo, nrow = 1) +
-  #scale_y_continuous(labels = scales::percent, limits = c(0,1)) +
+  hrbrthemes::scale_y_percent()+
   labs(
-    y = "% das famílias", x="",
+    y = 'Porcentagem das famílias', x="",
     color = 'Decil de Renda', fill = 'Decil de Renda'
     #,title = 'Famílias com despesas em transporte por tipo: 2002 - 2017',
     #subtitle = 'Evolução da parcela das famílias com despesas em transporte, por modo de transporte e faixa de renda.'
-  ) +
-  hrbrthemes::scale_y_percent() +
+  )+
+  facet_wrap(~Modo, nrow = 1) +
   aop_style() +
-  theme(legend.position = 'bottom', axis.title.x = element_markdown(size = 8, colour = '#808080',angle = 90))
+  theme(
+    legend.position = 'bottom',
+    axis.title.x = element_markdown(size = 8, colour = '#808080'),
+    axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90))
 
-ggsave('plot1.png',path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
+
+ggsave('plot1.png', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 2. Evolução Renda -------------------------
 
@@ -389,19 +393,19 @@ plot5 %>% na.omit() %>%
   scale_linetype_manual(name='Ano',
                         values = c("type1" = "solid", "type2" = "dashed"),
                         labels = c("2017", "2002")) +
+  hrbrthemes::scale_y_percent()+
   scale_colour_aop(palette = 'original') +
+  facet_wrap(~RM, nrow = 4) +
+  aop_style() +
+  theme(legend.position = 'bottom', ) +
   labs(
-    x = 'Decis de Renda', y = '% da renda total familiar',
+    x = 'Decis de Renda', y = 'Porcentagem da renda total familiar',
     fill = 'Modo', color = 'Modo'
     #title = 'Comprometimento da renda com Transporte: Coletivo e Individual',
     #subtitle = 'Parcela da renda familiar destinada a despesas com transporte, por modo de transporte e faixa de renda \nMédias para regiões metropolitanas em 2017 e 2008 (linha pontilhada)'
-    ) +
-  facet_wrap(~RM, nrow = 4) +
-  aop_style() +
-  scale_y_percent(name='% da renda total familiar') +
-  theme(legend.position = 'bottom')
+  )
 
-ggsave('plot5.png',path = 'R/POF/img', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('plot5.png', width = 16, height = 12, units = 'cm', dpi = 300)
 
 # 6. Cleveland: Cor e Raça: RM x Capital ---------------------------------
 
