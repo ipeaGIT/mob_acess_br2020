@@ -249,7 +249,7 @@ gg_BR <- ggplot(
   theme(
     plot.margin = margin(t = 0.5, r = 1.5, b = 0.5, l = 0.25, unit = 'cm'),
     strip.text = element_blank(),
-    #panel.spacing.x = unit(1, "cm"),
+    panel.spacing.y = unit(0.25, "cm"),
     plot.subtitle = element_markdown(
       margin = margin(t = 0, r = 0, b = 1.25, l = 0, unit = 'cm')
     )
@@ -436,6 +436,11 @@ gg_annotation_BR <- gg_BR +
     xmin = as.Date('2013-06-01'), xmax = as.Date("2013-06-01"),
     ymin = 1.2, ymax = 1.2, data = data.frame(componente = "Ônibus urbano")
   ) +
+  annotation_custom2(
+    grob = lista_grob_BR$jun_2013_data, 
+    xmin = as.Date('2013-06-01'), xmax = as.Date("2013-06-01"),
+    ymin = 1.04, ymax = 1.04, data = data.frame(componente = "Metrô")
+  ) +
   
   ## lines ; ref: https://stackoverflow.com/a/40622343/12707859
   
@@ -463,13 +468,21 @@ gg_annotation_BR <- gg_BR +
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Óleo diesel")
   ) +
-  # jun/2013
+  # jun/2013 - ONIBUS
   annotation_custom2(
     grob = linesGrob(y = c(0, 0), x = c(0.1725, 0.4725),  
                      gp = gpar(col = "#575757", lwd = 1, lty="solid")),
     ymin = 0.985, ymax = 0.985, 
     xmin = -Inf, xmax = Inf, 
     data = data.frame(componente = "Ônibus urbano")
+  ) +
+  # jun/2013 - METRO
+  annotation_custom2(
+    grob = linesGrob(y = c(0, 0), x = c(0.1725, 0.4725),  
+                     gp = gpar(col = "#575757", lwd = 1, lty="solid")),
+    ymin = 0.985, ymax = 0.985, 
+    xmin = -Inf, xmax = Inf, 
+    data = data.frame(componente = "Metrô")
   )
 
 # Code to override clipping
