@@ -350,12 +350,12 @@ ggplot() +
       #)
     ) +
     labs(
-      colour = "Sexo e Etnia",
+      colour = "Sexo e Cor",
       #title = "Condições de mobilidade e características sociodemográficas",
-      subtitle = 
+      #subtitle = 
         #expression(paste('Tempo médio (em minutos) no deslocamento por grau de ', escolaridade^1,', de acordo com sexo e etnia')),
         #"Deslocamento médio (em minutos) por grau de escolaridade<sup>1</sup>, de acordo com sexo e etnia<br>nas Regiões Metropolitanas brasileiras (2001 e 2015)",
-        "Tempo médio (em minutos) no deslocamento por grau de escolaridade, de acordo com sexo e etnia, nas<br>Regiões Metropolitanas brasileiras (2001 e 2015)",
+      #  "Tempo médio (em minutos) no deslocamento por grau de escolaridade, de acordo com sexo e etnia, nas<br>Regiões Metropolitanas brasileiras (2001 e 2015)",
       #caption = "Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Ensino Fundamental; Média: Ensino Médio; Alta: Ensino Superior.",
       #"Fonte: PNAD (IBGE, 2001 e 2015).<br>Nota: <sup>1</sup>Escolaridade - Baixa: Até 7 anos de estudo; Média: 8 à 14 anos de estudo; Alta: 15 ou mais anos de estudo."
       y = "Escolaridade",
