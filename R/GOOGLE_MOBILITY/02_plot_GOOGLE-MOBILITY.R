@@ -123,4 +123,6 @@ labs(x = NULL, y = "Mudança\nrelativa(%)",
 
 ggsave(filename = paste0("figures/GOOGLE/cities_grid.png"),
        width = 23.7, height = 30.7,dpi = 300,scale = 0.65, units = "cm")
+ggsave(filename = paste0("figures/GOOGLE/cities_grid.pdf"),
+       width = 23.7, height = 30.7,dpi = 300,scale = 0.65, units = "cm")
 

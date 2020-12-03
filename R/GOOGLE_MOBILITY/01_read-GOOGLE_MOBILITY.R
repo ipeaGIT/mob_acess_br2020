@@ -210,6 +210,8 @@ for(i in 1:length(activities)){ # i = 1
 
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".png"),
          width = 23.7, height = 17.6,dpi = 300, units = "cm")
+  ggsave(filename = paste0("figures/GOOGLE/",activities[i],".pdf"),
+         width = 23.7, height = 17.6,dpi = 300, units = "cm")
   
 }
 
