@@ -17,6 +17,7 @@ pof_agregado <-
 
 ######## 3. Plot data ----------------------------------------------------------
 
+setwd("C:/Users/lucas/Desktop/R/mob_acess_br2020")
 library(ggtext)
 windowsFonts(Helvetica='Helvetica')
 
@@ -24,16 +25,16 @@ windowsFonts(Helvetica='Helvetica')
 
 plot0 <-
   pof_agregado %>% 
-  filter(Ano != 2002) %>% 
-  filter(prop<1) %>% 
-  group_by(Ano, Grupo) %>% 
-  summarise(
+  dplyr::filter(Ano != 2002) %>% 
+  dplyr::filter(prop<1) %>% 
+  dplyr::group_by(Ano, Grupo) %>% 
+  dplyr::summarise(
     prop = weighted.mean(prop, PESO_FINAL, na.rm = T))
 
 plot0$Grupo <- factor(plot0$Grupo, levels = c('Habitação','Transporte Urbano','Alimentação','Roupas e Calçados','Cultura/Lazer/Esporte'))
 
 plot0 %>% 
-  filter(Grupo != 'Cultura/Lazer/Esporte') %>% 
+  dplyr::filter(Grupo != 'Cultura/Lazer/Esporte') %>% 
   ggplot(aes(Ano,prop,group = Grupo)) +
   geom_col(aes(fill= Grupo),position = 'dodge')+
   scale_fill_aop(palette = 'original') +
@@ -49,7 +50,8 @@ plot0 %>%
     legend.position = 'bottom',
     axis.title = element_markdown(size = 8, colour = '#808080'))
 
-ggsave('plot0.png', path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
+ggsave('gastos_categoria.png', path = 'figures/POF', width = 16, height = 11, units = 'cm', dpi = 300)
+ggsave('gastos_categoria.pdf', path = 'figures/POF', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 1. Parallel Coord -------------------------
 
@@ -90,8 +92,8 @@ ggplot() +
     axis.title.x = element_markdown(size = 8, colour = '#808080'),
     axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90))
 
-
-ggsave('plot1.png', width = 16, height = 11, units = 'cm', dpi = 300)
+ggsave('parallel_tipo_transporte.png', path = 'figures/POF', width = 16, height = 11, units = 'cm', dpi = 300)
+ggsave('parallel_tipo_transporte.pdf', path = 'figures/POF', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 2. Evolução Renda -------------------------
 
@@ -101,18 +103,18 @@ plot2 <-
   dplyr::group_by(UF,regiao, quintil_renda, Ano) %>% 
   dplyr::summarise(
     renda = weighted.mean(renda_pc, PESO_FINAL)) %>% 
-  mutate(
-    renda_defla = case_when(
+  dplyr::mutate(
+    renda_defla = dplyr::case_when(
       Ano == 2002 ~ renda*2.6137,
       Ano == 2008 ~ renda*1.8540,
       Ano == 2017 ~ renda*1.5976),
     names = UF) %>% 
-  pivot_wider(
+  tidyr::pivot_wider(
     names_from = Ano, values_from = c(renda_defla,renda))%>% 
-  ungroup() %>% 
-  mutate(variacao = renda_defla_2017/renda_defla_2002) %>% 
-  select(UF, regiao,quintil_renda,variacao) %>% 
-  mutate(quintil_renda = as.factor(quintil_renda))
+  dplyr::ungroup() %>% 
+  dplyr::mutate(variacao = renda_defla_2017/renda_defla_2002) %>% 
+  dplyr::select(UF, regiao,quintil_renda,variacao) %>% 
+  dplyr::mutate(quintil_renda = as.factor(quintil_renda))
 
 plot2$UF <- factor(plot2$UF, levels = c(
   "SC",'RJ','ES','PB','PA','PR','MS','MT','SP',
@@ -123,7 +125,7 @@ plot2$UF <- factor(plot2$UF, levels = c(
 ne <-
   plot2 %>% 
   na.omit() %>% 
-  filter(regiao=='Nordeste') %>% 
+  dplyr::filter(regiao=='Nordeste') %>% 
   ggplot() +
     geom_vline(aes(xintercept = 1), linetype = 'dashed') +
     geom_vline(aes(xintercept = 2), linetype = 'dashed') +
@@ -153,7 +155,7 @@ ne <-
 n <-
   plot2 %>% 
   na.omit() %>% 
-  filter(regiao=='Norte') %>% 
+  dplyr::filter(regiao=='Norte') %>% 
   ggplot() +
   geom_vline(aes(xintercept = 1), linetype = 'dashed') +
   geom_vline(aes(xintercept = 2), linetype = 'dashed') +
@@ -183,7 +185,7 @@ n <-
 co <-
   plot2 %>% 
   na.omit() %>% 
-  filter(regiao=='Centro-Oeste') %>% 
+  dplyr::filter(regiao=='Centro-Oeste') %>% 
   ggplot() +
   geom_vline(aes(xintercept = 1), linetype = 'dashed') +
   geom_vline(aes(xintercept = 2), linetype = 'dashed') +
@@ -213,7 +215,7 @@ co <-
 se <-
   plot2 %>% 
   na.omit() %>% 
-  filter(regiao=='Sudeste') %>% 
+  dplyr::filter(regiao=='Sudeste') %>% 
   ggplot() +
   geom_vline(aes(xintercept = 1), linetype = 'dashed') +
   geom_vline(aes(xintercept = 2), linetype = 'dashed') +
@@ -243,7 +245,7 @@ se <-
 s <-
   plot2 %>% 
   na.omit() %>% 
-  filter(regiao=='Sul') %>% 
+  dplyr::filter(regiao=='Sul') %>% 
   ggplot() +
   geom_vline(aes(xintercept = 1), linetype = 'dashed') +
   geom_vline(aes(xintercept = 2), linetype = 'dashed') +
@@ -269,37 +271,40 @@ s <-
     strip.placement = NULL,
     plot.margin = unit(c(0,0,0,0), "cm"))
 
+library(patchwork)
 p2 <- ne/n/co/se/s
 p2
 ne
-ggsave('plot2.png',path = 'R/POF/img', width = 16, height = 16, units = 'cm', dpi = 300)
+
+ggsave('clev_evol_renda.png', path = 'figures/POF', width = 16, height = 16, units = 'cm', dpi = 300)
+ggsave('clev_evol_renda.pdf', path = 'figures/POF', width = 16, height = 16, units = 'cm', dpi = 300)
 
 # 3. Gasto com Transporte ------------------------------------------
 
 plot3 <-
   pof_transporte_urbano %>% 
   #select(-V1, -V1) %>%
-  filter(Ano == 2017) %>% 
-  group_by(ID_FAMILIA, Modo) %>% 
-  mutate(gasto_pc = sum(valor_total)/n_distinct(ID_MORADOR)) %>% 
-  ungroup() %>% 
-  group_by(RM, decil_renda, Modo) %>% 
-  summarise(
+  dplyr::filter(Ano == 2017) %>% 
+  dplyr::group_by(ID_FAMILIA, Modo) %>% 
+  dplyr::mutate(gasto_pc = sum(valor_total)/dplyr::n_distinct(ID_MORADOR)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(RM, decil_renda, Modo) %>% 
+  dplyr::summarise(
     gasto_pc_mensal = weighted.mean(gasto_pc, PESO_FINAL)/12) %>% 
-  group_by(Modo) %>% 
-  mutate(
+  dplyr::group_by(Modo) %>% 
+  dplyr::mutate(
     RM = ifelse(RM=='Brasil Urbano','Brasil Urbano não metropolitano',RM),
     gastobr = mean(gasto_pc_mensal),
     names = RM) %>% 
-  ungroup()
+  dplyr::ungroup()
 
 plot3 %>% na.omit() %>% 
-  mutate(decil_renda = as.factor(decil_renda)) %>% 
+  dplyr::mutate(decil_renda = as.factor(decil_renda)) %>% 
   ggplot() +
   geom_hline(
     aes(yintercept = gastobr, color = Modo), linetype = 'dashed', alpha = .95) +
   geom_line(
-    data = plot3 %>% select(-RM) %>% na.omit(),
+    data = plot3 %>% dplyr::select(-RM) %>% na.omit(),
     aes(as.factor(decil_renda), gasto_pc_mensal, color = Modo, group = interaction(Modo,names)), alpha = .2,size=.4) +
   geom_line(
     aes(decil_renda, gasto_pc_mensal, color = Modo, group = interaction(Modo,RM)),size=.8) +
@@ -320,59 +325,32 @@ plot3 %>% na.omit() %>%
     axis.title.x = element_markdown(size = 8, colour = '#808080'),
     axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90))
 
-ggsave('plot3.png',path = 'R/POF/img', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('gastos_transp_pc.png', path = 'figures/POF', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('gastos_transp_pc.pdf', path = 'figures/POF', width = 16, height = 12, units = 'cm', dpi = 300)
 
-# 4 Elasticidade  ------------------------------------------
-
-plot4 <-
-  pof_transporte_urbano %>%
-  #select(-V1, -V1) %>% 
-  group_by(Ano, ID_FAMILIA, Modo, renda_pc) %>% 
-  mutate(gasto_pc = sum(valor_total)/n_distinct(ID_MORADOR)) %>% 
-  filter(Ano == 2017) %>% 
-  group_by(Ano,ID_FAMILIA, Modo, RM, PESO_FINAL, regiao) %>% 
-  summarise(gasto = log(sum(gasto_pc)), renda = log(mean(renda_pc)))
-
-plot4 %>% 
-  ggplot(aes(renda, gasto, color = Modo, weight = PESO_FINAL)) +
-    geom_jitter(alpha = .1,size=.8) +
-    geom_smooth(method = 'lm', se = FALSE, alpha = .6,size=.5) +
-    scale_colour_aop(palette = 'original') +
-    labs(
-      x = '(log) Renda per capita', y="(log) Gasto per capita"
-      #title = 'Elasticidade - Renda do gasto per capita com transporte por tipo'
-    )+
-  aop_style() +
-  theme(
-    legend.position = 'bottom',
-    axis.title.x = element_markdown(size = 8, colour = '#808080'),
-    axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90)) +
-facet_grid(Modo~regiao)
-
-ggsave('plot4.png', path = 'R/POF/img', width = 16, height = 11, units = 'cm', dpi = 300)
 
 # 5. Comprometimento da Renda ------------------------------------------
 
 plot5 <-
   pof_transporte_urbano %>% 
   #select(-V1, -V1) %>% 
-  group_by(Ano, ID_FAMILIA, Modo) %>% 
-  mutate(
-    gasto_pc = sum(valor_total)/n_distinct(ID_MORADOR),
+  dplyr::group_by(Ano, ID_FAMILIA, Modo) %>% 
+  dplyr::mutate(
+    gasto_pc = sum(valor_total)/dplyr::n_distinct(ID_MORADOR),
     prop = gasto_pc/renda_pc) %>% 
-  ungroup() %>% 
-  filter(prop<1) %>% 
-  group_by(Ano, RM, decil_renda, Modo) %>% 
-  summarise(
+  dplyr::ungroup() %>% 
+  dplyr::filter(prop<1) %>% 
+  dplyr::group_by(Ano, RM, decil_renda, Modo) %>% 
+  dplyr::summarise(
     gasto_pc = weighted.mean(gasto_pc, PESO_FINAL),
     renda_pc = weighted.mean(renda_pc, PESO_FINAL),
     prop = weighted.mean(prop, PESO_FINAL)) %>% 
-  group_by(Ano, Modo) %>% 
-  mutate(
+  dplyr::group_by(Ano, Modo) %>% 
+  dplyr::mutate(
     propbr = mean(prop, na.rm = T),
     gastobr = mean(gasto_pc)) %>% 
-  ungroup() %>% 
-  mutate(
+  dplyr::ungroup() %>% 
+  dplyr::mutate(
     RM = ifelse(RM=='Brasil Urbano','Brasil Urbano não metropolitano',RM),
     names = RM,
     decil_renda = as.factor(decil_renda)
@@ -381,13 +359,13 @@ plot5 <-
 plot5 %>% na.omit() %>% 
   ggplot() +
   geom_line(
-    data = plot5 %>% filter(Ano == 2017)%>% na.omit(),
+    data = plot5 %>% dplyr::filter(Ano == 2017)%>% na.omit(),
     aes(decil_renda, prop, color = Modo, linetype = 'type1', group = interaction(Modo,RM)),size=.8) +
   geom_point(
-    data = plot5 %>% filter(Ano == 2017)%>% na.omit(),
+    data = plot5 %>% dplyr::filter(Ano == 2017)%>% na.omit(),
     aes(decil_renda, prop, color = Modo)) +
   geom_line(
-    data = plot5 %>% filter(Ano == 2002)%>% na.omit(),
+    data = plot5 %>% dplyr::filter(Ano == 2002)%>% na.omit(),
     aes(decil_renda, prop, color = Modo, linetype = 'type2', group = interaction(Modo,RM)),
     size = .8, alpha = .7) +
   scale_linetype_manual(name='Ano',
@@ -405,18 +383,19 @@ plot5 %>% na.omit() %>%
     #subtitle = 'Parcela da renda familiar destinada a despesas com transporte, por modo de transporte e faixa de renda \nMédias para regiões metropolitanas em 2017 e 2008 (linha pontilhada)'
   )
 
-ggsave('plot5.png', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('comp_renda_transp.png', path = 'figures/POF', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('comp_renda_transp.pdf', path = 'figures/POF', width = 16, height = 12, units = 'cm', dpi = 300)
 
 # 6. Cleveland: Cor e Raça: RM x Capital ---------------------------------
 
 plot6 <-
   pof_transporte_urbano %>% 
   #select(-V1, -V1) %>% 
-  filter(etnia == 'Branca' | etnia == 'Preta' | etnia == 'Parda') %>% 
-  mutate(cor = ifelse(etnia == 'Branca', 'Branca', 'Negra')) %>% 
-  group_by(Ano, cor, genero, Estrato, Modo) %>% 
-  summarise(prop = weighted.mean(prop_transp_ind, PESO_FINAL)) %>% 
-  mutate(grupo = paste(genero, cor, sep = " "))
+  dplyr::filter(etnia == 'Branca' | etnia == 'Preta' | etnia == 'Parda') %>% 
+  dplyr::mutate(cor = ifelse(etnia == 'Branca', 'Branca', 'Negra')) %>% 
+  dplyr::group_by(Ano, cor, genero, Estrato, Modo) %>% 
+  dplyr::summarise(prop = weighted.mean(prop_transp_ind, PESO_FINAL)) %>% 
+  dplyr::mutate(grupo = paste(genero, cor, sep = " "))
 
 plot6$grupo <-
   recode(plot6$grupo,
@@ -437,7 +416,7 @@ plot6$Ano <-
   )
 
 plot6 %>% 
-  mutate(Ano = as.factor(Ano)) %>% 
+  dplyr::mutate(Ano = as.factor(Ano)) %>% 
   ggplot(aes(prop, Ano, group = Ano)) +
   geom_path(
     aes(group = interaction(Ano, genero)),
@@ -448,7 +427,7 @@ plot6 %>%
     size = 1.75, alpha = 1,
     position = position_dodge(width = .5)) +
   scale_colour_aop(palette = 'original') +
-  scale_x_percent(expand = c(0.1,0)) +
+  hrbrthemes::scale_x_percent(expand = c(0.1,0)) +
   guides(fill = guide_legend(ncol = 2)) +
   labs(
     x = '% da renda destinada a despesas com transporte', y="", colour = 'Cor', shape = 'Sexo' 
@@ -464,6 +443,7 @@ plot6 %>%
     axis.title.y = element_markdown(size = 8, colour = '#808080',angle = 90)) +
 facet_grid(Estrato ~ Modo, scales = 'free')
 
-ggsave('plot6.png',path = 'R/POF/img', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('clev_cor_sexo.png', path = 'figures/POF', width = 16, height = 12, units = 'cm', dpi = 300)
+ggsave('clev_cor_sexo.pdf', path = 'figures/POF', width = 16, height = 12, units = 'cm', dpi = 300)
 
 #==================================================================================================
