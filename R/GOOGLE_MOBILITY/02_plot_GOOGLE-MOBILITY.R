@@ -23,10 +23,10 @@ ls_initial_list <- c("google","activities","%nin%","toupper_noaccent")
 # static google url
 
 link <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
-google <- data.table::fread(input = link, encoding = "UTF-8")
+google_raw <- data.table::fread(input = link, encoding = "UTF-8")
 #google <- data.table::fread("../../data-raw/GOOGLE/Global_Mobility_Report.csv", encoding = "UTF-8")
-google <- google[country_region %in% "Brazil",]
-google <- google[date < as.Date("2020-10-01"),]
+google <- data.table::copy(google_raw)[country_region %in% "Brazil",]
+google <- google[date < as.Date("2020-12-13"),]
 
 google[,sub_region_1_fix := toupper_noaccent(sub_region_1) %>% 
          stringr::str_remove_all("STATE OF ")]
@@ -74,8 +74,8 @@ google1 <- data.table::melt(data = google,
                                                               'workplaces_percent_change_from_baseline',
                                                               'residential_percent_change_from_baseline')))
 
-label_x <- c(paste0("01/0",3:9),"30/09")
-label_plot <- paste0("01/",c('Mar','Abr','Mai','Jun','Jul','Ago','Set','Out'))
+label_x <- c(paste0("01/0",3:9),paste0("01/",10:12))
+label_plot <- paste0("01/",c('Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'))
 break_x <- google[day_month %in% label_x,unique(day_month_id)]
 limits_x <- c(min(google1$day_month_id),max(google1$day_month_id))
 my_pallete <- c("E","D","B","A")
@@ -102,6 +102,7 @@ ggplot(data = google2,
   geom_line(aes(color = variable)) + 
   facet_wrap(facets = vars(sub_region_2),ncol = 3) +
   geom_hline(yintercept = 0, color= "black", linetype='dotted') +
+  scale_y_continuous(breaks = c(25,0,-25,-50,-75))+
   scale_x_continuous(breaks = break_x,
                      labels = label_x) +
   scale_color_manual(labels = grid_categories,

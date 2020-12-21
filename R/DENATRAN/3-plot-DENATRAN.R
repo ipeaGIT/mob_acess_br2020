@@ -174,9 +174,11 @@ p1 <- ggplot(temp_den,
                                                 angle = 0)) + 
   guides(fill = guide_legend(override.aes = list(shape = NA)))
 
-  p1
+  
   ggsave("figures/DENATRAN/rm_taxa-motorizacao.png", width = 25, 
        height = 18, scale = 0.8, units = "cm", dpi = 300, device = 'png')
+  ggsave("figures/DENATRAN/rm_taxa-motorizacao.pdf", width = 25, 
+         height = 18, scale = 0.8, units = "cm", dpi = 300, device = 'pdf')
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
 rm(list = lista)
@@ -236,8 +238,9 @@ pf <- ggplot() +
         axis.title.y = ggtext::element_markdown(size = 15,margin = margin(r = 0.25, unit = 'cm'),
                                                 lineheight = 0.5,colour = "#575757",hjust = 0,vjust = 1)) 
 
-pf
 ggsave("figures/DENATRAN/map_years_BR21.png",
+       scale = 0.9,width = 23.5,height = 13,dpi = 300, units = "cm")
+ggsave("figures/DENATRAN/map_years_BR21.pdf",
        scale = 0.9,width = 23.5,height = 13,dpi = 300, units = "cm")
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
@@ -266,7 +269,8 @@ my_size <- 2.7
 
 ggplot(data = temp_denatran)  + 
   geom_point(aes(x = pop_dens,y = MOTO_RATE, 
-                 fill = name_region),shape = 21,size=2.5) +
+                 fill = name_region),shape = 21,size=2.75,
+             alpha = 1,stroke = .25) +
   labs(x = "Densidade populacional urbana (hab./km²)",
        y = "Taxa de motorização (veículos/hab.)",
        fill = "Região") + 
@@ -274,9 +278,11 @@ ggplot(data = temp_denatran)  +
   scale_y_continuous(breaks = seq(0,0.8,by= 0.1)) + 
   scale_fill_manual(values = 
                       c(as.vector(aop_colors$qualitativo[c(3)]),
-                        as.vector(aop_colors$crimson[3]),
-                        as.vector(aop_colors$cartola[6]),
-                        as.vector(aop_colors$qualitativas[c(4,6)]))) + 
+                        "palegreen3",
+                        #as.vector(aop_colors$caqui[5]),
+                        as.vector(aop_colors$qualitativas[6]),
+                        as.vector(aop_colors$cinzas[3]),
+                        as.vector(aop_colors$qualitativas[c(2)]))) + 
   ggrepel::geom_label_repel(data = temp_denatran[MUNI_UF %in% "BELO HORIZONTE-MG"],
                             aes(x = pop_dens,
                                 y = MOTO_RATE,
@@ -372,6 +378,8 @@ ggrepel::geom_label_repel(data = temp_denatran[MUNI_UF %in% "MANAUS-AM"],
 
   
 ggsave("figures/DENATRAN/motorizacao_x_densidade.png",scale = 1,
+       width = 20,height = 12, dpi = 300, units = "cm")
+ggsave("figures/DENATRAN/motorizacao_x_densidade.pdf",scale = 1,
        width = 20,height = 12, dpi = 300, units = "cm")
 
 lista <- ls()[ls() %nin% c(ls_initial_list,"ls_initial_list")]
@@ -523,4 +531,6 @@ p2 <- ggplot(temp_br[variable %like% "rel",],aes(x = ANO,y = value, group = clas
 pf <- (p1 / p2) + plot_annotation(tag_levels = 'A')
 pf
 ggsave("figures/DENATRAN/rm_taxa_city_adjust_facetveh.png",scale=1,
+       width = 20,height = 15,dpi = 300,units = "cm")
+ggsave("figures/DENATRAN/rm_taxa_city_adjust_facetveh.pdf",scale=1,
        width = 20,height = 15,dpi = 300,units = "cm")

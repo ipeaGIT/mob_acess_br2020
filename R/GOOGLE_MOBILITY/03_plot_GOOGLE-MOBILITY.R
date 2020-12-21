@@ -37,9 +37,13 @@ statebr[,name_state := toupper_noaccent(name_state)]
 # static google url
 
 link <- "https://www.gstatic.com/covid19/mobility/Global_Mobility_Report.csv"
-google <- data.table::fread(input = link, encoding = "UTF-8")
+google_raw <- data.table::fread(input = link, encoding = "UTF-8")
 #google <- data.table::fread("../../data-raw/GOOGLE/Global_Mobility_Report.csv", encoding = "UTF-8")
-google <- data.table::copy(google)[country_region %in% "Brazil",]
+
+
+# data analysis
+
+google <- data.table::copy(google_raw)[country_region %in% "Brazil",]
 google <- google[date < as.Date("2020-12-13"),]
 
 google[,sub_region_1_fix := toupper_noaccent(sub_region_1) %>% 
@@ -52,6 +56,20 @@ google[,day_month_id := .GRP,by = date_fix]
 google[,sub_region_2_fix := toupper_noaccent(sub_region_2)]
 google[statebr,on = c('sub_region_1_fix' = 'name_state'), state_abrev := i.abbrev_state]
 google[,name_muni := paste0(sub_region_2_fix,"-",state_abrev)]
+
+#
+# cities names-------------
+#
+my_cities <- c("Belém","Belo Horizonte","Campinas",
+               "Curitiba","Fortaleza","Goiânia",
+               "João Pessoa","Maceió","Manaus",
+               "Natal","Porto Alegre","Recife",
+               "Rio de Janeiro","Salvador","Santos",
+               "São José dos Campos","São Luís","São Paulo",
+               "Sorocaba", "Teresina","Vitória")
+google[sub_region_2 %in% "Sao Jose dos Campos",sub_region_2 := "São José dos Campos"]
+google <- google[sub_region_2 %in% my_cities,]
+
 
 activities <- c("retail_and_recreation",
                 #"grocery_and_pharmacy",
@@ -98,8 +116,7 @@ google1 <- data.table::melt(data = google,
 #label_x <- c("15/02","01/03","15/03","01/04","15/04",
 #             "01/05","15/05","01/06","15/06","01/07","15/07",
 #             "01/08","15/08","01/09","01/10","01/11","01/12")
-label_x <- c(#"15/02",
-             paste0("01/0",3:9),paste0("01/",10:12))
+label_x <- c(paste0("01/0",3:9),paste0("01/",10:12))
 label_plot <- c(#"15/fev",
                 paste0("01/",c('Mar','Abr','Mai','Jun','Jul',
                                'Ago','Set','Out','Nov','Dez')))
@@ -113,20 +130,17 @@ for(i in 1:length(activities)){ # i = 1
   
   message(activities[i])
   # i = 2
-  google2 <- data.table::copy(google1)[variable %like% activities[i] & 
-                                         sub_region_2 %in% "" & 
-                                         state_abrev %nin% "" & 
-                                         !is.na(state_abrev),]
+  google2 <- data.table::copy(google1)[variable %like% activities[i],]
   # orderuf
-  orderuf <- google2[data.table::between(date_fix,"2020-07-01","2020-12-01"),
+  orderuf <- google2[data.table::between(date_fix,"2020-07-01","2020-12-12"),
                      lapply(.SD,sum),
-                     .SDcols = 'value',by = state_abrev][order(value),state_abrev]
+                     .SDcols = 'value',by = sub_region_2][order(value),sub_region_2]
   orderuf <- as.character(orderuf)
-  data.table::setkey(google2,state_abrev)
+  data.table::setkey(google2,sub_region_2)
   google2 <- google2[data.table::data.table(orderuf)]
-  google2[,grp := .GRP, by = state_abrev]
-  labels_y <- google2[,.SD[1], by = state_abrev][, state_abrev]
-  breaks_y <- google2[,.SD[1], by = state_abrev][, grp]
+  google2[,grp := .GRP, by = sub_region_2]
+  labels_y <- google2[,.SD[1], by = sub_region_2][, sub_region_2]
+  breaks_y <- google2[,.SD[1], by = sub_region_2][, grp]
   range_fill <- seq(min(google2$value, na.rm=T),max(google2$value, na.rm=T),length.out = 6)
   
   
@@ -138,16 +152,19 @@ for(i in 1:length(activities)){ # i = 1
                                 direction = -1,
                                 breaks = round(range_fill,0)) +
     scale_x_continuous(breaks = break_x,
-                       labels = label_plot) +
-    scale_y_continuous(NULL,breaks = breaks_y,
-                       labels = labels_y,
+                       labels = label_plot,
                        sec.axis = sec_axis(~ .,
-                                           breaks = breaks_y,
-                                           labels = labels_y)) + 
+                                           breaks = break_x,
+                                           labels = label_plot))+ 
+    scale_y_continuous(NULL,breaks = breaks_y,
+                       labels = labels_y)+#,
+                       #sec.axis = sec_axis(~ .,
+                      #                     breaks = breaks_y,
+                      #                     labels = labels_y)) + 
     labs( title = local_categories[i],
           # subtitle = description[i],
-         x = NULL, y = "Estados",
-         fill = "Mudança\nrelativa (%)") +
+          x = NULL, y = "Estados",
+          fill = "Mudança\nrelativa (%)") +
     aop_style1() +
     theme(legend.position = 'right',
           axis.ticks = element_line(
@@ -161,7 +178,7 @@ for(i in 1:length(activities)){ # i = 1
     coord_cartesian(xlim = limits_x, expand = FALSE)
   
   
-  plot1
+  
   
   #
   # errorbar ------------------
@@ -210,7 +227,7 @@ for(i in 1:length(activities)){ # i = 1
   
   
   pf <- plot1 / plot2 +  plot_layout(heights = c(3, 2.0)) + plot_annotation(tag_levels = 'A')
-
+  
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".png"),
          width = 23.7, height = 17.6,dpi = 300, units = "cm")
   ggsave(filename = paste0("figures/GOOGLE/",activities[i],".pdf"),
