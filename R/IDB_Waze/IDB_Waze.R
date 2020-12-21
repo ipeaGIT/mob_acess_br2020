@@ -1,8 +1,8 @@
 
 # 1 Load Setup ------------------------------------------------------------
 
-rm(list=ls())
-gc(reset = T)
+#rm(list=ls())
+#gc(reset = T)
 
 source('R/setup.R')
 source('R/colours.R')
@@ -399,7 +399,7 @@ cities$coluna <- 'valor1'
 anotacoes <- data.frame(
   anotacao = c('primeira', 'segunda'),
   date = c(as.Date('2020-03-18'), as.Date('2020-08-01')),
-  tcp = c(-5, 220),
+  tcp = c(0, 220),
   legenda = c(
     "<b style='color:#872e2b'>Média móvel<br>(7 dias)</b>",
     "<b style='color:#323232'>*Outliers*</b>"
@@ -459,7 +459,7 @@ gg_errorbar <-
   theme(
     #legend.position = 'bottom'
     axis.text.y = ggtext::element_markdown(
-      margin = margin(r = 0.25,l = -0.3, unit = 'cm'),
+      margin = margin(r = 0.25,l = -0.25, unit = 'cm'),
       #vjust = 0
     ),
     #panel.grid.major.x = element_line(size = 0.15, color = "grey"),
@@ -486,7 +486,8 @@ ggsave("figures/waze_IDB/boxplot.pdf",
 pf <- gg_heatmap_cities / gg_errorbar + plot_layout(heights = c(3, 2.0)) + plot_annotation(tag_levels = 'A')
 theme_set(theme_cowplot() + theme(text = element_text(colour = "#575757")))
 pf <- plot_grid(
-  gg_heatmap_cities, gg_errorbar, labels = c('A', 'B'), ncol = 1, align = "v", hjust = -0.1
+  gg_heatmap_cities, gg_errorbar, labels = c('A', 'B'), ncol = 1, align = "v", axis = 'lr',
+  hjust = -0.5
   )
 ggsave(pf,
        filename = "figures/waze_IDB/heatmap_errobar2.png", 
