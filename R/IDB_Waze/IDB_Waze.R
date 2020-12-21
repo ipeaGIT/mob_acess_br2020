@@ -282,11 +282,11 @@ gg_heatmap_cities <-
   guides(fill = guide_colorbar(barwidth = 0.75, barheight = 5)) +
   coord_cartesian(xlim = limits_x, expand = FALSE)
 
-ggsave("figures/waze_IDB/heatmap_cidades.png", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
+#ggsave("figures/waze_IDB/heatmap_cidades.png", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/waze_IDB/heatmap_cidades.pdf", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
+#ggsave("figures/waze_IDB/heatmap_cidades.pdf", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
 
 # * * 2.3.2 Boxplot -------------------------------------------------------
@@ -372,12 +372,12 @@ gg_boxplot <-
   coord_cartesian(clip = "off", xlim = limits_x#, expand = F)
   )
 
-ggsave(gg_boxplot,
-       filename = "figures/waze_IDB/boxplot.png", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
+#ggsave(gg_boxplot,
+#       filename = "figures/waze_IDB/boxplot.png", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/waze_IDB/boxplot.pdf", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
+#ggsave("figures/waze_IDB/boxplot.pdf", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
 
 # * * 2.3.3 Errorbar ------------------------------------------------------
@@ -472,12 +472,12 @@ gg_errorbar <-
   coord_cartesian(clip = "off", xlim = limits_x#, expand = F)
   )
 
-ggsave(gg_errorbar,
-       filename = "figures/waze_IDB/errorbar.png", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
+#ggsave(gg_errorbar,
+#       filename = "figures/waze_IDB/errorbar.png", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/waze_IDB/boxplot.pdf", 
-       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
+#ggsave("figures/waze_IDB/boxplot.pdf", 
+#       width = 16, height = 12, units = "cm", dpi = 300, device = 'pdf')
 
 
 # * * 2.3.4 Patchwork -----------------------------------------------------
@@ -503,11 +503,11 @@ gg_heatmap_cities / gg_boxplot &
   theme(plot.margin = unit(c(0.25,0.25,0.25,0.25), "cm"))
 
 
-ggsave(filename = "figures/waze_IDB/heatmap_boxplot.png", 
-       width = 16, height = 18, units = "cm", dpi = 300, device = 'png')
+#ggsave(filename = "figures/waze_IDB/heatmap_boxplot.png", 
+#       width = 16, height = 18, units = "cm", dpi = 300, device = 'png')
 
-ggsave("figures/waze_IDB/heatmap_boxplot.pdf", 
-       width = 16, height = 18, units = "cm", dpi = 300, device = 'pdf')
+#ggsave("figures/waze_IDB/heatmap_boxplot.pdf", 
+#       width = 16, height = 18, units = "cm", dpi = 300, device = 'pdf')
 
 
 
@@ -606,7 +606,7 @@ scale_x_date(
   coord_cartesian(clip = "off", xlim = limits_x#, expand = F)
   )
 
-ggsave(gg_errorbar2,
-       filename = "figures/waze_IDB/errorbar_separate.png", 
-       width = 16, height = 20, units = "cm", dpi = 300, device = 'png')
+#ggsave(gg_errorbar2,
+#       filename = "figures/waze_IDB/errorbar_separate.png", 
+#       width = 16, height = 20, units = "cm", dpi = 300, device = 'png')
 
