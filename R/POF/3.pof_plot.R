@@ -298,11 +298,25 @@ plot3 <-
     names = RM) %>% 
   dplyr::ungroup()
 
+pof_transporte_urbano %>%  
+  #select(-V1, -V1) %>%
+  dplyr::filter(Ano == 2017) %>% 
+  dplyr::group_by(ID_FAMILIA, Modo) %>% 
+  dplyr::mutate(gasto_pc = sum(valor_total)/dplyr::n_distinct(ID_MORADOR)) %>% 
+  dplyr::ungroup() %>% 
+  dplyr::group_by(Modo) %>% 
+  dplyr::summarise(
+    gastobr = weighted.mean(gasto_pc, PESO_FINAL)/12)
+
+plot3 <- plot3 %>% 
+  dplyr::mutate(
+    media = ifelse(Modo == 'Transporte Coletivo',133,538))
+
 plot3 %>% na.omit() %>% 
   dplyr::mutate(decil_renda = as.factor(decil_renda)) %>% 
   ggplot() +
   geom_hline(
-    aes(yintercept = gastobr, color = Modo), linetype = 'dashed', alpha = .95) +
+    aes(yintercept = media, color = Modo), linetype = 'dashed', alpha = .95) +
   geom_line(
     data = plot3 %>% dplyr::select(-RM) %>% na.omit(),
     aes(as.factor(decil_renda), gasto_pc_mensal, color = Modo, group = interaction(Modo,names)), alpha = .2,size=.4) +
